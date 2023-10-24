@@ -6,20 +6,167 @@
 
     <groupId>com.qiniu</groupId>
     <artifactId>qiniu-server</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.14</version>
+    </parent>
 
     <modules>
         <module>qiniu-service</module>
         <module>qiniu-gateway</module>
+        <module>qiniu-feign</module>
+        <module>qiniu-common</module>
+        <module>qiniu-model</module>
     </modules>
 
     <properties>
+        <java.version>1.8</java.version>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- 依赖包版本管理 -->
-
+        <spring.boot.version>2.7.14</spring.boot.version>
+        <mysql.version>8.0.31</mysql.version>
+        <mybatis.plus.version>3.5.2</mybatis.plus.version>
+        <spring.cloud.version>Hoxton.SR10</spring.cloud.version>
+        <com.alibaba.cloud>2.2.6.RELEASE</com.alibaba.cloud>
+        <jwt.version>0.9.1</jwt.version>
+        <ali.core.version>4.1.1</ali.core.version>
+        <fastjson.version>1.2.58</fastjson.version>
+        <fastjson.dataformat.version>2.10.0</fastjson.dataformat.version>
+        <spring.jwt.version>1.0.9.RELEASE</spring.jwt.version>
+        <spring.boot.admin.version>2.1.6</spring.boot.admin.version>
+        <reflections.version>0.9.11</reflections.version>
+        <lang3.version>3.5</lang3.version>
+        <commons.io.version>2.13.0</commons.io.version>
+        <commons.codec.version>1.12</commons.codec.version>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+    </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- feign -->
+            <dependency>
+                <groupId>com.qiniu</groupId>
+                <artifactId>qiniu-feign</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <!-- common -->
+            <dependency>
+                <groupId>com.qiniu</groupId>
+                <artifactId>qiniu-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.qiniu</groupId>
+                <artifactId>qiniu-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>com.roydon</groupId>-->
+<!--                <artifactId>qiniu-utils</artifactId>-->
+<!--                <version>${project.version}</version>-->
+<!--            </dependency>-->
+            <!-- spring cloud -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring.cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- spring cloud alibaba -->
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>${com.alibaba.cloud}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!--  Spring boot 特殊处理包 reflections -->
+            <dependency>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections</artifactId>
+                <version>${reflections.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-web</artifactId>
+                <version>${spring.boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter</artifactId>
+                <version>${spring.boot.version}</version>
+            </dependency>
+            <!--  spring boot admin  -->
+            <dependency>
+                <groupId>de.codecentric</groupId>
+                <artifactId>spring-boot-admin-dependencies</artifactId>
+                <version>${spring.boot.admin.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!--  jwt  -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt</artifactId>
+                <version>${jwt.version}</version>
+            </dependency>
+            <!--  fastjson  -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
+            </dependency>
+            <!-- Apache 工具包 commons-io -->
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons.io.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${lang3.version}</version>
+            </dependency>
+            <!-- 加密处理包 -->
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${commons.codec.version}</version>
+            </dependency>
+            <!-- Mysql -->
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.version}</version>
+            </dependency>
+            <!-- mybatis-plus -->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>${mybatis.plus.version}</version>
+            </dependency>
+            <!-- aliyun java sdk-->
+            <dependency>
+                <groupId>com.aliyun</groupId>
+                <artifactId>aliyun-java-sdk-core</artifactId>
+                <version>${ali.core.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 </project>
