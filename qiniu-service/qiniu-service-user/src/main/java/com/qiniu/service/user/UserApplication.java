@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 import javax.annotation.Resource;
@@ -16,11 +17,13 @@ import javax.annotation.Resource;
  * @DATE: 2023/10/24
  **/
 @Slf4j
-@SpringBootApplication
-@MapperScan("com.qiniu.**.mapper")
+@SpringBootApplication(scanBasePackages = {
+        "com.qiniu.service.user",
+        "com.qiniu.model.user"
+})
+@MapperScan("com.qiniu.model.user.mapper")
 @EnableDiscoveryClient
 public class UserApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(UserApplication.class, args);
     }
