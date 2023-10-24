@@ -5,21 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.qiniu</groupId>
-        <artifactId>qiniu-server</artifactId>
+        <artifactId>qiniu-model</artifactId>
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>qiniu-service</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>qiniu-service-user</module>
-    </modules>
-
-    <dependencies>
-        <dependency>
-            <groupId>com.qiniu</groupId>
-            <artifactId>qiniu-model</artifactId>
-        </dependency>
-    </dependencies>
+    <artifactId>qiniu-model-user</artifactId>
 
 </project>

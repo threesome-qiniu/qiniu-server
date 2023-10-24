@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.14</version>
+        <version>2.3.9.RELEASE</version>
     </parent>
 
     <modules>
@@ -29,7 +29,7 @@
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- 依赖包版本管理 -->
-        <spring.boot.version>2.7.14</spring.boot.version>
+        <spring.boot.version>2.3.9.RELEASE</spring.boot.version>
         <mysql.version>8.0.31</mysql.version>
         <mybatis.plus.version>3.5.2</mybatis.plus.version>
         <spring.cloud.version>Hoxton.SR10</spring.cloud.version>
@@ -74,6 +74,7 @@
                 <artifactId>qiniu-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
 <!--            <dependency>-->
 <!--                <groupId>com.roydon</groupId>-->
 <!--                <artifactId>qiniu-utils</artifactId>-->
@@ -92,6 +93,14 @@
                 <groupId>com.alibaba.cloud</groupId>
                 <artifactId>spring-cloud-alibaba-dependencies</artifactId>
                 <version>${com.alibaba.cloud}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- SpringBoot 依赖配置 -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
