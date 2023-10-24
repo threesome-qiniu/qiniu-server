@@ -7,11 +7,19 @@
     <groupId>com.qiniu</groupId>
     <artifactId>qiniu-server</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>qiniu-service</module>
+        <module>qiniu-gateway</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- 依赖包版本管理 -->
+
     </properties>
 
 </project>
