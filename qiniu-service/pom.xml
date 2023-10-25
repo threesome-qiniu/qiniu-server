@@ -13,6 +13,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>qiniu-service-user</module>
+        <module>qiniu-service-video</module>
     </modules>
 
     <dependencies>
