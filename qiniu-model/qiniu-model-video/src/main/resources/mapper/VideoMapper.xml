@@ -5,7 +5,11 @@
     <resultMap type="com.qiniu.model.video.domain.Video" id="VideoMap">
         <result property="videoId" column="video_id" jdbcType="VARCHAR"/>
         <result property="userId" column="user_id" jdbcType="INTEGER"/>
+        <result property="videoTitle" column="video_title" jdbcType="VARCHAR"/>
+        <result property="videoDesc" column="video_desc" jdbcType="VARCHAR"/>
         <result property="videoUrl" column="video_url" jdbcType="VARCHAR"/>
+        <result property="viewNum" column="view_num" jdbcType="INTEGER"/>
+        <result property="likeNum" column="like_num" jdbcType="INTEGER"/>
         <result property="delFlag" column="del_flag" jdbcType="VARCHAR"/>
         <result property="createBy" column="create_by" jdbcType="VARCHAR"/>
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
@@ -16,7 +20,11 @@
     <sql id="selectVideoVo">
         select video_id,
                user_id,
+               video_title,
+               video_desc,
                video_url,
+               view_num,
+               like_num,
                del_flag,
                create_by,
                create_time,
@@ -24,29 +32,6 @@
                update_time
         from video
     </sql>
-
-    <!--查询单个-->
-    <select id="queryById" resultMap="VideoMap">
-        <include refid="selectVideoVo"/>
-        where video_id = #{videoId}
-    </select>
-
-    <!--查询指定行数据-->
-    <select id="queryAllByLimit" resultMap="VideoMap">
-        <include refid="selectVideoVo"/>
-        <where>
-            <if test="videoId != null and videoId != ''">
-                and video_id = #{videoId}
-            </if>
-            <if test="userId != null">
-                and user_id = #{userId}
-            </if>
-            <if test="delFlag != null and delFlag != ''">
-                and del_flag = #{delFlag}
-            </if>
-        </where>
-        limit #{pageable.offset}, #{pageable.pageSize}
-    </select>
 
     <!--通过主键删除-->
     <delete id="deleteById">

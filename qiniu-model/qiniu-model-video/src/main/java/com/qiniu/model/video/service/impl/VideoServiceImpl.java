@@ -18,15 +18,4 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     @Resource
     private VideoMapper videoMapper;
 
-    /**
-     * 通过ID查询单条数据
-     *
-     * @param videoId 主键
-     * @return 实例对象
-     */
-    @Override
-    public Video queryById(String videoId) {
-        return this.videoMapper.queryById(videoId);
-    }
-
 }

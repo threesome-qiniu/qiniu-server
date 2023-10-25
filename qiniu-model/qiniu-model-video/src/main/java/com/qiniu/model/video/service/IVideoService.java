@@ -11,12 +11,4 @@ import com.qiniu.model.video.domain.Video;
  */
 public interface IVideoService extends IService<Video> {
 
-    /**
-     * 通过ID查询单条数据
-     *
-     * @param videoId 主键
-     * @return 实例对象
-     */
-    Video queryById(String videoId);
-
 }

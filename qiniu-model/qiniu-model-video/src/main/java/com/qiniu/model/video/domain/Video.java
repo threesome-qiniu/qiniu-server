@@ -26,10 +26,14 @@ public class Video implements Serializable {
      * 用户id
      */
     private Long userId;
+    private Long videoTitle;
+    private Long videoDesc;
     /**
      * 视频地址
      */
     private String videoUrl;
+    private Long viewNum;
+    private Long likeNum;
     /**
      * 删除标志（0代表存在 1代表删除）
      */
