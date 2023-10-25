@@ -1,6 +1,7 @@
 package com.qiniu.util.date;
 
 import org.apache.commons.lang3.RandomUtils;
+
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -676,7 +677,7 @@ public class DateUtil {
      */
     public static long differenceNumberOfDays(long startTime, long currentTime) {
         long len = currentTime - startTime;
-        if(len % ONE_DAY_MS == 0){
+        if (len % ONE_DAY_MS == 0) {
             return Math.abs(len / ONE_DAY_MS);
         }
         return Math.abs(len / ONE_DAY_MS) + 1;
@@ -1041,12 +1042,13 @@ public class DateUtil {
     }
 
     //日期比较
-    public static int compareDate(Date first, Date second){
+    public static int compareDate(Date first, Date second) {
         return first.compareTo(second);
     }
 
     /**
      * 友好显示时间
+     *
      * @param ms
      * @return
      */
@@ -1063,25 +1065,25 @@ public class DateUtil {
         Long milliSecond = ms - day * dd - hour * hh - minute * mi - second * ss;
 
         StringBuffer sb = new StringBuffer();
-        if(day > 0) {
-            sb.append(day+"天");
+        if (day > 0) {
+            sb.append(day + "天");
         }
-        if(hour > 0) {
-            sb.append(hour+"小时");
+        if (hour > 0) {
+            sb.append(hour + "小时");
         }
-        if(minute > 0) {
-            sb.append(minute+"分");
+        if (minute > 0) {
+            sb.append(minute + "分");
         }
-        if(second > 0) {
-            sb.append(second+"秒");
+        if (second > 0) {
+            sb.append(second + "秒");
         }
-        if(milliSecond > 0) {
-            sb.append(milliSecond+"毫秒");
+        if (milliSecond > 0) {
+            sb.append(milliSecond + "毫秒");
         }
         return sb.toString();
     }
 
-    public static Object formatDate(Object object){
+    public static Object formatDate(Object object) {
         if (object == null) {
             return null;
         }
@@ -1095,7 +1097,7 @@ public class DateUtil {
             time = DateUtil.localDate2Long((LocalDate) object);
         }
 
-        if (time != null){
+        if (time != null) {
             return dateToyyyyMMddHHmmss(time);
         }
 
@@ -1117,7 +1119,7 @@ public class DateUtil {
             time = (Long) object;
         } else if (object instanceof String) {
             final Date date = parseDateFormatLocal10((String) object);
-            if (date != null){
+            if (date != null) {
                 time = date.getTime();
             }
         }
