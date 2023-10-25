@@ -21,9 +21,11 @@
         <module>qiniu-feign</module>
         <module>qiniu-common</module>
         <module>qiniu-model</module>
+        <module>qiniu-util</module>
     </modules>
 
     <properties>
+        <server.version>1.0.0</server.version>
         <java.version>1.8</java.version>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
@@ -35,15 +37,22 @@
         <spring.cloud.version>Hoxton.SR10</spring.cloud.version>
         <com.alibaba.cloud>2.2.6.RELEASE</com.alibaba.cloud>
         <jwt.version>0.9.1</jwt.version>
+        <swagger.version>3.0.0</swagger.version>
         <ali.core.version>4.1.1</ali.core.version>
-        <fastjson.version>1.2.58</fastjson.version>
-        <fastjson.dataformat.version>2.10.0</fastjson.dataformat.version>
+        <fastjson.version>2.0.34</fastjson.version>
         <spring.jwt.version>1.0.9.RELEASE</spring.jwt.version>
         <spring.boot.admin.version>2.1.6</spring.boot.admin.version>
         <reflections.version>0.9.11</reflections.version>
+        <oshi.version>6.2.2</oshi.version>
         <lang3.version>3.5</lang3.version>
         <commons.io.version>2.13.0</commons.io.version>
         <commons.codec.version>1.12</commons.codec.version>
+        <commons.fileupload.version>1.4</commons.fileupload.version>
+        <commons.collections.version>3.2.2</commons.collections.version>
+        <bitwalker.version>1.21</bitwalker.version>
+        <poi.version>4.1.2</poi.version>
+        <hutool.version>5.8.11</hutool.version>
+        <google.zxing.version>3.3.3</google.zxing.version>
     </properties>
 
     <dependencies>
@@ -72,6 +81,12 @@
             <dependency>
                 <groupId>com.qiniu</groupId>
                 <artifactId>qiniu-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.qiniu</groupId>
+                <artifactId>qiniu-common-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -128,16 +143,22 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!-- spring-boot-devtools -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-devtools</artifactId>
+                <optional>true</optional> <!-- 表示依赖不会传递 -->
+            </dependency>
             <!--  jwt  -->
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt</artifactId>
                 <version>${jwt.version}</version>
             </dependency>
-            <!--  fastjson  -->
+            <!-- 阿里JSON解析器 -->
             <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>fastjson</artifactId>
+                <groupId>com.alibaba.fastjson2</groupId>
+                <artifactId>fastjson2</artifactId>
                 <version>${fastjson.version}</version>
             </dependency>
             <!-- Apache 工具包 commons-io -->
@@ -150,6 +171,24 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <version>${lang3.version}</version>
+            </dependency>
+            <!-- collections工具类 -->
+            <dependency>
+                <groupId>commons-collections</groupId>
+                <artifactId>commons-collections</artifactId>
+                <version>${commons.collections.version}</version>
+            </dependency>
+            <!-- 文件上传工具类 -->
+            <dependency>
+                <groupId>commons-fileupload</groupId>
+                <artifactId>commons-fileupload</artifactId>
+                <version>${commons.fileupload.version}</version>
+            </dependency>
+            <!-- excel工具 -->
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${poi.version}</version>
             </dependency>
             <!-- 加密处理包 -->
             <dependency>
@@ -174,6 +213,50 @@
                 <groupId>com.aliyun</groupId>
                 <artifactId>aliyun-java-sdk-core</artifactId>
                 <version>${ali.core.version}</version>
+            </dependency>
+            <!-- 解析客户端操作系统、浏览器等 -->
+            <dependency>
+                <groupId>eu.bitwalker</groupId>
+                <artifactId>UserAgentUtils</artifactId>
+                <version>${bitwalker.version}</version>
+            </dependency>
+            <!-- 获取系统信息 -->
+            <dependency>
+                <groupId>com.github.oshi</groupId>
+                <artifactId>oshi-core</artifactId>
+                <version>${oshi.version}</version>
+            </dependency>
+
+            <!-- Swagger3依赖 -->
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-boot-starter</artifactId>
+                <version>${swagger.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>io.swagger</groupId>
+                        <artifactId>swagger-models</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <!--开发工具集-->
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>${hutool.version}</version>
+            </dependency>
+
+            <!-- 二维码生成 -->
+            <dependency>
+                <groupId>com.google.zxing</groupId>
+                <artifactId>core</artifactId>
+                <version>${google.zxing.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.zxing</groupId>
+                <artifactId>javase</artifactId>
+                <version>${google.zxing.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

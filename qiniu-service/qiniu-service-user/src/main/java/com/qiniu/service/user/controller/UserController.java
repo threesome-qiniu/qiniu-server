@@ -1,5 +1,6 @@
 package com.qiniu.service.user.controller;
 
+import com.qiniu.common.core.domain.R;
 import com.qiniu.model.user.domain.User;
 import com.qiniu.model.user.domain.dto.LoginUserDTO;
 import com.qiniu.model.user.domain.dto.RegisterBody;
@@ -26,16 +27,16 @@ public class UserController {
     private IUserService userService;
 
     @PostMapping("/login")
-    public String login(@RequestBody LoginUserDTO loginUserDTO) {
+    public R<?> login(@RequestBody LoginUserDTO loginUserDTO) {
         log.debug("登录用户：{}", loginUserDTO);
-        return loginUserDTO.toString();
+        return R.ok(loginUserDTO);
     }
 
     @PostMapping("/register")
-    public String register(@RequestBody RegisterBody registerBody) {
+    public R<?> register(@RequestBody RegisterBody registerBody) {
         log.debug("注册用户：{}", registerBody);
         User user = userService.queryById(1L);
-        return registerBody.toString();
+        return R.ok(registerBody);
     }
 
 }
