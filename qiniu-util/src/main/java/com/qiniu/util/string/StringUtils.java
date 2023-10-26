@@ -1,4 +1,4 @@
-package com.qiniu.util;
+package com.qiniu.util.string;
 
 import cn.hutool.core.text.StrFormatter;
 import com.qiniu.common.core.constant.Constants;

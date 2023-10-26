@@ -1,5 +1,7 @@
 package com.qiniu.util;
 
+import com.qiniu.util.string.StringUtils;
+
 import java.util.regex.Pattern;
 
 /**
@@ -22,7 +24,7 @@ public class PhoneUtils {
      * @return boolean true:是  false:否
      */
     public static boolean isMobile(String tel) {
-        if (StringUtils.isEmpty(tel)) {
+        if (com.qiniu.util.string.StringUtils.isEmpty(tel)) {
             return false;
         }
         return Pattern.matches(REGEX_MOBILE, tel);
