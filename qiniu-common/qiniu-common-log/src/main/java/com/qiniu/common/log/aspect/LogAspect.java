@@ -54,6 +54,8 @@ public class LogAspect {
      */
     @Before(value = "@annotation(controllerLog)")
     public void boBefore(JoinPoint joinPoint, Log controllerLog) {
+        log.debug("开始切入操作。。。");
+        System.out.println("开始切入操作。。。");
         TIME_THREADLOCAL.set(System.currentTimeMillis());
     }
 
@@ -65,6 +67,7 @@ public class LogAspect {
     @AfterReturning(pointcut = "@annotation(controllerLog)", returning = "jsonResult")
     public void doAfterReturning(JoinPoint joinPoint, Log controllerLog, Object jsonResult) {
         log.debug("完成了切入操作。。。");
+        System.out.println("完成了切入操作。。。");
 //        handleLog(joinPoint, controllerLog, null, jsonResult);
     }
 
