@@ -1,3 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.qiniu.common.log.aspect.LogAspect
+com.qiniu.common.log.aspect.LogAspect,\
 com.qiniu.common.log.service.AsyncLogService
