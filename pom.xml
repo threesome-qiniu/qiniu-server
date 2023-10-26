@@ -22,6 +22,7 @@
         <module>qiniu-common</module>
         <module>qiniu-model</module>
         <module>qiniu-util</module>
+        <module>qiniu-auth</module>
     </modules>
 
     <properties>
