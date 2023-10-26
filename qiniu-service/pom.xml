@@ -21,6 +21,10 @@
             <groupId>com.qiniu</groupId>
             <artifactId>qiniu-model</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.qiniu</groupId>
+            <artifactId>qiniu-common-log</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
