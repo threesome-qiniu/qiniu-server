@@ -1,5 +1,7 @@
 package com.qiniu.util;
 
+import com.qiniu.util.string.StringUtils;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import javax.servlet.http.HttpServletRequest;
@@ -75,7 +77,7 @@ public class IpUtils {
      * @return 结果
      */
     private static boolean internalIp(byte[] addr) {
-        if (StringUtils.isNull(addr) || addr.length < 2) {
+        if (com.qiniu.util.string.StringUtils.isNull(addr) || addr.length < 2) {
             return true;
         }
         final byte b0 = addr[0];
@@ -223,7 +225,7 @@ public class IpUtils {
                 }
             }
         }
-        return StringUtils.substring(ip, 0, 255);
+        return com.qiniu.util.string.StringUtils.substring(ip, 0, 255);
     }
 
     /**
@@ -233,21 +235,21 @@ public class IpUtils {
      * @return 是否未知
      */
     public static boolean isUnknown(String checkString) {
-        return StringUtils.isBlank(checkString) || "unknown".equalsIgnoreCase(checkString);
+        return com.qiniu.util.string.StringUtils.isBlank(checkString) || "unknown".equalsIgnoreCase(checkString);
     }
 
     /**
      * 是否为IP
      */
     public static boolean isIP(String ip) {
-        return StringUtils.isNotBlank(ip) && ip.matches(REGX_IP);
+        return com.qiniu.util.string.StringUtils.isNotBlank(ip) && ip.matches(REGX_IP);
     }
 
     /**
      * 是否为IP，或 *为间隔的通配符地址
      */
     public static boolean isIpWildCard(String ip) {
-        return StringUtils.isNotBlank(ip) && ip.matches(REGX_IP_WILDCARD);
+        return com.qiniu.util.string.StringUtils.isNotBlank(ip) && ip.matches(REGX_IP_WILDCARD);
     }
 
     /**
@@ -270,7 +272,7 @@ public class IpUtils {
      * 是否为特定格式如:“10.10.10.1-10.10.10.99”的ip段字符串
      */
     public static boolean isIPSegment(String ipSeg) {
-        return StringUtils.isNotBlank(ipSeg) && ipSeg.matches(REGX_IP_SEG);
+        return com.qiniu.util.string.StringUtils.isNotBlank(ipSeg) && ipSeg.matches(REGX_IP_SEG);
     }
 
     /**
@@ -303,7 +305,7 @@ public class IpUtils {
      * @return boolean 结果
      */
     public static boolean isMatchedIp(String filter, String ip) {
-        if (StringUtils.isEmpty(filter) || StringUtils.isEmpty(ip)) {
+        if (com.qiniu.util.string.StringUtils.isEmpty(filter) || StringUtils.isEmpty(ip)) {
             return false;
         }
         String[] ips = filter.split(";");

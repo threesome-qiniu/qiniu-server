@@ -1,6 +1,6 @@
 package com.qiniu.util.spring;
 
-import com.qiniu.util.StringUtils;
+import com.qiniu.util.string.StringUtils;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;

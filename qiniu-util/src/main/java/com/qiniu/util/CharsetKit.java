@@ -1,5 +1,7 @@
 package com.qiniu.util;
 
+import com.qiniu.util.string.StringUtils;
+
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -42,7 +44,7 @@ public class CharsetKit {
      * @return Charset
      */
     public static Charset charset(String charset) {
-        return StringUtils.isEmpty(charset) ? Charset.defaultCharset() : Charset.forName(charset);
+        return com.qiniu.util.string.StringUtils.isEmpty(charset) ? Charset.defaultCharset() : Charset.forName(charset);
     }
 
     /**

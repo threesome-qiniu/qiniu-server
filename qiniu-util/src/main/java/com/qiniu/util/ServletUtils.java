@@ -15,6 +15,7 @@ import javax.servlet.http.HttpSession;
 
 import com.qiniu.common.core.constant.Constants;
 import com.qiniu.common.core.domain.R;
+import com.qiniu.util.string.StringUtils;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -29,8 +30,6 @@ import reactor.core.publisher.Mono;
 
 /**
  * 客户端工具类
- *
- * @author ruoyi
  */
 public class ServletUtils {
     /**
@@ -95,7 +94,7 @@ public class ServletUtils {
     public static Map<String, String> getParamMap(ServletRequest request) {
         Map<String, String> params = new HashMap<>();
         for (Map.Entry<String, String[]> entry : getParams(request).entrySet()) {
-            params.put(entry.getKey(), StringUtils.join(entry.getValue(), ","));
+            params.put(entry.getKey(), com.qiniu.util.string.StringUtils.join(entry.getValue(), ","));
         }
         return params;
     }
@@ -140,8 +139,8 @@ public class ServletUtils {
 
     public static String getHeader(HttpServletRequest request, String name) {
         String value = request.getHeader(name);
-        if (StringUtils.isEmpty(value)) {
-            return StringUtils.EMPTY;
+        if (com.qiniu.util.string.StringUtils.isEmpty(value)) {
+            return com.qiniu.util.string.StringUtils.EMPTY;
         }
         return urlDecode(value);
     }
@@ -193,12 +192,12 @@ public class ServletUtils {
         }
 
         String uri = request.getRequestURI();
-        if (StringUtils.inStringIgnoreCase(uri, ".json", ".xml")) {
+        if (com.qiniu.util.string.StringUtils.inStringIgnoreCase(uri, ".json", ".xml")) {
             return true;
         }
 
         String ajax = request.getParameter("__ajax");
-        return StringUtils.inStringIgnoreCase(ajax, "json", "xml");
+        return com.qiniu.util.string.StringUtils.inStringIgnoreCase(ajax, "json", "xml");
     }
 
     /**
@@ -211,7 +210,7 @@ public class ServletUtils {
         try {
             return URLEncoder.encode(str, Constants.UTF8);
         } catch (UnsupportedEncodingException e) {
-            return StringUtils.EMPTY;
+            return com.qiniu.util.string.StringUtils.EMPTY;
         }
     }
 
