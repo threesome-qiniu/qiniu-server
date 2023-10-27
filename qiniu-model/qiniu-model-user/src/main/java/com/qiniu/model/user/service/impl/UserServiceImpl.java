@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.qiniu.model.user.domain.User;
 import com.qiniu.model.user.mapper.UserMapper;
 import com.qiniu.model.user.service.IUserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
