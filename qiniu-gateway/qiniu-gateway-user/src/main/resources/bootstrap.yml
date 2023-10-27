@@ -1,0 +1,14 @@
+server:
+  port: 12000
+spring:
+  application:
+    name: qiniu-gateway-user
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 106.14.105.101:8848
+      config:
+        server-addr: 106.14.105.101:8848
+        file-extension: yml
