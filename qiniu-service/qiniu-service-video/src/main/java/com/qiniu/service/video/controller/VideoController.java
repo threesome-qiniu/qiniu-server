@@ -17,7 +17,6 @@ import javax.annotation.Resource;
  * @since 2023-10-25 20:33:08
  */
 @RestController
-@RequestMapping("/video")
 public class VideoController {
 
     @Resource
