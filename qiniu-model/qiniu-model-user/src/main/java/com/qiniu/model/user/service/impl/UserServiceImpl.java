@@ -2,6 +2,7 @@ package com.qiniu.model.user.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.qiniu.model.user.domain.User;
+import com.qiniu.model.user.domain.dto.RegisterBody;
 import com.qiniu.model.user.mapper.UserMapper;
 import com.qiniu.model.user.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public User queryById(Long userId) {
         return this.getById(userId);
+    }
+
+    @Override
+    public User register(RegisterBody registerBody) {
+
+        return null;
     }
 
 }

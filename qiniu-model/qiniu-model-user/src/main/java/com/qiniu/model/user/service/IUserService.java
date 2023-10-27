@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.qiniu.model.user.domain.User;
+import com.qiniu.model.user.domain.dto.RegisterBody;
 
 /**
  * 用户表(User)表服务接口
@@ -20,5 +21,12 @@ public interface IUserService extends IService<User> {
      * @return 实例对象
      */
     User queryById(Long userId);
+
+    /**
+     * 用户注册
+     * @param registerBody
+     * @return
+     */
+    User register(RegisterBody registerBody);
 
 }
