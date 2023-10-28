@@ -34,6 +34,6 @@ public class ExceptionCatch {
     @ResponseBody
     public R<?> exception(CustomException e) {
         log.error("catch exception:{}", e.getMessage());
-        return R.fail(e.getHttpCodeEnum());
+        return R.fail(e.getHttpCodeEnum().getCode(),e.getHttpCodeEnum().getMsg());
     }
 }

@@ -49,24 +49,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if(StringUtils.isBlank(loginUserDTO.getUsername()) || StringUtils.isBlank(loginUserDTO.getPassword())){
             throw new CustomException(SYSTEM_ERROR);
         }
-
         //2.查询用户
-        User wmUser = getOne(Wrappers.<User>lambdaQuery().eq(User::getUserName, loginUserDTO.getUsername()));
-        if(wmUser == null){
+        User dbUser = getOne(Wrappers.<User>lambdaQuery().eq(User::getUserName, loginUserDTO.getUsername()));
+        if(dbUser == null){
             throw new CustomException(USER_NOT_EXISTS);
         }
-
         //3.比对密码
-        String salt = wmUser.getSalt();
+        String salt = dbUser.getSalt();
         String pswd = loginUserDTO.getPassword();
         pswd = DigestUtils.md5DigestAsHex((pswd + salt).getBytes());
-        if(pswd.equals(wmUser.getPassword())){
-            //4.返回数据  jwt
-            wmUser.setSalt("");
-            wmUser.setPassword("");
-//            map.put("user",wmUser);
-            return JwtUtil.getToken(wmUser.getUserId());
-
+        if(pswd.equals(dbUser.getPassword())){
+            return JwtUtil.getToken(dbUser.getUserId());
         }else {
             throw new CustomException(USER_NOT_EXISTS);
         }
