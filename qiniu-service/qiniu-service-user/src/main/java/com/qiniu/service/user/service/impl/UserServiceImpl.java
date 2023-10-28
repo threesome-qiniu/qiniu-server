@@ -46,21 +46,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public String login(LoginUserDTO loginUserDTO) {
         //1.检查参数
-        if(StringUtils.isBlank(loginUserDTO.getUsername()) || StringUtils.isBlank(loginUserDTO.getPassword())){
+        if (StringUtils.isBlank(loginUserDTO.getUsername()) || StringUtils.isBlank(loginUserDTO.getPassword())) {
             throw new CustomException(SYSTEM_ERROR);
         }
         //2.查询用户
         User dbUser = getOne(Wrappers.<User>lambdaQuery().eq(User::getUserName, loginUserDTO.getUsername()));
-        if(dbUser == null){
+        if (dbUser == null) {
             throw new CustomException(USER_NOT_EXISTS);
         }
         //3.比对密码
         String salt = dbUser.getSalt();
         String pswd = loginUserDTO.getPassword();
         pswd = DigestUtils.md5DigestAsHex((pswd + salt).getBytes());
-        if(pswd.equals(dbUser.getPassword())){
+        if (pswd.equals(dbUser.getPassword())) {
             return JwtUtil.getToken(dbUser.getUserId());
-        }else {
+        } else {
             throw new CustomException(USER_NOT_EXISTS);
         }
     }
@@ -77,6 +77,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         //判断username是否存在
         if (userNameExist(registerBody.getUsername())) {
             throw new CustomException(USERNAME_EXIST);
+        }
+        if (!registerBody.getPassword().equals(registerBody.getConfirmPassword())) {
+            throw new CustomException(CONFIRM_PASSWORD_NOT_MATCH);
         }
         // 生成随机盐加密密码
         String fastUUID = IdUtils.fastUUID();

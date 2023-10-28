@@ -41,7 +41,6 @@ public class UserController {
     @PostMapping("/register")
     public R<Boolean> register(@RequestBody RegisterBody registerBody) {
         log.debug("注册用户：{}", registerBody);
-//        User user = userService.queryById(1L);
         boolean b = userService.register(registerBody);
         return R.ok(b);
     }

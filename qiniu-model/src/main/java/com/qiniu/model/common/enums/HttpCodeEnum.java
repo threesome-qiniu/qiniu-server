@@ -27,6 +27,8 @@ public enum HttpCodeEnum {
     USERNAME_EXIST(1011, "用户名已存在"),
     PHONENUMBER_EXIST(1012, "手机号已存在"),
     EMAIL_EXIST(1013, "邮箱已存在"),
+
+    CONFIRM_PASSWORD_NOT_MATCH(1020, "两次密码不一致"),
     ;
 
     int code;
