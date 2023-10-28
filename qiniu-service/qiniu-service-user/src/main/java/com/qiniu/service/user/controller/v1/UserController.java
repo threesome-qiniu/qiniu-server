@@ -1,10 +1,7 @@
 package com.qiniu.service.user.controller.v1;
 
 import com.qiniu.common.constant.Constants;
-import com.qiniu.common.constant.TokenConstants;
 import com.qiniu.common.domain.R;
-import com.qiniu.common.exception.user.UserPasswordNotMatchException;
-import com.qiniu.common.utils.JwtUtil;
 import com.qiniu.model.user.domain.dto.LoginUserDTO;
 import com.qiniu.model.user.domain.dto.RegisterBody;
 import com.qiniu.service.user.service.IUserService;
