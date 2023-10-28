@@ -26,8 +26,8 @@ public class Video implements Serializable {
      * 用户id
      */
     private Long userId;
-    private Long videoTitle;
-    private Long videoDesc;
+    private String videoTitle;
+    private String videoDesc;
     /**
      * 视频地址
      */

@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.UnsupportedEncodingException;
 
 /**
  * 视频表(Video)表控制层
@@ -22,8 +23,8 @@ public class VideoController {
     /**
      * 视频上传
      */
-    @PostMapping("/upload")
-    public R<?> uploadVideo(@RequestParam("file") MultipartFile file) {
+    @PostMapping("/upload/v1")
+    public R<?> uploadVideo(@RequestParam("file") MultipartFile file)throws UnsupportedEncodingException {
         String url = videoService.uploadVideo(file);
         return R.ok(url);
     }

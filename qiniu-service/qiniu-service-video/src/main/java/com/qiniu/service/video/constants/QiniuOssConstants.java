@@ -10,5 +10,5 @@ public class QiniuOssConstants {
     /**
      * 临时域名
      */
-    public static final String PREFIX_URL = "http://s34vo1rvp.hn-bkt.clouddn.com/";
+    public static final String PREFIX_URL = "http://s38bf8bdn.hb-bkt.clouddn.com/";
 }
