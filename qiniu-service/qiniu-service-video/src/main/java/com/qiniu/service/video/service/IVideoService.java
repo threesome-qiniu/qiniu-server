@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.qiniu.model.video.domain.Video;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.UnsupportedEncodingException;
+
 /**
  * 视频表(Video)表服务接口
  *
@@ -17,6 +19,6 @@ public interface IVideoService extends IService<Video> {
      * @param file
      * @return
      */
-    String uploadVideo(MultipartFile file);
+    String uploadVideo(MultipartFile file)throws UnsupportedEncodingException;
 
 }
