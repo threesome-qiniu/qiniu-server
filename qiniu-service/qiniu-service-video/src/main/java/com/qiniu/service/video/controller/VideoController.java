@@ -1,10 +1,10 @@
 package com.qiniu.service.video.controller;
 
-import com.qiniu.common.core.domain.R;
+import com.qiniu.common.domain.R;
 import com.qiniu.common.log.annotation.Log;
 import com.qiniu.common.log.enums.BusinessType;
 import com.qiniu.common.log.enums.OperatorType;
-import com.qiniu.model.video.service.IVideoService;
+import com.qiniu.service.video.service.IVideoService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 

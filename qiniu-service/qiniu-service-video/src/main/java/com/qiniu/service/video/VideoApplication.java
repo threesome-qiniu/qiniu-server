@@ -12,12 +12,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
  * @AUTHOR: roydon
  * @DATE: 2023/10/25
  **/
-@Slf4j
-@SpringBootApplication(scanBasePackages = {
-        "com.qiniu.service.video",
-        "com.qiniu.model.video"
-})
-@MapperScan("com.qiniu.model.video.mapper")
+@SpringBootApplication
 @EnableDiscoveryClient
 public class VideoApplication {
     public static void main(String[] args) {
