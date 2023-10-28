@@ -35,14 +35,14 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Transactional
     @Override
-    public String uploadVideo(MultipartFile file) throws UnsupportedEncodingException {
+    public String uploadVideo(MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
 
         //对原始文件名进行判断
         //如果文件名重复，则对文件名重新命名
         //构造一个带指定 Region 对象的配置类
 //        if(!originalFilename.endsWith(".png")){
-//          throw new SystemException(AppHttpCodeEnum.FILE_TYPE_ERROR);
+//          throw new SystemException(HttpCodeEnum.FILE_TYPE_ERROR);
 //        }
         //上传文件到OSS
         assert originalFilename != null;

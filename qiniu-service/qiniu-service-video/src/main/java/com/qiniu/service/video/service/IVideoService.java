@@ -16,9 +16,10 @@ public interface IVideoService extends IService<Video> {
 
     /**
      * 上传视频文件，返回文件url
+     *
      * @param file
      * @return
      */
-    String uploadVideo(MultipartFile file)throws UnsupportedEncodingException;
+    String uploadVideo(MultipartFile file);
 
 }

@@ -1,4 +1,4 @@
-package com.qiniu.service.video.controller;
+package com.qiniu.service.video.controller.v1;
 
 import com.qiniu.common.domain.R;
 import com.qiniu.service.video.service.IVideoService;
@@ -15,6 +15,7 @@ import java.io.UnsupportedEncodingException;
  * @since 2023-10-25 20:33:08
  */
 @RestController
+@RequestMapping("/api/v1")
 public class VideoController {
 
     @Resource
@@ -23,8 +24,8 @@ public class VideoController {
     /**
      * 视频上传
      */
-    @PostMapping("/upload/v1")
-    public R<?> uploadVideo(@RequestParam("file") MultipartFile file)throws UnsupportedEncodingException {
+    @PostMapping("/upload")
+    public R<?> uploadVideo(@RequestParam("file") MultipartFile file) {
         String url = videoService.uploadVideo(file);
         return R.ok(url);
     }
