@@ -3,6 +3,7 @@ package com.qiniu.model.user.domain;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ import java.io.Serializable;
  * @author roydon
  * @since 2023-10-24 19:18:25
  */
+@ApiModel("用户表-user")
 @Data
 @TableName("user")
 public class User implements Serializable {

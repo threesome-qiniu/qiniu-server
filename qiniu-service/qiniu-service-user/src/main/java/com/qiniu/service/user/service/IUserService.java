@@ -2,9 +2,9 @@ package com.qiniu.service.user.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.qiniu.model.user.domain.User;
-import com.qiniu.model.user.domain.dto.LoginUserDTO;
-import com.qiniu.model.user.domain.dto.RegisterBody;
-import com.qiniu.model.user.domain.dto.UpdatePasswordDTO;
+import com.qiniu.model.user.dto.LoginUserDTO;
+import com.qiniu.model.user.dto.RegisterBody;
+import com.qiniu.model.user.dto.UpdatePasswordDTO;
 
 /**
  * 用户表(User)表服务接口

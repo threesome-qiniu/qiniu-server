@@ -1,4 +1,4 @@
-package com.qiniu.model.user.domain.dto;
+package com.qiniu.model.user.dto;
 
 import lombok.Data;
 

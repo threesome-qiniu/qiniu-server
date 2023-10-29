@@ -14,6 +14,7 @@ public enum HttpCodeEnum {
 
     HAS_ERROR(500, "出现异常"),
     SYSTEM_ERROR(502, "系统异常"),
+    SENSITIVEWORD_ERROR(503, "禁止出现敏感词"),
 
     REQUIRE_USERNAME(504, "必需填写用户名"),
     CONTENT_NOT_NULL(506, "评论内容不能为空"),

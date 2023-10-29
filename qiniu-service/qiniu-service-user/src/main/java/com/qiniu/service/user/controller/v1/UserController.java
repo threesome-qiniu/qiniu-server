@@ -4,24 +4,22 @@ import cn.hutool.core.util.PhoneUtil;
 import com.qiniu.common.constant.Constants;
 import com.qiniu.common.domain.R;
 import com.qiniu.common.exception.CustomException;
-import com.qiniu.common.service.RedisCache;
 import com.qiniu.common.service.RedisService;
 import com.qiniu.common.utils.EmailUtils;
 import com.qiniu.common.utils.file.PathUtils;
 import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.model.common.enums.HttpCodeEnum;
 import com.qiniu.model.user.domain.User;
-import com.qiniu.model.user.domain.dto.LoginUserDTO;
-import com.qiniu.model.user.domain.dto.RegisterBody;
-import com.qiniu.model.user.domain.dto.UpdatePasswordDTO;
-import com.qiniu.model.user.domain.dto.UserThreadLocalUtil;
+import com.qiniu.model.user.dto.LoginUserDTO;
+import com.qiniu.model.user.dto.RegisterBody;
+import com.qiniu.model.user.dto.UpdatePasswordDTO;
+import com.qiniu.model.user.dto.UserThreadLocalUtil;
 import com.qiniu.service.user.constants.QiniuUserOssConstants;
 import com.qiniu.service.user.constants.UserCacheConstants;
 import com.qiniu.service.user.service.IUserService;
 import com.qiniu.starter.file.service.FileStorageService;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.omg.CORBA.SystemException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,11 +39,14 @@ import java.util.concurrent.TimeUnit;
 @RequestMapping("/api/v1")
 public class UserController {
 
-    @Autowired
+    @Resource
     private IUserService userService;
 
     @Resource
     private RedisService redisService;
+
+    @Resource
+    private FileStorageService fileStorageService;
 
     /**
      * 登录
@@ -53,6 +54,7 @@ public class UserController {
      * @param loginUserDTO
      * @return
      */
+    @ApiOperation("登录")
     @PostMapping("/login")
     public R<Map<String, String>> login(@RequestBody LoginUserDTO loginUserDTO) {
         log.debug("登录用户：{}", loginUserDTO);
@@ -68,6 +70,7 @@ public class UserController {
      * @param registerBody
      * @return
      */
+    @ApiOperation("注册")
     @PostMapping("/register")
     public R<Boolean> register(@RequestBody RegisterBody registerBody) {
         log.debug("注册用户：{}", registerBody);
@@ -81,6 +84,7 @@ public class UserController {
      * @param user
      * @return
      */
+    @ApiOperation("更新信息")
     @PutMapping("/update")
     public R<User> save(@RequestBody User user) {
         // 校验邮箱
@@ -100,6 +104,7 @@ public class UserController {
      * @param userId
      * @return
      */
+    @ApiOperation("根据id获取用户信息")
     @GetMapping("/{userId}")
     public R<User> userInfoById(@PathVariable Long userId) {
         User user = userService.queryById(userId);
@@ -110,9 +115,8 @@ public class UserController {
 
     /**
      * 通过token获取用户信息
-     *
-     * @return
      */
+    @ApiOperation("获取用户信息")
     @GetMapping("/userinfo")
     public R<User> userInfo() {
         Long userId = UserThreadLocalUtil.getUser().getUserId();
@@ -135,18 +139,22 @@ public class UserController {
     /**
      * 修改密码
      *
-     * @param dto
-     * @return
+     * @param dto 原密码，新密码，确认密码
+     * @return user
      */
+    @ApiOperation("修改密码")
     @PostMapping("/updatepass")
     public R<?> updatePass(@RequestBody UpdatePasswordDTO dto) {
         return R.ok(userService.updatePass(dto));
     }
 
-
-    @Resource
-    private FileStorageService fileStorageService;
-
+    /**
+     * 头像上传
+     *
+     * @param file 图片文件，大小限制1M
+     * @return url
+     */
+    @ApiOperation("上传头像")
     @PostMapping("/avatar")
     public R<String> avatar(@RequestParam("file") MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
