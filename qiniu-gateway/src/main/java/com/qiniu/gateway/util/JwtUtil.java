@@ -56,7 +56,7 @@ public class JwtUtil {
     }
 
     /**
-     * 获取hearder body信息
+     * 获取header body信息
      *
      * @param token
      * @return

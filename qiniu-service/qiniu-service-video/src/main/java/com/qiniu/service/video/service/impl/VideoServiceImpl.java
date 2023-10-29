@@ -1,21 +1,34 @@
 package com.qiniu.service.video.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.qiniu.common.utils.IdUtils;
+import com.microsoft.schemas.office.visio.x2012.main.VisioDocumentDocument1;
+import com.qiniu.common.exception.CustomException;
 import com.qiniu.common.utils.file.PathUtils;
+import com.qiniu.model.user.domain.User;
 import com.qiniu.model.video.domain.Video;
+import com.qiniu.model.video.domain.dto.PageDto;
+import com.qiniu.model.video.domain.dto.VideoBindDto;
 import com.qiniu.service.video.mapper.VideoMapper;
 import com.qiniu.service.video.service.IVideoService;
 import com.qiniu.service.video.util.QiniuOssService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ServerWebExchange;
 
 import javax.annotation.Resource;
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
+
+import static com.qiniu.model.common.enums.HttpCodeEnum.*;
 
 /**
  * 视频表(Video)表服务实现类
@@ -37,28 +50,66 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     @Override
     public String uploadVideo(MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
+        String url="";
+        //对文件id进行判断，如果文件已经存在，则不上传，直接返回数据库中文件的存储路径
+        String id="";
+        try {
+            InputStream inputStream = file.getInputStream();
+            id=DigestUtils.md5DigestAsHex(inputStream);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        Video videodb = selectById(id);
+        if (videodb!= null){
+            url=videodb.getVideoUrl();
+        }else {
+            assert originalFilename != null;
+            String filePath = PathUtils.generateFilePath(originalFilename,file);
+            url = qiniuOssService.uploadOss(file, filePath);
+            log.info("视频上传地址：{}", url);
+        }
 
-        //对原始文件名进行判断
-        //如果文件名重复，则对文件名重新命名
-        //构造一个带指定 Region 对象的配置类
-//        if(!originalFilename.endsWith(".png")){
-//          throw new SystemException(HttpCodeEnum.FILE_TYPE_ERROR);
-//        }
-        //上传文件到OSS
-        assert originalFilename != null;
-        String filePath = PathUtils.generateFilePath(originalFilename);
-        String url = qiniuOssService.uploadOss(file, filePath);
-        Video video = new Video();
-        video.setVideoId(IdUtils.fastSimpleUUID());
-        video.setUserId(1L);
-        video.setVideoUrl(url);
-        video.setCreateBy("lzq");
-        video.setCreateTime(LocalDateTime.now());
-        video.setVideoDesc("视频简介");
-        video.setVideoTitle("治愈");
-        videoMapper.insert(video);
-        log.info("视频上传地址：{}", url);
         return url;
     }
+
+    @Override
+    public Video selectById(String id) {
+        Video video = videoMapper.selectById(id);
+        return video;
+    }
+
+    @Override
+    public Video bindVideoAndUser(VideoBindDto videoBindDto, User user) {
+        //判断传过来的数据是否符合数据库字段标准
+        if (videoBindDto.getVideoTitle().length()<=0&&videoBindDto.getVideoTitle().length()>30){
+            throw new CustomException(BIND_CONTENT_TITLE_FAIL);
+        }
+        if (videoBindDto.getVideoDesc().length()<=0&&videoBindDto.getVideoDesc().length()>200){
+            throw new CustomException(BIND_CONTENT_DESC_FAIL);
+        }
+        Video video = new Video();
+        video.setVideoId(videoBindDto.getVideoId());
+        video.setVideoUrl(videoBindDto.getVideoUrl());
+        video.setVideoTitle(videoBindDto.getVideoTitle());
+        video.setVideoDesc(videoBindDto.getVideoDesc());
+        video.setUserId(user.getUserId());
+        video.setCreateTime(LocalDateTime.now());
+        video.setCreateBy(user.getUserId().toString());
+        int insert = videoMapper.insert(video);
+        if (insert == 0){
+            throw new CustomException(BIND_FAIL);
+        }
+        return videoMapper.selectById(videoBindDto.getVideoId());
+    }
+
+    @Override
+    public Page<Video> findVideosById(PageDto pageDto) {
+        Page<Video> page = new Page<>(pageDto.getPageNum(),pageDto.getPageSize());
+        LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Video::getUserId, pageDto.getUserId());
+        Page<Video> videoPage = videoMapper.selectPage(page, queryWrapper);
+        return videoPage;
+    }
+
 
 }
