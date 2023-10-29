@@ -56,8 +56,7 @@ public class VideoController {
      */
     @PostMapping("/page")
     public R<?> page(@RequestBody VideoPageDto pageDto) {
-        IPage<Video> videoIPage = videoService.findVideosById(pageDto);
-        return R.ok(videoIPage);
+        return R.ok(videoService.queryUserVideoPage(pageDto));
     }
 }
 

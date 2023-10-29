@@ -34,5 +34,5 @@ public interface IVideoService extends IService<Video> {
      */
     Video bindVideoAndUser(VideoBindDto videoBindDto);
 
-    IPage<Video> findVideosById(VideoPageDto pageDto);
+    IPage<Video> queryUserVideoPage(VideoPageDto pageDto);
 }

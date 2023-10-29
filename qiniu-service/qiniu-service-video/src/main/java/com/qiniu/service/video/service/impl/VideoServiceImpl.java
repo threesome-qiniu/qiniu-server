@@ -97,7 +97,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     }
 
     @Override
-    public IPage<Video> findVideosById(VideoPageDto pageDto) {
+    public IPage<Video> queryUserVideoPage(VideoPageDto pageDto) {
         Long userId = UserThreadLocalUtil.getUser().getUserId();
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Video::getUserId, userId);
