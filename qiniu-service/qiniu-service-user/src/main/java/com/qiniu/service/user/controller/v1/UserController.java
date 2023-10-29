@@ -12,6 +12,7 @@ import com.qiniu.model.common.enums.HttpCodeEnum;
 import com.qiniu.model.user.domain.User;
 import com.qiniu.model.user.domain.dto.LoginUserDTO;
 import com.qiniu.model.user.domain.dto.RegisterBody;
+import com.qiniu.model.user.domain.dto.UpdatePasswordDTO;
 import com.qiniu.model.user.domain.dto.UserThreadLocalUtil;
 import com.qiniu.service.user.constants.UserCacheConstants;
 import com.qiniu.service.user.service.IUserService;
@@ -125,5 +126,17 @@ public class UserController {
         redisService.expire(UserCacheConstants.USER_INFO_PREFIX + userId, UserCacheConstants.USER_INFO_EXPIRE_TIME, TimeUnit.SECONDS);
         return R.ok(user);
     }
+
+    /**
+     * 修改密码
+     *
+     * @param dto
+     * @return
+     */
+    @PostMapping("/updatepass")
+    public R<?> updatePass(@RequestBody UpdatePasswordDTO dto) {
+        return R.ok(userService.updatePass(dto));
+    }
+
 
 }

@@ -19,6 +19,7 @@ public enum HttpCodeEnum {
     FILE_TYPE_ERROR(507, "文件类型错误，请上传png文件"),
     NICKNAME_EXIST(512, "昵称已存在"),
     LOGIN_ERROR(505, "用户名或密码错误"),
+    PASSWORD_ERROR(510, "密码错误"),
 
     USER_NOT_EXISTS(1000, "用户名不存在"),
     USERNAME_NOT_NULL(1001, "用户名不能为空"),

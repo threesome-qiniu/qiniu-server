@@ -7,11 +7,13 @@ import com.qiniu.common.exception.CustomException;
 import com.qiniu.common.service.RedisService;
 import com.qiniu.common.utils.IdUtils;
 import com.qiniu.common.utils.JwtUtil;
+import com.qiniu.common.utils.Md5Util;
 import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.model.common.enums.HttpCodeEnum;
 import com.qiniu.model.user.domain.User;
 import com.qiniu.model.user.domain.dto.LoginUserDTO;
 import com.qiniu.model.user.domain.dto.RegisterBody;
+import com.qiniu.model.user.domain.dto.UpdatePasswordDTO;
 import com.qiniu.model.user.domain.dto.UserThreadLocalUtil;
 import com.qiniu.service.user.constants.UserCacheConstants;
 import com.qiniu.service.user.mapper.UserMapper;
@@ -88,7 +90,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
         // 生成随机盐加密密码
         String fastUUID = IdUtils.fastUUID();
-        String enPasswd = DigestUtils.md5DigestAsHex((registerBody.getPassword() + fastUUID).getBytes());
+        String enPasswd = DigestUtils.md5DigestAsHex((registerBody.getPassword().trim() + fastUUID).getBytes());
         User user = new User();
         user.setUserName(registerBody.getUsername());
         user.setPassword(enPasswd);
@@ -118,5 +120,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         } else {
             return new User();
         }
+    }
+
+    @Override
+    public boolean updatePass(UpdatePasswordDTO dto) {
+        Long userId = UserThreadLocalUtil.getUser().getUserId();
+        if (StringUtils.isNull(userId)) {
+            throw new CustomException(HttpCodeEnum.NEED_LOGIN);
+        }
+        // 获取用户，拿到原密码加盐比较
+        User user = this.getById(userId);
+        String dtoEnPasswd = DigestUtils.md5DigestAsHex((dto.getOldPassword().trim() + user.getSalt()).getBytes());
+        if (!dtoEnPasswd.equals(user.getPassword())) {
+            throw new CustomException(PASSWORD_ERROR);
+        }
+        if(!dto.getNewPassword().equals(dto.getConfirmPassword())){
+            throw new CustomException(CONFIRM_PASSWORD_NOT_MATCH);
+        }
+        User updateUser = new User();
+        updateUser.setUserId(userId);
+        updateUser.setPassword(DigestUtils.md5DigestAsHex((dto.getConfirmPassword().trim() + user.getSalt()).getBytes()));
+        return this.updateById(updateUser);
     }
 }
