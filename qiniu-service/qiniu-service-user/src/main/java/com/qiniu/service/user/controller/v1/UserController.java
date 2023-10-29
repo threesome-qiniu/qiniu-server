@@ -1,10 +1,15 @@
 package com.qiniu.service.user.controller.v1;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.qiniu.common.constant.Constants;
 import com.qiniu.common.domain.R;
+import com.qiniu.common.utils.string.StringUtils;
+import com.qiniu.model.common.enums.HttpCodeEnum;
 import com.qiniu.model.user.domain.User;
 import com.qiniu.model.user.domain.dto.LoginUserDTO;
 import com.qiniu.model.user.domain.dto.RegisterBody;
+import com.qiniu.model.user.domain.dto.UserThreadLocalUtil;
 import com.qiniu.service.user.service.IUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +39,7 @@ public class UserController {
      * @return
      */
     @PostMapping("/login")
-    public R<?> login(@RequestBody LoginUserDTO loginUserDTO) {
+    public R<Map<String, String>> login(@RequestBody LoginUserDTO loginUserDTO) {
         log.debug("登录用户：{}", loginUserDTO);
         String token = userService.login(loginUserDTO);
         Map<String, String> map = new HashMap<>();
@@ -62,8 +67,39 @@ public class UserController {
      * @return
      */
     @PutMapping("/update")
-    public R<?> save(@RequestBody User user) {
+    public R<User> save(@RequestBody User user) {
         return R.ok(userService.updateUserInfo(user));
+    }
+
+    /**
+     * 获取用户信息
+     *
+     * @param userId
+     * @return
+     */
+    @GetMapping("/{userId}")
+    public R<User> userInfoById(@PathVariable Long userId) {
+        User user = userService.queryById(userId);
+        user.setPassword(null);
+        user.setSalt(null);
+        return R.ok(user);
+    }
+
+    /**
+     * 通过token获取用户信息
+     *
+     * @return
+     */
+    @GetMapping("/userinfo")
+    public R<User> userInfo() {
+        Long userId = UserThreadLocalUtil.getUser().getUserId();
+        if (StringUtils.isNull(userId)) {
+            R.fail(HttpCodeEnum.NEED_LOGIN.getCode(), "请先登录");
+        }
+        User user = userService.queryById(userId);
+        user.setPassword(null);
+        user.setSalt(null);
+        return R.ok(user);
     }
 
 
