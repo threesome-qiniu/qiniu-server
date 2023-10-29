@@ -2,6 +2,7 @@ package com.qiniu.service.video.util;
 
 import com.google.gson.Gson;
 import com.qiniu.common.QiniuException;
+import com.qiniu.common.utils.Md5Util;
 import com.qiniu.http.Response;
 import com.qiniu.service.video.config.QiniuOssConfig;
 import com.qiniu.service.video.constants.QiniuOssConstants;
@@ -10,8 +11,10 @@ import com.qiniu.storage.Region;
 import com.qiniu.storage.UploadManager;
 import com.qiniu.storage.model.DefaultPutRet;
 import com.qiniu.util.Auth;
+import org.apache.commons.codec.cli.Digest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
@@ -31,9 +34,11 @@ public class QiniuOssService {
     public String uploadOss(MultipartFile file, String filePath) {
         //构造一个带指定 Region 对象的配置类
         Configuration cfg = new Configuration(Region.autoRegion());
+//        cfg.resumableUploadAPIVersion = Configuration.ResumableUploadAPIVersion.V1;
         //...其他参数参考类注释
         UploadManager uploadManager = new UploadManager(cfg);
         //默认不指定key的情况下，以文件内容的hash值作为文件名
+
         try {
             InputStream inputStream = file.getInputStream();
             Auth auth = Auth.create(qiniuOssConfig.getAccessKey(), qiniuOssConfig.getSecretKey());

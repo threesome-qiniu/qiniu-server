@@ -29,6 +29,12 @@ public enum HttpCodeEnum {
     EMAIL_EXIST(1013, "邮箱已存在"),
 
     CONFIRM_PASSWORD_NOT_MATCH(1020, "两次密码不一致"),
+
+
+    UPLOAD_FAIL(10001, "上传失败"),
+    BIND_FAIL(10002,"绑定失败"),
+    BIND_CONTENT_TITLE_FAIL(10003,"视频标题不合法"),
+    BIND_CONTENT_DESC_FAIL(10003,"视频描述不合法"),
     ;
 
     int code;
