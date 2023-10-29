@@ -5,17 +5,15 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.qiniu</groupId>
-        <artifactId>qiniu-service</artifactId>
+        <artifactId>qiniu-server</artifactId>
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>qiniu-service-user</artifactId>
+    <artifactId>qiniu-starter</artifactId>
+    <packaging>pom</packaging>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.qiniu</groupId>
-            <artifactId>qiniu-starter-file</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-    </dependencies>
+    <modules>
+        <module>qiniu-starter-file</module>
+    </modules>
+
 </project>

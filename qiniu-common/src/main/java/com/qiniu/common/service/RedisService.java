@@ -1,5 +1,6 @@
 package com.qiniu.common.service;
 
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.HashOperations;
@@ -15,9 +16,9 @@ import java.util.concurrent.TimeUnit;
  **/
 @SuppressWarnings(value = {"unchecked", "rawtypes"})
 @Component
+@AllArgsConstructor
 public class RedisService {
 
-    @Autowired
     public RedisTemplate redisTemplate;
 
     /**

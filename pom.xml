@@ -21,6 +21,7 @@
         <module>qiniu-feign</module>
         <module>qiniu-common</module>
         <module>qiniu-model</module>
+        <module>qiniu-starter</module>
     </modules>
 
     <properties>
@@ -64,6 +65,11 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>${hutool.version}</version>
         </dependency>
     </dependencies>
 
@@ -253,11 +259,11 @@
 <!--                </exclusions>-->
 <!--            </dependency>-->
             <!--开发工具集-->
-            <dependency>
-                <groupId>cn.hutool</groupId>
-                <artifactId>hutool-all</artifactId>
-                <version>${hutool.version}</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>cn.hutool</groupId>-->
+<!--                <artifactId>hutool-all</artifactId>-->
+<!--                <version>${hutool.version}</version>-->
+<!--            </dependency>-->
             <!-- gson -->
             <dependency>
                 <groupId>com.google.code.gson</groupId>

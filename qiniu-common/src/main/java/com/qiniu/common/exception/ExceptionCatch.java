@@ -20,8 +20,9 @@ public class ExceptionCatch {
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public R<?> exception(Exception e) {
+        e.printStackTrace();
         log.error("catch exception:{}", e.getMessage());
-        return R.fail(HttpCodeEnum.SYSTEM_ERROR);
+        return R.fail(HttpCodeEnum.HAS_ERROR.getCode(), HttpCodeEnum.HAS_ERROR.getMsg());
     }
 
     /**
@@ -34,6 +35,6 @@ public class ExceptionCatch {
     @ResponseBody
     public R<?> exception(CustomException e) {
         log.error("catch exception:{}", e.getMessage());
-        return R.fail(e.getHttpCodeEnum().getCode(),e.getHttpCodeEnum().getMsg());
+        return R.fail(e.getHttpCodeEnum().getCode(), e.getHttpCodeEnum().getMsg());
     }
 }

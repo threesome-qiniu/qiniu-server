@@ -2,11 +2,6 @@ package com.qiniu.model.user.domain.dto;
 
 import com.qiniu.model.user.domain.User;
 
-/**
- * 功能：
- * 作者：lzq
- * 日期：2023/10/29 18:18
- */
 public class UserThreadLocalUtil {
 
     private final static ThreadLocal<User> USER_THREAD_LOCAL = new ThreadLocal<>();

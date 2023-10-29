@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.qiniu.model.user.domain.User;
 import com.qiniu.model.user.domain.dto.LoginUserDTO;
 import com.qiniu.model.user.domain.dto.RegisterBody;
+import com.qiniu.model.user.domain.dto.UpdatePasswordDTO;
 
 /**
  * 用户表(User)表服务接口
@@ -15,19 +16,26 @@ public interface IUserService extends IService<User> {
 
     /**
      * 通过ID查询单条数据
-     *
-     * @param userId 主键
-     * @return 实例对象
      */
     User queryById(Long userId);
 
     /**
      * 用户注册
-     *
-     * @param registerBody
-     * @return
      */
     boolean register(RegisterBody registerBody);
 
+    /**
+     * 登录
+     */
     String login(LoginUserDTO loginUserDTO);
+
+    /**
+     * 更新信息
+     */
+    User updateUserInfo(User user);
+
+    /**
+     * 修改密码
+     */
+    boolean updatePass(UpdatePasswordDTO dto);
 }

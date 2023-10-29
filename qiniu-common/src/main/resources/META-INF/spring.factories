@@ -2,4 +2,5 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.qiniu.common.exception.ExceptionCatch,\
   com.qiniu.common.swagger.SwaggerConfiguration,\
   com.qiniu.common.swagger.Swagger2Configuration,\
-  com.qiniu.common.service.RedisCache
+  com.qiniu.common.service.RedisCache,\
+  com.qiniu.common.service.RedisService
