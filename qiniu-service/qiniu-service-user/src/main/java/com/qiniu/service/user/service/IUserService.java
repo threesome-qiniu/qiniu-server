@@ -30,4 +30,6 @@ public interface IUserService extends IService<User> {
     boolean register(RegisterBody registerBody);
 
     String login(LoginUserDTO loginUserDTO);
+
+    User updateUserInfo(User user);
 }

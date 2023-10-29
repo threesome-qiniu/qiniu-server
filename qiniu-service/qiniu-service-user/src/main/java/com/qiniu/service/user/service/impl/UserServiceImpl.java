@@ -1,19 +1,19 @@
 package com.qiniu.service.user.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.qiniu.common.exception.CustomException;
 import com.qiniu.common.utils.IdUtils;
 import com.qiniu.common.utils.JwtUtil;
+import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.model.common.enums.HttpCodeEnum;
 import com.qiniu.model.user.domain.User;
 import com.qiniu.model.user.domain.dto.LoginUserDTO;
 import com.qiniu.model.user.domain.dto.RegisterBody;
+import com.qiniu.model.user.domain.dto.UserThreadLocalUtil;
 import com.qiniu.service.user.mapper.UserMapper;
 import com.qiniu.service.user.service.IUserService;
-import org.omg.CORBA.SystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
@@ -98,4 +98,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         return count(queryWrapper) > 0;
     }
 
+    @Override
+    public User updateUserInfo(User user) {
+        Long userId = UserThreadLocalUtil.getUser().getUserId();
+        if (StringUtils.isNull(userId)) {
+            throw new CustomException(HttpCodeEnum.NEED_LOGIN);
+        }
+        user.setUserId(userId);
+        boolean update = this.updateById(user);
+        if (update) {
+            return user;
+        } else {
+            return new User();
+        }
+    }
 }
