@@ -2,43 +2,5 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.qiniu.service.video.mapper.VideoMapper">
 
-    <resultMap type="com.qiniu.model.video.domain.Video" id="VideoMap">
-        <result property="videoId" column="video_id" jdbcType="VARCHAR"/>
-        <result property="userId" column="user_id" jdbcType="INTEGER"/>
-        <result property="videoTitle" column="video_title" jdbcType="VARCHAR"/>
-        <result property="videoDesc" column="video_desc" jdbcType="VARCHAR"/>
-        <result property="videoUrl" column="video_url" jdbcType="VARCHAR"/>
-        <result property="viewNum" column="view_num" jdbcType="INTEGER"/>
-        <result property="likeNum" column="like_num" jdbcType="INTEGER"/>
-        <result property="delFlag" column="del_flag" jdbcType="VARCHAR"/>
-        <result property="createBy" column="create_by" jdbcType="VARCHAR"/>
-        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
-        <result property="updateBy" column="update_by" jdbcType="VARCHAR"/>
-        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
-    </resultMap>
-
-    <sql id="selectVideoVo">
-        select video_id,
-               user_id,
-               video_title,
-               video_desc,
-               video_url,
-               view_num,
-               like_num,
-               del_flag,
-               create_by,
-               create_time,
-               update_by,
-               update_time
-        from video
-    </sql>
-
-    <!--通过主键删除-->
-    <delete id="deleteById">
-        delete
-        from video
-        where video_id = #{videoId}
-    </delete>
-
 </mapper>
 

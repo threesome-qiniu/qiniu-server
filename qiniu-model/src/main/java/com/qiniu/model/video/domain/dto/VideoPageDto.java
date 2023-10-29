@@ -7,9 +7,12 @@ import lombok.EqualsAndHashCode;
 /**
  * 功能：
  * 作者：lzq
- * 日期：2023/10/29 14:58
+ * 日期：2023/10/29 19:55
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class VideoBindDto extends Video {
+public class VideoPageDto extends Video {
+    private Integer pageNum = 1;
+    private Integer pageSize = 10;
 }
+

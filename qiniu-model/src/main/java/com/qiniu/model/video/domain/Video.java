@@ -57,6 +57,5 @@ public class Video implements Serializable {
      */
     private LocalDateTime updateTime;
 
-
 }
 

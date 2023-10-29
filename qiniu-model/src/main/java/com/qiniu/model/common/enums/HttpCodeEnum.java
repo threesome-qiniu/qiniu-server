@@ -41,8 +41,8 @@ public enum HttpCodeEnum {
 
     UPLOAD_FAIL(10001, "上传失败"),
     BIND_FAIL(10002,"绑定失败"),
-    BIND_CONTENT_TITLE_FAIL(10003,"视频标题不合法"),
-    BIND_CONTENT_DESC_FAIL(10003,"视频描述不合法"),
+    BIND_CONTENT_TITLE_FAIL(10003,"视频标题需在30字符以内"),
+    BIND_CONTENT_DESC_FAIL(10004,"视频描述需在200字符以内"),
     ;
 
     int code;

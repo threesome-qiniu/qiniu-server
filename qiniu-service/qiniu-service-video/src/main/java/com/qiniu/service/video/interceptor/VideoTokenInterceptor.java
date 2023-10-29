@@ -1,7 +1,7 @@
 package com.qiniu.service.video.interceptor;
 
 import com.qiniu.model.user.domain.User;
-import com.qiniu.model.user.domain.dto.UserThreadLocalUtil;
+import com.qiniu.model.user.dto.UserThreadLocalUtil;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
