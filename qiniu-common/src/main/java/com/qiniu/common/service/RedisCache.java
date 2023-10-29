@@ -14,7 +14,11 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 老api
+ */
 @Component
+@Deprecated
 public class RedisCache extends CachingConfigurerSupport {
 
     @Autowired
