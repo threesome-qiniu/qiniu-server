@@ -16,7 +16,7 @@ public class PathUtils {
         //根据日期生成路径   2022/1/15/
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd/");
         String datePath = sdf.format(new Date());
-        //uuid作为文件名
+        //文件流的md5值作为文件名
         String md5="";
         try {
             InputStream inputStream = file.getInputStream();

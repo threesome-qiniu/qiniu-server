@@ -34,7 +34,7 @@ public class QiniuOssService {
     public String uploadOss(MultipartFile file, String filePath) {
         //构造一个带指定 Region 对象的配置类
         Configuration cfg = new Configuration(Region.autoRegion());
-//        cfg.resumableUploadAPIVersion = Configuration.ResumableUploadAPIVersion.V1;
+        //cfg.resumableUploadAPIVersion = Configuration.ResumableUploadAPIVersion.V1;
         //...其他参数参考类注释
         UploadManager uploadManager = new UploadManager(cfg);
         //默认不指定key的情况下，以文件内容的hash值作为文件名

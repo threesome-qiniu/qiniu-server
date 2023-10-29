@@ -1,11 +1,15 @@
 package com.qiniu.service.video.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.microsoft.schemas.office.visio.x2012.main.VisioDocumentDocument1;
 import com.qiniu.common.exception.CustomException;
 import com.qiniu.common.utils.file.PathUtils;
 import com.qiniu.model.user.domain.User;
 import com.qiniu.model.video.domain.Video;
+import com.qiniu.model.video.domain.dto.PageDto;
 import com.qiniu.model.video.domain.dto.VideoBindDto;
 import com.qiniu.service.video.mapper.VideoMapper;
 import com.qiniu.service.video.service.IVideoService;
@@ -76,7 +80,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Override
     public Video bindVideoAndUser(VideoBindDto videoBindDto, User user) {
-
+        //判断传过来的数据是否符合数据库字段标准
         if (videoBindDto.getVideoTitle().length()<=0&&videoBindDto.getVideoTitle().length()>30){
             throw new CustomException(BIND_CONTENT_TITLE_FAIL);
         }
@@ -90,12 +94,21 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         video.setVideoDesc(videoBindDto.getVideoDesc());
         video.setUserId(user.getUserId());
         video.setCreateTime(LocalDateTime.now());
-        video.setCreateBy(user.getUserName());
+        video.setCreateBy(user.getUserId().toString());
         int insert = videoMapper.insert(video);
         if (insert == 0){
             throw new CustomException(BIND_FAIL);
         }
         return videoMapper.selectById(videoBindDto.getVideoId());
+    }
+
+    @Override
+    public Page<Video> findVideosById(PageDto pageDto) {
+        Page<Video> page = new Page<>(pageDto.getPageNum(),pageDto.getPageSize());
+        LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Video::getUserId, pageDto.getUserId());
+        Page<Video> videoPage = videoMapper.selectPage(page, queryWrapper);
+        return videoPage;
     }
 
 

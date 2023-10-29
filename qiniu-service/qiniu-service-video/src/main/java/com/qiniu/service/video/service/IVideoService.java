@@ -1,8 +1,11 @@
 package com.qiniu.service.video.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.qiniu.model.user.domain.User;
 import com.qiniu.model.video.domain.Video;
+import com.qiniu.model.video.domain.dto.PageDto;
 import com.qiniu.model.video.domain.dto.VideoBindDto;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,4 +30,6 @@ public interface IVideoService extends IService<Video> {
     Video selectById(String id);
 
     Video bindVideoAndUser( VideoBindDto videoBindDto, User user);
+
+    Page<Video> findVideosById(PageDto pageDto);
 }

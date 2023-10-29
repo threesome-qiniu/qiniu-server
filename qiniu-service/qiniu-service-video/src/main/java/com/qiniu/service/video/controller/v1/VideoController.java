@@ -1,10 +1,12 @@
 package com.qiniu.service.video.controller.v1;
 
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.qiniu.common.domain.R;
 import com.qiniu.model.user.domain.User;
 import com.qiniu.model.user.domain.dto.UserThreadLocalUtil;
 import com.qiniu.model.video.domain.Video;
+import com.qiniu.model.video.domain.dto.PageDto;
 import com.qiniu.model.video.domain.dto.VideoBindDto;
 import com.qiniu.service.video.interceptor.VideoTokenInterceptor;
 import com.qiniu.service.video.service.IVideoService;
@@ -45,11 +47,27 @@ public class VideoController {
         return R.ok(url);
     }
 
+    /**
+     * 将用户上传的视频和用户信息绑定到一起
+     * @param videoBindDto
+     * @return
+     */
     @PostMapping("/bind")
     public R<?> bindVideoAndUser(@RequestBody VideoBindDto videoBindDto) {
         User user = UserThreadLocalUtil.getUser();
         Video video = videoService.bindVideoAndUser(videoBindDto, user);
         return R.ok(video);
+    }
+
+    /**
+     * 根据用户id查询用户所有的视频
+     * @param pageDto 用户id   pageSize   pageNum
+     * @return
+     */
+    @PostMapping("/list")
+    public R<?> page(@RequestBody PageDto pageDto) {
+        Page<Video> videos = videoService.findVideosById(pageDto);
+        return R.ok(videos);
     }
 }
 
