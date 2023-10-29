@@ -27,9 +27,8 @@ public class AuthorizeFilter implements Ordered, GlobalFilter {
 
         //2.判断是否是登录
         if (request.getURI().getPath().contains("/login")
-                ||request.getURI().getPath().contains("/register")
-                ||request.getURI().getPath().contains("/doc.html")
-                ||request.getURI().getPath().contains("/swagger-ui")) {
+                || request.getURI().getPath().contains("/register")
+                || request.getURI().getPath().contains("/swagger-ui")) {
             return chain.filter(exchange);//放行
         }
 
