@@ -11,4 +11,11 @@
 
     <artifactId>qiniu-service-user</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.qiniu</groupId>
+            <artifactId>qiniu-starter-file</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+    </dependencies>
 </project>

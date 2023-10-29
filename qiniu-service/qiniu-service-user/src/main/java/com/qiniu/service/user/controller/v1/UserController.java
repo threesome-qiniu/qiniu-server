@@ -7,6 +7,7 @@ import com.qiniu.common.exception.CustomException;
 import com.qiniu.common.service.RedisCache;
 import com.qiniu.common.service.RedisService;
 import com.qiniu.common.utils.EmailUtils;
+import com.qiniu.common.utils.file.PathUtils;
 import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.model.common.enums.HttpCodeEnum;
 import com.qiniu.model.user.domain.User;
@@ -14,11 +15,15 @@ import com.qiniu.model.user.domain.dto.LoginUserDTO;
 import com.qiniu.model.user.domain.dto.RegisterBody;
 import com.qiniu.model.user.domain.dto.UpdatePasswordDTO;
 import com.qiniu.model.user.domain.dto.UserThreadLocalUtil;
+import com.qiniu.service.user.constants.QiniuUserOssConstants;
 import com.qiniu.service.user.constants.UserCacheConstants;
 import com.qiniu.service.user.service.IUserService;
+import com.qiniu.starter.file.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
+import org.omg.CORBA.SystemException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
@@ -138,5 +143,24 @@ public class UserController {
         return R.ok(userService.updatePass(dto));
     }
 
+
+    @Resource
+    private FileStorageService fileStorageService;
+
+    @PostMapping("/avatar")
+    public R<String> avatar(@RequestParam("file") MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+        //对原始文件名进行判断
+        if (originalFilename.endsWith(".png")
+                || originalFilename.endsWith(".jpg")
+                || originalFilename.endsWith(".jpeg")
+                || originalFilename.endsWith(".webp")) {
+            String filePath = PathUtils.generateFilePath(originalFilename);
+            String url = fileStorageService.uploadImgFile(file, QiniuUserOssConstants.PREFIX_URL, filePath);
+            return R.ok(url);
+        } else {
+            throw new CustomException(HttpCodeEnum.FILE_TYPE_ERROR);
+        }
+    }
 
 }

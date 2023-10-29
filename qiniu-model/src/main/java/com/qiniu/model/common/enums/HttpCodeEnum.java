@@ -12,11 +12,12 @@ public enum HttpCodeEnum {
     NEED_LOGIN(401, "需要登录后操作"),
     NO_OPERATOR_AUTH(403, "无权限操作"),
 
-    SYSTEM_ERROR(500, "出现错误"),
+    HAS_ERROR(500, "出现异常"),
+    SYSTEM_ERROR(502, "系统异常"),
 
     REQUIRE_USERNAME(504, "必需填写用户名"),
     CONTENT_NOT_NULL(506, "评论内容不能为空"),
-    FILE_TYPE_ERROR(507, "文件类型错误，请上传png文件"),
+    FILE_TYPE_ERROR(507, "文件类型错误，请上传png/jpg/jpeg/webp文件"),
     NICKNAME_EXIST(512, "昵称已存在"),
     LOGIN_ERROR(505, "用户名或密码错误"),
     PASSWORD_ERROR(510, "密码错误"),
