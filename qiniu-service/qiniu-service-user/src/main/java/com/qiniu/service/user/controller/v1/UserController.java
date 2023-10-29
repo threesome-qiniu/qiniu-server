@@ -1,22 +1,28 @@
 package com.qiniu.service.user.controller.v1;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import cn.hutool.core.util.PhoneUtil;
 import com.qiniu.common.constant.Constants;
 import com.qiniu.common.domain.R;
+import com.qiniu.common.exception.CustomException;
+import com.qiniu.common.service.RedisCache;
+import com.qiniu.common.service.RedisService;
+import com.qiniu.common.utils.EmailUtils;
 import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.model.common.enums.HttpCodeEnum;
 import com.qiniu.model.user.domain.User;
 import com.qiniu.model.user.domain.dto.LoginUserDTO;
 import com.qiniu.model.user.domain.dto.RegisterBody;
 import com.qiniu.model.user.domain.dto.UserThreadLocalUtil;
+import com.qiniu.service.user.constants.UserCacheConstants;
 import com.qiniu.service.user.service.IUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * UserController
@@ -31,6 +37,9 @@ public class UserController {
 
     @Autowired
     private IUserService userService;
+
+    @Resource
+    private RedisService redisService;
 
     /**
      * 登录
@@ -68,6 +77,14 @@ public class UserController {
      */
     @PutMapping("/update")
     public R<User> save(@RequestBody User user) {
+        // 校验邮箱
+        if (StringUtils.isNotEmpty(user.getEmail()) && !EmailUtils.isValidEmail(user.getEmail())) {
+            throw new CustomException(HttpCodeEnum.EMAIL_VALID_ERROR);
+        }
+        // 校验手机号
+        if (StringUtils.isNotEmpty(user.getTelephone()) && !PhoneUtil.isPhone(user.getTelephone())) {
+            throw new CustomException(HttpCodeEnum.TELEPHONE_VALID_ERROR);
+        }
         return R.ok(userService.updateUserInfo(user));
     }
 
@@ -96,11 +113,17 @@ public class UserController {
         if (StringUtils.isNull(userId)) {
             R.fail(HttpCodeEnum.NEED_LOGIN.getCode(), "请先登录");
         }
+        User userCache = redisService.getCacheObject(UserCacheConstants.USER_INFO_PREFIX + userId);
+        if (StringUtils.isNotNull(userCache)) {
+            return R.ok(userCache);
+        }
         User user = userService.queryById(userId);
         user.setPassword(null);
         user.setSalt(null);
+        // 设置缓存
+        redisService.setCacheObject(UserCacheConstants.USER_INFO_PREFIX + userId, user);
+        redisService.expire(UserCacheConstants.USER_INFO_PREFIX + userId, UserCacheConstants.USER_INFO_EXPIRE_TIME, TimeUnit.SECONDS);
         return R.ok(user);
     }
-
 
 }

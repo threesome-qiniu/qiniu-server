@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.qiniu.common.exception.CustomException;
+import com.qiniu.common.service.RedisService;
 import com.qiniu.common.utils.IdUtils;
 import com.qiniu.common.utils.JwtUtil;
 import com.qiniu.common.utils.string.StringUtils;
@@ -12,6 +13,7 @@ import com.qiniu.model.user.domain.User;
 import com.qiniu.model.user.domain.dto.LoginUserDTO;
 import com.qiniu.model.user.domain.dto.RegisterBody;
 import com.qiniu.model.user.domain.dto.UserThreadLocalUtil;
+import com.qiniu.service.user.constants.UserCacheConstants;
 import com.qiniu.service.user.mapper.UserMapper;
 import com.qiniu.service.user.service.IUserService;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,9 @@ import static com.qiniu.model.common.enums.HttpCodeEnum.*;
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private RedisService redisService;
 
     /**
      * 通过ID查询单条数据
@@ -104,6 +109,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if (StringUtils.isNull(userId)) {
             throw new CustomException(HttpCodeEnum.NEED_LOGIN);
         }
+        // 先删除缓存
+        redisService.deleteObject(UserCacheConstants.USER_INFO_PREFIX + userId);
         user.setUserId(userId);
         boolean update = this.updateById(user);
         if (update) {

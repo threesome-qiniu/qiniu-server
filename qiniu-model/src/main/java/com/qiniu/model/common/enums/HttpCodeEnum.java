@@ -30,6 +30,9 @@ public enum HttpCodeEnum {
     PHONENUMBER_EXIST(1012, "手机号已存在"),
     EMAIL_EXIST(1013, "邮箱已存在"),
 
+    TELEPHONE_VALID_ERROR(1020, "手机号码格式错误"),
+    EMAIL_VALID_ERROR(1021, "邮箱格式错误"),
+
     CONFIRM_PASSWORD_NOT_MATCH(1020, "两次密码不一致"),
     ;
 
