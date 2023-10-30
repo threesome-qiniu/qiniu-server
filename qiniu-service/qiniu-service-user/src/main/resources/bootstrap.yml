@@ -16,3 +16,7 @@ spring:
         shared-configs:
           - dataId: shared-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
           - dataId: shared-mysql-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+    sentinel:
+      transport:
+        dashboard: localhost:8090
+      eager: true

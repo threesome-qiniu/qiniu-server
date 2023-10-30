@@ -99,17 +99,20 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Override
     public IPage<Video> queryMyVideoPage(VideoPageDto pageDto) {
+        Long userId = UserContext.getUser().getUserId();
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Video::getUserId, pageDto.getUserId());
+        queryWrapper.eq(Video::getUserId, userId);
         queryWrapper.like(StringUtils.isNotEmpty(pageDto.getVideoTitle()), Video::getVideoTitle, pageDto.getVideoTitle());
         return this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
     }
 
     @Override
     public IPage<Video> queryUserVideoPage(VideoPageDto pageDto) {
-        Long userId = UserContext.getUser().getUserId();
+        if (com.qiniu.common.utils.string.StringUtils.isNull(pageDto.getUserId())) {
+            return new Page<>();
+        }
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Video::getUserId, userId);
+        queryWrapper.eq(Video::getUserId, pageDto.getUserId());
         queryWrapper.like(StringUtils.isNotEmpty(pageDto.getVideoTitle()), Video::getVideoTitle, pageDto.getVideoTitle());
         return this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
     }

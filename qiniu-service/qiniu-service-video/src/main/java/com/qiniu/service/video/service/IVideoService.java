@@ -34,8 +34,20 @@ public interface IVideoService extends IService<Video> {
      */
     Video bindVideoAndUser(VideoBindDto videoBindDto);
 
+    /**
+     * 分页我的视频
+     *
+     * @param pageDto
+     * @return
+     */
     IPage<Video> queryMyVideoPage(VideoPageDto pageDto);
 
+    /**
+     * 分页用户视频
+     *
+     * @param pageDto
+     * @return
+     */
     IPage<Video> queryUserVideoPage(VideoPageDto pageDto);
 
 }

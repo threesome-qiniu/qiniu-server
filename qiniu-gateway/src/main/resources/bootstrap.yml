@@ -14,3 +14,16 @@ spring:
       config:
         server-addr: 106.14.105.101:8848
         file-extension: yml
+    sentinel:
+      transport:
+        dashboard: localhost:8090
+      eager: true
+      # nacos配置持久化
+      datasource:
+        ds1:
+          nacos:
+            server-addr: 106.14.105.101:8848
+            dataId: sentinel-qiniu-gateway
+            groupId: DEFAULT_GROUP
+            data-type: json
+            rule-type: gw-flow
