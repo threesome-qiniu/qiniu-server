@@ -46,6 +46,10 @@
             <groupId>com.alibaba.csp</groupId>
             <artifactId>sentinel-datasource-nacos</artifactId>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.qiniu</groupId>-->
+<!--            <artifactId>qiniu-common</artifactId>-->
+<!--        </dependency>-->
     </dependencies>
 
     <build>
