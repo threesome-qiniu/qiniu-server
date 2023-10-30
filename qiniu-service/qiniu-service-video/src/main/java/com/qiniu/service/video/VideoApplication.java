@@ -1,5 +1,6 @@
 package com.qiniu.service.video;
 
+import com.qiniu.common.annotations.EnableRedisConfig;
 import com.qiniu.common.annotations.EnableUserTokenInterceptor;
 import com.qiniu.common.config.MybatisPlusConfig;
 import com.qiniu.common.swagger.Swagger2Configuration;
@@ -16,13 +17,18 @@ import org.springframework.context.annotation.Import;
  * @AUTHOR: roydon
  * @DATE: 2023/10/25
  **/
+
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableFeignClients(clients = {RemoteUserService.class})
 @EnableUserTokenInterceptor
+@EnableRedisConfig
 @Import({MybatisPlusConfig.class,Swagger2Configuration.class})
 public class VideoApplication {
     public static void main(String[] args) {
+
         SpringApplication.run(VideoApplication.class,args);
+
+
     }
 }

@@ -64,10 +64,10 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 //        if (videodb != null) {
 //            url = videodb.getVideoUrl();
 //        } else {
-            assert originalFilename != null;
-            String filePath = PathUtils.generateFilePath(originalFilename);
-            url = qiniuOssService.uploadOss(file, filePath);
-            log.info("视频上传地址：{}", url);
+        assert originalFilename != null;
+        String filePath = PathUtils.generateFilePath(originalFilename);
+        url = qiniuOssService.uploadOss(file, filePath);
+        log.info("视频上传地址：{}", url);
 //        }
 
         return url;

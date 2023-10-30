@@ -3,8 +3,9 @@ package com.qiniu.service.video.controller.v1;
 import com.qiniu.common.domain.R;
 import com.qiniu.common.utils.file.PathUtils;
 import com.qiniu.model.video.domain.Video;
-import com.qiniu.model.video.domain.dto.VideoPageDto;
-import com.qiniu.model.video.domain.dto.VideoBindDto;
+import com.qiniu.model.video.dto.VideoBindDto;
+import com.qiniu.model.video.dto.VideoPageDto;
+import com.qiniu.service.video.constants.QiniuVideoOssConstants;
 import com.qiniu.service.video.service.IVideoService;
 import com.qiniu.starter.file.service.FileStorageService;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +36,7 @@ public class VideoController {
     public R<?> uploadVideo(@RequestParam("file") MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
         String filePath = PathUtils.generateFilePath(originalFilename);
-        String url = fileStorageService.uploadVideo(file,QiniuVideoOssConstants.PREFIX_URL,filePath);
+        String url = fileStorageService.uploadVideo(file, QiniuVideoOssConstants.PREFIX_URL,filePath);
         return R.ok(url);
     }
 
