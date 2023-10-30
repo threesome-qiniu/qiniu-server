@@ -13,9 +13,11 @@ import com.qiniu.common.utils.uniqueid.IdGenerator;
 import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.dto.VideoPageDto;
 import com.qiniu.model.video.dto.VideoBindDto;
+import com.qiniu.service.video.constants.QiniuVideoOssConstants;
 import com.qiniu.service.video.mapper.VideoMapper;
 import com.qiniu.service.video.service.IVideoService;
 import com.qiniu.service.video.util.QiniuOssService;
+import com.qiniu.starter.file.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,31 +48,15 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     @Autowired
     private QiniuOssService qiniuOssService;
 
+    @Resource
+    private FileStorageService fileStorageService;
 
-    @Transactional
     @Override
     public String uploadVideo(MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
-        String url = "";
         //对文件id进行判断，如果文件已经存在，则不上传，直接返回数据库中文件的存储路径
-//        String id = "";
-//        try {
-//            InputStream inputStream = file.getInputStream();
-//            id = DigestUtils.md5DigestAsHex(inputStream);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//        Video videodb = selectById(id);
-//        if (videodb != null) {
-//            url = videodb.getVideoUrl();
-//        } else {
-            assert originalFilename != null;
-            String filePath = PathUtils.generateFilePath(originalFilename);
-            url = qiniuOssService.uploadOss(file, filePath);
-            log.info("视频上传地址：{}", url);
-//        }
-
-        return url;
+        String filePath = PathUtils.generateFilePath(originalFilename);
+        return fileStorageService.uploadVideo(file, QiniuVideoOssConstants.PREFIX_URL, filePath);
     }
 
     @Override
