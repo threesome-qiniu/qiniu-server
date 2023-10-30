@@ -19,4 +19,10 @@ public interface IUserFollowService extends IService<UserFollow> {
      * @param userId 被关注用户id
      */
     boolean followUser(Long userId);
+
+    /**
+     * 取消关注
+     * @param userId 取消关注用户id
+     */
+    boolean unFollowUser(Long userId);
 }

@@ -36,7 +36,7 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
     @Override
     public boolean followUser(Long userId) {
         Long loginUserId = UserContext.getUser().getUserId();
-        if (StringUtils.isNull(userId)) {
+        if (StringUtils.isNull(userId) || StringUtils.isNull(loginUserId)) {
             return false;
         }
         if (loginUserId.equals(userId)) {
@@ -44,7 +44,7 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
             throw new CustomException(HttpCodeEnum.NOT_ALLOW_FOLLOW_YOURSELF);
         }
         User user = userService.queryById(userId);
-        if(StringUtils.isNull(user)){
+        if (StringUtils.isNull(user)) {
             // 用户不存在
             throw new CustomException(HttpCodeEnum.USER_NOT_EXIST);
         }
@@ -57,5 +57,22 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
             throw new CustomException(HttpCodeEnum.ALREADY_FOLLOW);
         }
         return this.save(new UserFollow(loginUserId, userId));
+    }
+
+    /**
+     * 取消关注
+     *
+     * @param userId 取消关注用户id
+     */
+    @Override
+    public boolean unFollowUser(Long userId) {
+        Long loginUserId = UserContext.getUser().getUserId();
+        if (StringUtils.isNull(userId) || StringUtils.isNull(loginUserId)) {
+            return false;
+        }
+        LambdaQueryWrapper<UserFollow> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserFollow::getUserId, loginUserId);
+        queryWrapper.eq(UserFollow::getUserFollowId, userId);
+        return this.remove(queryWrapper);
     }
 }

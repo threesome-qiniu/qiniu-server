@@ -25,9 +25,18 @@ public class UserFollowController {
      * 关注
      */
     @GetMapping("/follow/{userId}")
-    public R<?> queryById(@PathVariable("userId") Long userId) {
+    public R<?> follow(@PathVariable("userId") Long userId) {
         return R.ok(userFollowService.followUser(userId));
     }
+
+    /**
+     * 取消关注
+     */
+    @GetMapping("/unfollow/{userId}")
+    public R<?> unfollow(@PathVariable("userId") Long userId) {
+        return R.ok(userFollowService.unFollowUser(userId));
+    }
+
 
 }
 
