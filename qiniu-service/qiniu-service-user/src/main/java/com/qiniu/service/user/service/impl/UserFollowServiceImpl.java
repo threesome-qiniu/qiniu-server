@@ -73,6 +73,7 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
         LambdaQueryWrapper<UserFollow> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserFollow::getUserId, loginUserId);
         queryWrapper.eq(UserFollow::getUserFollowId, userId);
-        return this.remove(queryWrapper);
+        this.remove(queryWrapper);
+        return true;
     }
 }

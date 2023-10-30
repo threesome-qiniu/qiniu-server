@@ -1,11 +1,10 @@
 package com.qiniu.service.video.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.qiniu.model.video.domain.Video;
-import com.qiniu.model.video.domain.dto.VideoPageDto;
-import com.qiniu.model.video.domain.dto.VideoBindDto;
+import com.qiniu.model.video.dto.VideoPageDto;
+import com.qiniu.model.video.dto.VideoBindDto;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
