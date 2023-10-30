@@ -1,8 +1,10 @@
 package com.qiniu.common.domain;
 
 import com.qiniu.common.constant.Constants;
+import com.qiniu.common.constant.HttpStatus;
 
 import java.io.Serializable;
+import java.util.HashMap;
 
 /**
  * 统一响应体

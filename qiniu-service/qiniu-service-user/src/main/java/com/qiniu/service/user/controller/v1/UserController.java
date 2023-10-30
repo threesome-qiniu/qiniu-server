@@ -107,11 +107,9 @@ public class UserController {
     @ApiOperation("根据id获取用户信息")
     @GetMapping("/{userId}")
     public R<User> userInfoById(@PathVariable Long userId) {
-        User user = userService.queryById(userId);
-        user.setPassword(null);
-        user.setSalt(null);
-        return R.ok(user);
+        return R.ok(getUserFromCache(userId));
     }
+
 
     /**
      * 通过token获取用户信息
@@ -123,9 +121,16 @@ public class UserController {
         if (StringUtils.isNull(userId)) {
             R.fail(HttpCodeEnum.NEED_LOGIN.getCode(), "请先登录");
         }
+        return R.ok(getUserFromCache(userId));
+    }
+
+    /**
+     * 从缓存获取用户详情
+     */
+    private User getUserFromCache(Long userId) {
         User userCache = redisService.getCacheObject(UserCacheConstants.USER_INFO_PREFIX + userId);
         if (StringUtils.isNotNull(userCache)) {
-            return R.ok(userCache);
+            return userCache;
         }
         User user = userService.queryById(userId);
         user.setPassword(null);
@@ -133,7 +138,7 @@ public class UserController {
         // 设置缓存
         redisService.setCacheObject(UserCacheConstants.USER_INFO_PREFIX + userId, user);
         redisService.expire(UserCacheConstants.USER_INFO_PREFIX + userId, UserCacheConstants.USER_INFO_EXPIRE_TIME, TimeUnit.SECONDS);
-        return R.ok(user);
+        return user;
     }
 
     /**

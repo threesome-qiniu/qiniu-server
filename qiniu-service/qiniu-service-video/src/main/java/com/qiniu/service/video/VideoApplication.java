@@ -3,6 +3,7 @@ package com.qiniu.service.video;
 import com.qiniu.common.annotations.EnableUserTokenInterceptor;
 import com.qiniu.common.config.MybatisPlusConfig;
 import com.qiniu.common.swagger.Swagger2Configuration;
+import com.qiniu.feign.user.RemoteUserService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
@@ -17,7 +18,7 @@ import org.springframework.context.annotation.Import;
  **/
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableFeignClients(basePackages = "com.qiniu.feign")
+@EnableFeignClients(clients = {RemoteUserService.class})
 @EnableUserTokenInterceptor
 @Import({MybatisPlusConfig.class,Swagger2Configuration.class})
 public class VideoApplication {
