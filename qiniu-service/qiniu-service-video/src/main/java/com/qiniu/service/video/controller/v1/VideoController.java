@@ -2,8 +2,8 @@ package com.qiniu.service.video.controller.v1;
 
 import com.qiniu.common.domain.R;
 import com.qiniu.model.video.domain.Video;
-import com.qiniu.model.video.domain.dto.VideoPageDto;
-import com.qiniu.model.video.domain.dto.VideoBindDto;
+import com.qiniu.model.video.dto.VideoPageDto;
+import com.qiniu.model.video.dto.VideoBindDto;
 import com.qiniu.service.video.service.IVideoService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
