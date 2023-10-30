@@ -15,8 +15,11 @@ spring:
         server-addr: 106.14.105.101:8848
         file-extension: yml
     sentinel:
+      scg:
+        fallback:
+          content-type:
       transport:
-        dashboard: localhost:8090
+        dashboard: 106.14.105.101:8090
       eager: true
       http-method-specify: true
       # nacos配置持久化
