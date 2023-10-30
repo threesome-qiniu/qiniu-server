@@ -14,8 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.multipart.MultipartFile;
-import sun.dc.pr.PRError;
 
+
+import java.io.IOException;
 import java.io.InputStream;
 
 @Slf4j
@@ -29,6 +30,7 @@ public class QiniuFileStorageService implements FileStorageService {
     @Autowired
     private QiniuOssConfigProperties qiniuOssConfigProperties;
 
+
     private final static String separator = "/";
 
     /**
@@ -36,6 +38,34 @@ public class QiniuFileStorageService implements FileStorageService {
      */
     @Override
     public String uploadImgFile(MultipartFile file, String prefix, String filePath) {
+        try {
+            InputStream inputStream = file.getInputStream();
+            String upToken = Auth.create(qiniuOssConfigProperties.getAccessKey(), qiniuOssConfigProperties.getSecretKey())
+                    .uploadToken(qiniuOssConfigProperties.getBucket());
+            try {
+                Response response = uploadManager.put(inputStream, filePath, upToken, null, null);
+                //解析上传成功的结果
+                DefaultPutRet putRet = new Gson().fromJson(response.bodyString(), DefaultPutRet.class);
+                System.out.println(putRet.key);
+                System.out.println(putRet.hash);
+                return prefix + filePath;
+            } catch (QiniuException ex) {
+                Response r = ex.response;
+                System.err.println(r.toString());
+                try {
+                    System.err.println(r.bodyString());
+                } catch (QiniuException ex2) {
+                    //ignore
+                }
+            }
+        } catch (Exception ex) {
+            //ignore
+        }
+        return "www";
+    }
+
+    @Override
+    public String uploadVideo(MultipartFile file, String prefix, String filePath) {
         try {
             InputStream inputStream = file.getInputStream();
             String upToken = Auth.create(qiniuOssConfigProperties.getAccessKey(), qiniuOssConfigProperties.getSecretKey())

@@ -4,6 +4,7 @@ import com.qiniu.common.domain.R;
 import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.dto.VideoPageDto;
 import com.qiniu.model.video.dto.VideoBindDto;
+import com.qiniu.service.video.constants.QiniuVideoOssConstants;
 import com.qiniu.service.video.service.IVideoService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,12 +24,17 @@ public class VideoController {
     @Resource
     private IVideoService videoService;
 
+    @Resource
+    private FileStorageService fileStorageService;
+
     /**
      * 视频上传
      */
     @PostMapping("/upload")
     public R<?> uploadVideo(@RequestParam("file") MultipartFile file) {
-        String url = videoService.uploadVideo(file);
+        String originalFilename = file.getOriginalFilename();
+        String filePath = PathUtils.generateFilePath(originalFilename);
+        String url = fileStorageService.uploadVideo(file,QiniuVideoOssConstants.PREFIX_URL,filePath);
         return R.ok(url);
     }
 

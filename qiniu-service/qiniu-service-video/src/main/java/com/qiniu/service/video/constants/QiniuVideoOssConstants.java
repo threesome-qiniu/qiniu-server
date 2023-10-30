@@ -6,7 +6,7 @@ package com.qiniu.service.video.constants;
  * @AUTHOR: roydon
  * @DATE: 2023/10/26
  **/
-public class QiniuOssConstants {
+public class QiniuVideoOssConstants {
     /**
      * 临时域名
      */

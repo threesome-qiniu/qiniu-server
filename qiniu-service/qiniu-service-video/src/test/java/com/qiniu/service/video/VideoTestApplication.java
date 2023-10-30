@@ -1,10 +1,7 @@
 package com.qiniu.service.video;
 
-import com.qiniu.common.domain.R;
-import com.qiniu.feign.user.RemoteUserService;
-import com.qiniu.model.user.domain.User;
+import com.qiniu.model.video.domain.dto.VideoBindDto;
 import com.qiniu.service.video.service.IVideoService;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
