@@ -61,11 +61,6 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
         }
     }
 
-    @Scheduled(fixedDelay = 2000)
-    private void scheduled() {
-        log.info(">>>>>>轮询redis的视频点赞信息");
-    }
-
 //    @PostConstruct
 //    public void init() {
 //        log.info(" 视频点赞量写入缓存开始==>");
