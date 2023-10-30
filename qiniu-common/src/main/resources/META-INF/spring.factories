@@ -5,4 +5,5 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.qiniu.common.config.WebMvcConfig,\
   com.qiniu.common.config.RedisConfig,\
   com.qiniu.common.service.RedisCache,\
-  com.qiniu.common.service.RedisService
+  com.qiniu.common.service.RedisService,\
+  com.qiniu.common.config.MybatisPlusConfig
