@@ -15,3 +15,4 @@ spring:
         file-extension: yml
         shared-configs:
           - dataId: shared-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+          - dataId: shared-mysql-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}

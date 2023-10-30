@@ -1,10 +1,6 @@
 package com.qiniu.service.video.controller.v1;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.qiniu.common.domain.R;
-import com.qiniu.model.user.domain.User;
-import com.qiniu.model.user.dto.UserThreadLocalUtil;
 import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.domain.dto.VideoPageDto;
 import com.qiniu.model.video.domain.dto.VideoBindDto;
@@ -58,7 +54,6 @@ public class VideoController {
     public R<?> myPage(@RequestBody VideoPageDto pageDto) {
         return R.ok(videoService.queryMyVideoPage(pageDto));
     }
-
 
     /**
      * 分页查询用户视频

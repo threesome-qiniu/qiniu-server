@@ -5,11 +5,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.qiniu.common.context.UserContext;
 import com.qiniu.common.exception.CustomException;
 import com.qiniu.common.utils.bean.BeanCopyUtils;
 import com.qiniu.common.utils.file.PathUtils;
 import com.qiniu.common.utils.uniqueid.IdGenerator;
-import com.qiniu.model.user.dto.UserThreadLocalUtil;
 import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.domain.dto.VideoPageDto;
 import com.qiniu.model.video.domain.dto.VideoBindDto;
@@ -24,7 +24,6 @@ import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
@@ -81,7 +80,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Override
     public Video bindVideoAndUser(VideoBindDto videoBindDto) {
-        Long userId = UserThreadLocalUtil.getUser().getUserId();
+        Long userId = UserContext.getUser().getUserId();
         //判断传过来的数据是否符合数据库字段标准
         if (videoBindDto.getVideoTitle().length() > 30) {
             throw new CustomException(BIND_CONTENT_TITLE_FAIL);
@@ -108,7 +107,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Override
     public IPage<Video> queryUserVideoPage(VideoPageDto pageDto) {
-        Long userId = UserThreadLocalUtil.getUser().getUserId();
+        Long userId = UserContext.getUser().getUserId();
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Video::getUserId, userId);
         queryWrapper.like(StringUtils.isNotEmpty(pageDto.getVideoTitle()), Video::getVideoTitle, pageDto.getVideoTitle());
