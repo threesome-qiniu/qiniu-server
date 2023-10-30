@@ -3,6 +3,7 @@ package com.qiniu.service.user.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.qiniu.common.context.UserContext;
 import com.qiniu.common.exception.CustomException;
 import com.qiniu.common.service.RedisService;
 import com.qiniu.common.utils.IdUtils;
@@ -15,7 +16,6 @@ import com.qiniu.model.user.domain.UserSensitive;
 import com.qiniu.model.user.dto.LoginUserDTO;
 import com.qiniu.model.user.dto.RegisterBody;
 import com.qiniu.model.user.dto.UpdatePasswordDTO;
-import com.qiniu.model.user.dto.UserThreadLocalUtil;
 import com.qiniu.service.user.constants.UserCacheConstants;
 import com.qiniu.service.user.mapper.UserMapper;
 import com.qiniu.service.user.service.IUserSensitiveService;
@@ -136,7 +136,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public User updateUserInfo(User user) {
-        Long userId = UserThreadLocalUtil.getUser().getUserId();
+        Long userId = UserContext.getUser().getUserId();
         if (StringUtils.isNull(userId)) {
             throw new CustomException(HttpCodeEnum.NEED_LOGIN);
         }
@@ -157,7 +157,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public boolean updatePass(UpdatePasswordDTO dto) {
-        Long userId = UserThreadLocalUtil.getUser().getUserId();
+        Long userId = UserContext.getUser().getUserId();
         if (StringUtils.isNull(userId)) {
             throw new CustomException(HttpCodeEnum.NEED_LOGIN);
         }

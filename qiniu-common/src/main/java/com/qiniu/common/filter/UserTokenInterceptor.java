@@ -1,7 +1,7 @@
 package com.qiniu.common.filter;
 
+import com.qiniu.common.context.UserContext;
 import com.qiniu.model.user.domain.User;
-import com.qiniu.model.user.dto.UserThreadLocalUtil;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -20,7 +20,8 @@ public class UserTokenInterceptor implements HandlerInterceptor {
             //存入到当前线程中
             User user = new User();
             user.setUserId(Long.valueOf(userId));
-            UserThreadLocalUtil.setUser(user);
+//            UserThreadLocalUtil.setUser(user);
+            UserContext.setUser(user);
         }
         return true;
     }
@@ -30,6 +31,6 @@ public class UserTokenInterceptor implements HandlerInterceptor {
      */
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-        UserThreadLocalUtil.clear();
+        UserContext.clear();
     }
 }

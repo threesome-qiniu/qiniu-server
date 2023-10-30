@@ -1,5 +1,6 @@
 package com.qiniu.service.user;
 
+import com.qiniu.common.annotations.EnableRedisConfig;
 import com.qiniu.common.annotations.EnableUserTokenInterceptor;
 import com.qiniu.common.swagger.Swagger2Configuration;
 import org.springframework.boot.SpringApplication;
@@ -18,6 +19,7 @@ import org.springframework.context.annotation.Import;
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = "com.qiniu.feign")
 @EnableUserTokenInterceptor
+@EnableRedisConfig
 @Import({Swagger2Configuration.class})
 public class UserApplication {
     public static void main(String[] args) {

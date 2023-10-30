@@ -2,6 +2,7 @@ package com.qiniu.service.user.controller.v1;
 
 import cn.hutool.core.util.PhoneUtil;
 import com.qiniu.common.constant.Constants;
+import com.qiniu.common.context.UserContext;
 import com.qiniu.common.domain.R;
 import com.qiniu.common.exception.CustomException;
 import com.qiniu.common.service.RedisService;
@@ -13,13 +14,10 @@ import com.qiniu.model.user.domain.User;
 import com.qiniu.model.user.dto.LoginUserDTO;
 import com.qiniu.model.user.dto.RegisterBody;
 import com.qiniu.model.user.dto.UpdatePasswordDTO;
-import com.qiniu.model.user.dto.UserThreadLocalUtil;
 import com.qiniu.service.user.constants.QiniuUserOssConstants;
 import com.qiniu.service.user.constants.UserCacheConstants;
 import com.qiniu.service.user.service.IUserService;
 import com.qiniu.starter.file.service.FileStorageService;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -121,7 +119,7 @@ public class UserController {
     @ApiOperation("获取用户信息")
     @GetMapping("/userinfo")
     public R<User> userInfo() {
-        Long userId = UserThreadLocalUtil.getUser().getUserId();
+        Long userId = UserContext.getUser().getUserId();
         if (StringUtils.isNull(userId)) {
             R.fail(HttpCodeEnum.NEED_LOGIN.getCode(), "请先登录");
         }
