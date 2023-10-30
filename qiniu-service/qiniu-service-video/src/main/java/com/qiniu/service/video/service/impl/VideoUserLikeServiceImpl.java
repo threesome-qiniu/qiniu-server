@@ -15,6 +15,7 @@ import com.qiniu.service.video.service.IVideoUserLikeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -42,23 +43,25 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
 
     /**
      * 向视频点赞表插入点赞信息
+     *
      * @param videoId
      * @return
      */
     @Override
     public Video videoLike(String videoId) {
+
         Long userId = UserContext.getUser().getUserId();
         LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(VideoUserLike::getVideoId,videoId)
-                .eq(VideoUserLike::getUserId,userId);
+        queryWrapper.eq(VideoUserLike::getVideoId, videoId)
+                .eq(VideoUserLike::getUserId, userId);
         VideoUserLike videoUserLikedb = videoUserLikeMapper.selectOne(queryWrapper);
-        if (videoUserLikedb == null){
+        if (videoUserLikedb == null) {
             VideoUserLike videoUserLike = new VideoUserLike();
             videoUserLike.setVideoId(videoId);
             videoUserLike.setUserId(userId);
             videoUserLike.setCreateTime(LocalDateTime.now());
             videoUserLikeMapper.insert(videoUserLike);
-        }else {
+        } else {
             videoUserLikeMapper.delete(queryWrapper);
         }
 
@@ -76,7 +79,6 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
 //        log.info("<==视频点赞量写入缓存成功");
 //    }
 //
-
 
 
 }

@@ -1,7 +1,10 @@
 package com.qiniu.service.video;
 
-import com.qiniu.model.video.domain.dto.VideoBindDto;
+
+import com.qiniu.feign.user.RemoteUserService;
+import com.qiniu.service.video.service.IVideoCategoryService;
 import com.qiniu.service.video.service.IVideoService;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -18,8 +21,11 @@ public class VideoTestApplication {
     @Autowired
     IVideoService videoService;
 
+    @Autowired
+    private IVideoCategoryService videoCategoryService;
+
     @Resource
-            private RemoteUserService remoteUserService;
+    private RemoteUserService remoteUserService;
 
 //    void bindTest(){
 //        VideoBindDto videoBindDto = new VideoBindDto();
@@ -28,9 +34,9 @@ public class VideoTestApplication {
 //    }
 
     @Test
-    void getUser(){
-        R<User> r = remoteUserService.userInfoById(2L);
-        System.out.println("r = " + r.getData().getAvatar());
+    void getUser() {
+        videoCategoryService.saveVideoCategoriesToRedis();
+
     }
 
 }
