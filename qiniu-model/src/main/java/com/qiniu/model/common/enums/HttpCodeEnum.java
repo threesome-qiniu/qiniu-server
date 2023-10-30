@@ -38,6 +38,9 @@ public enum HttpCodeEnum {
 
     CONFIRM_PASSWORD_NOT_MATCH(1020, "两次密码不一致"),
 
+    NOT_ALLOW_FOLLOW_YOURSELF(1100, "不能关注自己"),
+    USER_NOT_EXIST(1101, "用户不存在"),
+    ALREADY_FOLLOW(1102, "已关注"),
 
     UPLOAD_FAIL(10001, "上传失败"),
     BIND_FAIL(10002,"绑定失败"),
