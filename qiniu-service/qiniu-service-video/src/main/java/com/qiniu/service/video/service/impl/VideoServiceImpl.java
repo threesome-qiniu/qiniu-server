@@ -16,18 +16,12 @@ import com.qiniu.model.video.dto.VideoBindDto;
 import com.qiniu.service.video.constants.QiniuVideoOssConstants;
 import com.qiniu.service.video.mapper.VideoMapper;
 import com.qiniu.service.video.service.IVideoService;
-import com.qiniu.service.video.util.QiniuOssService;
 import com.qiniu.starter.file.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import java.io.IOException;
-import java.io.InputStream;
 import java.time.LocalDateTime;
 
 import static com.qiniu.model.common.enums.HttpCodeEnum.*;
@@ -44,9 +38,6 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Resource
     private VideoMapper videoMapper;
-
-    @Autowired
-    private QiniuOssService qiniuOssService;
 
     @Resource
     private FileStorageService fileStorageService;
