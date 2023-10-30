@@ -18,6 +18,8 @@ import com.qiniu.service.user.constants.QiniuUserOssConstants;
 import com.qiniu.service.user.constants.UserCacheConstants;
 import com.qiniu.service.user.service.IUserService;
 import com.qiniu.starter.file.service.FileStorageService;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -163,7 +165,7 @@ public class UserController {
                 || originalFilename.endsWith(".jpg")
                 || originalFilename.endsWith(".jpeg")
                 || originalFilename.endsWith(".webp")) {
-            String filePath = PathUtils.generateFilePath(originalFilename,file);
+            String filePath = PathUtils.generateFilePath(originalFilename, file);
             String url = fileStorageService.uploadImgFile(file, QiniuUserOssConstants.PREFIX_URL, filePath);
             return R.ok(url);
         } else {

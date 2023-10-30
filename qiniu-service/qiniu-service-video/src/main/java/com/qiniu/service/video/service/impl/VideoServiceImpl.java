@@ -2,6 +2,7 @@ package com.qiniu.service.video.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.qiniu.common.exception.CustomException;
@@ -23,6 +24,7 @@ import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
@@ -97,11 +99,19 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     }
 
     @Override
+    public IPage<Video> queryMyVideoPage(VideoPageDto pageDto) {
+        LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Video::getUserId, pageDto.getUserId());
+        queryWrapper.like(StringUtils.isNotEmpty(pageDto.getVideoTitle()), Video::getVideoTitle, pageDto.getVideoTitle());
+        return this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
+    }
+
+    @Override
     public IPage<Video> queryUserVideoPage(VideoPageDto pageDto) {
         Long userId = UserThreadLocalUtil.getUser().getUserId();
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Video::getUserId, userId);
-        queryWrapper.like(Video::getVideoTitle, pageDto.getVideoTitle());
+        queryWrapper.like(StringUtils.isNotEmpty(pageDto.getVideoTitle()), Video::getVideoTitle, pageDto.getVideoTitle());
         return this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
     }
 

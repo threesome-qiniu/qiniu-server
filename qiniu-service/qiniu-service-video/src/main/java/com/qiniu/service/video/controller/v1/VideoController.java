@@ -49,14 +49,27 @@ public class VideoController {
     }
 
     /**
-     * 分页查询
+     * 分页查询我的视频
      *
      * @param pageDto
      * @return
      */
-    @PostMapping("/page")
-    public R<?> page(@RequestBody VideoPageDto pageDto) {
+    @PostMapping("/mypage")
+    public R<?> myPage(@RequestBody VideoPageDto pageDto) {
+        return R.ok(videoService.queryMyVideoPage(pageDto));
+    }
+
+
+    /**
+     * 分页查询用户视频
+     *
+     * @param pageDto
+     * @return
+     */
+    @PostMapping("/userpage")
+    public R<?> userPage(@RequestBody VideoPageDto pageDto) {
         return R.ok(videoService.queryUserVideoPage(pageDto));
     }
+
 }
 
