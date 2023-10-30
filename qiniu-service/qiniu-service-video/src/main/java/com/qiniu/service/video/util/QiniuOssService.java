@@ -2,19 +2,16 @@ package com.qiniu.service.video.util;
 
 import com.google.gson.Gson;
 import com.qiniu.common.QiniuException;
-import com.qiniu.common.utils.Md5Util;
 import com.qiniu.http.Response;
 import com.qiniu.service.video.config.QiniuOssConfig;
-import com.qiniu.service.video.constants.QiniuOssConstants;
+import com.qiniu.service.video.constants.QiniuVideoOssConstants;
 import com.qiniu.storage.Configuration;
 import com.qiniu.storage.Region;
 import com.qiniu.storage.UploadManager;
 import com.qiniu.storage.model.DefaultPutRet;
 import com.qiniu.util.Auth;
-import org.apache.commons.codec.cli.Digest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
@@ -49,7 +46,7 @@ public class QiniuOssService {
                 DefaultPutRet putRet = new Gson().fromJson(response.bodyString(), DefaultPutRet.class);
                 System.out.println(putRet.key);
                 System.out.println(putRet.hash);
-                return QiniuOssConstants.PREFIX_URL + filePath;
+                return QiniuVideoOssConstants.PREFIX_URL + filePath;
             } catch (QiniuException ex) {
                 Response r = ex.response;
                 System.err.println(r.toString());

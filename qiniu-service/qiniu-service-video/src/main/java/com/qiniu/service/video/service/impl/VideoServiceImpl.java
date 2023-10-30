@@ -11,8 +11,8 @@ import com.qiniu.common.utils.bean.BeanCopyUtils;
 import com.qiniu.common.utils.file.PathUtils;
 import com.qiniu.common.utils.uniqueid.IdGenerator;
 import com.qiniu.model.video.domain.Video;
-import com.qiniu.model.video.domain.dto.VideoPageDto;
-import com.qiniu.model.video.domain.dto.VideoBindDto;
+import com.qiniu.model.video.dto.VideoPageDto;
+import com.qiniu.model.video.dto.VideoBindDto;
 import com.qiniu.service.video.mapper.VideoMapper;
 import com.qiniu.service.video.service.IVideoService;
 import com.qiniu.service.video.util.QiniuOssService;
@@ -46,28 +46,29 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     @Autowired
     private QiniuOssService qiniuOssService;
 
+
     @Transactional
     @Override
     public String uploadVideo(MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
         String url = "";
         //对文件id进行判断，如果文件已经存在，则不上传，直接返回数据库中文件的存储路径
-        String id = "";
-        try {
-            InputStream inputStream = file.getInputStream();
-            id = DigestUtils.md5DigestAsHex(inputStream);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        Video videodb = selectById(id);
-        if (videodb != null) {
-            url = videodb.getVideoUrl();
-        } else {
+//        String id = "";
+//        try {
+//            InputStream inputStream = file.getInputStream();
+//            id = DigestUtils.md5DigestAsHex(inputStream);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//        Video videodb = selectById(id);
+//        if (videodb != null) {
+//            url = videodb.getVideoUrl();
+//        } else {
             assert originalFilename != null;
-            String filePath = PathUtils.generateFilePath(originalFilename, file);
+            String filePath = PathUtils.generateFilePath(originalFilename);
             url = qiniuOssService.uploadOss(file, filePath);
             log.info("视频上传地址：{}", url);
-        }
+//        }
 
         return url;
     }
@@ -116,5 +117,14 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         queryWrapper.like(StringUtils.isNotEmpty(pageDto.getVideoTitle()), Video::getVideoTitle, pageDto.getVideoTitle());
         return this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
     }
+
+//    @PostConstruct
+//    public void init() {
+//        log.info("新闻浏览量写入缓存开始==>");
+//        List<AppNews> appNewsList = list();
+//        Map<String, Integer> newsViewMap = appNewsList.stream().collect(Collectors.toMap(AppNews::getNewsId, AppNews::getViewNum));
+//        redisCache.setCacheMap(CacheConstants.NEWS_VIEW_NUM_KEY, newsViewMap);
+//        log.info("<==新闻浏览量写入缓存成功");
+//    }
 
 }

@@ -1,4 +1,4 @@
-package com.qiniu.model.video.domain.dto;
+package com.qiniu.model.video.dto;
 
 import com.qiniu.model.video.domain.Video;
 import lombok.Data;
