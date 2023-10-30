@@ -14,6 +14,17 @@ spring:
       config:
         server-addr: 106.14.105.101:8848
         file-extension: yml
+    gateway:
+      httpclient:
+        response-timeout: PT10S # 全局的响应超时时间，网络链接后，后端服务多久不返回网关就报错 The response timeout.
+        connect-timeout: 5000 # 全局的TCP连接超时时间默认时间是45秒，修改为5秒
+        # 链接池配置
+        pool:
+          max-connections: 10000 # 最大连接数
+          max-life-time: 10 # 最大连接时间
+          acquire-timeout: 10 # 返回时间
+          max-idle-time: 10000 # 最大空闲时间
+          type: fixed # 设置固定链接池
     sentinel:
       scg:
         fallback:
