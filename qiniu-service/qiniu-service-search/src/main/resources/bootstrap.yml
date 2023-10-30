@@ -1,0 +1,17 @@
+server:
+  port: 9401
+spring:
+  application:
+    name: qiniu-search
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 106.14.105.101:8848
+      config:
+        server-addr: 106.14.105.101:8848
+        file-extension: yml
+        shared-configs:
+          - dataId: shared-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+          - dataId: shared-mysql-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}

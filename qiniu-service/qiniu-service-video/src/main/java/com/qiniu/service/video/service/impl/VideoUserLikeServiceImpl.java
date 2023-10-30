@@ -15,6 +15,7 @@ import com.qiniu.service.video.mapper.VideoUserLikeMapper;
 import com.qiniu.service.video.service.IVideoUserLikeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -39,6 +40,7 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
 
     /**
      * 向视频点赞表插入点赞信息
+     *
      * @param videoId
      * @return
      */
@@ -53,10 +55,15 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
             videoUserLike.setVideoId(videoId);
             videoUserLike.setUserId(userId);
             videoUserLike.setCreateTime(LocalDateTime.now());
-           return this.save(videoUserLike);
-        }else {
-           return this.remove(queryWrapper);
+            return this.save(videoUserLike);
+        } else {
+            return this.remove(queryWrapper);
         }
+    }
+
+    @Scheduled(fixedDelay = 2000)
+    private void scheduled() {
+        log.info(">>>>>>轮询redis的视频点赞信息");
     }
 
 //    @PostConstruct
@@ -69,7 +76,6 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
 //        log.info("<==视频点赞量写入缓存成功");
 //    }
 //
-
 
 
 }
