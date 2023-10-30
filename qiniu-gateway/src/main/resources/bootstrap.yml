@@ -18,6 +18,7 @@ spring:
       transport:
         dashboard: localhost:8090
       eager: true
+      http-method-specify: true
       # nacos配置持久化
       datasource:
         ds1:
