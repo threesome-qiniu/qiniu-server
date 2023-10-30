@@ -36,7 +36,7 @@ public class VideoCategory implements Serializable {
      */
     @ApiModelProperty("视频分类描述")
     private String description;
-
+    private String status; //0可用，1禁用
 
 }
 

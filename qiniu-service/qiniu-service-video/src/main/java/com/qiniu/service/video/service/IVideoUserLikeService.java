@@ -14,5 +14,5 @@ import org.springframework.data.domain.PageRequest;
  */
 public interface IVideoUserLikeService extends IService<VideoUserLike> {
 
-    Video videoLike(String videoId);
+    boolean videoLike(String videoId);
 }

@@ -24,7 +24,7 @@ public class VideoUserLike implements Serializable {
     /**
      * 点赞表id，记录总数即为点赞总数
      */
-    @TableId(value = "id",type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.AUTO)
     @ApiModelProperty("点赞表id")
     private Long id;
     /**

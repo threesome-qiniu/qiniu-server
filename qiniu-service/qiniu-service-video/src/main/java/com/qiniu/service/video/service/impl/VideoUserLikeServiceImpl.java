@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.qiniu.common.constant.UserConstants;
 import com.qiniu.common.context.UserContext;
 import com.qiniu.common.service.RedisService;
+import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.model.user.domain.User;
 import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.domain.VideoUserLike;
@@ -32,41 +33,30 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service("videoUserLikeService")
 public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, VideoUserLike> implements IVideoUserLikeService {
+
     @Resource
     private RedisService redisService;
 
-    @Autowired
-    private VideoUserLikeMapper videoUserLikeMapper;
-
-    @Autowired
-    private VideoMapper videoMapper;
-
     /**
      * 向视频点赞表插入点赞信息
-     *
      * @param videoId
      * @return
      */
     @Override
-    public Video videoLike(String videoId) {
-
+    public boolean videoLike(String videoId) {
         Long userId = UserContext.getUser().getUserId();
         LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(VideoUserLike::getVideoId, videoId)
-                .eq(VideoUserLike::getUserId, userId);
-        VideoUserLike videoUserLikedb = videoUserLikeMapper.selectOne(queryWrapper);
-        if (videoUserLikedb == null) {
+        queryWrapper.eq(VideoUserLike::getVideoId, videoId).eq(VideoUserLike::getUserId, userId);
+        List<VideoUserLike> list = this.list(queryWrapper);
+        if (StringUtils.isNull(list) || list.isEmpty()) {
             VideoUserLike videoUserLike = new VideoUserLike();
             videoUserLike.setVideoId(videoId);
             videoUserLike.setUserId(userId);
             videoUserLike.setCreateTime(LocalDateTime.now());
-            videoUserLikeMapper.insert(videoUserLike);
-        } else {
-            videoUserLikeMapper.delete(queryWrapper);
+           return this.save(videoUserLike);
+        }else {
+           return this.remove(queryWrapper);
         }
-
-
-        return videoMapper.selectById(videoId);
     }
 
 //    @PostConstruct
@@ -79,6 +69,7 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
 //        log.info("<==视频点赞量写入缓存成功");
 //    }
 //
+
 
 
 }

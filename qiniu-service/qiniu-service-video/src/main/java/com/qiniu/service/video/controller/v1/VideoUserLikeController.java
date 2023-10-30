@@ -18,16 +18,14 @@ import javax.annotation.Resource;
 @RestController
 @RequestMapping("/videoUserLike")
 public class VideoUserLikeController {
-    
+
     @Resource
     private IVideoUserLikeService videoUserLikeService;
 
 
     @GetMapping("/like/{videoId}")
-    public R<?> getDetails(@PathVariable("videoId") String videoId) {
-
-        videoUserLikeService.videoLike(videoId);
-        return R.ok();
+    public R<Boolean> getDetails(@PathVariable("videoId") String videoId) {
+        return R.ok(videoUserLikeService.videoLike(videoId));
     }
 
 }

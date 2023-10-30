@@ -2,7 +2,9 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.qiniu.service.video.mapper.VideoCategoryMapper">
     <select id="getAllVideoCategory" resultType="com.qiniu.model.video.domain.VideoCategory">
-        SELECT name,description FROM video_category
+        SELECT name
+        FROM video_category
+        where status = '0'
     </select>
 </mapper>
 
