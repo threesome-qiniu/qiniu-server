@@ -6,13 +6,12 @@ import com.qiniu.common.context.UserContext;
 import com.qiniu.common.service.RedisService;
 import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.model.video.domain.Video;
-import com.qiniu.model.video.domain.VideoUserLike;
+import com.qiniu.model.video.domain.VideoUserFavorites;
 import com.qiniu.model.video.vo.VideoUserVo;
 import com.qiniu.service.video.constants.VideoCacheConstants;
 import com.qiniu.service.video.mapper.VideoMapper;
-import com.qiniu.service.video.mapper.VideoUserLikeMapper;
-import com.qiniu.service.video.service.IVideoUserLikeService;
-import lombok.extern.slf4j.Slf4j;
+import com.qiniu.service.video.mapper.VideoUserFavoritesMapper;
+import com.qiniu.service.video.service.IVideoUserFavoritesService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,14 +22,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 点赞表(VideoUserLike)表服务实现类
+ * 视频收藏表(VideoUserFavorites)表服务实现类
  *
  * @author lzq
- * @since 2023-10-30 14:33:01
+ * @since 2023-10-31 15:57:38
  */
-@Slf4j
-@Service("videoUserLikeService")
-public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, VideoUserLike> implements IVideoUserLikeService {
+@Service("videoUserFavoritesService")
+public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavoritesMapper, VideoUserFavorites> implements IVideoUserFavoritesService {
+    @Resource
+    private VideoUserFavoritesMapper videoUserFavoritesMapper;
 
     @Resource
     private RedisService redisService;
@@ -39,27 +39,27 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
     private VideoMapper videoMapper;
 
     /**
-     * 向视频点赞表插入点赞信息
+     * 用户收藏
      *
      * @param videoId
      * @return
      */
     @Override
-    public boolean videoLike(String videoId) {
+    public boolean videoFavorites(String videoId) {
         Long userId = UserContext.getUser().getUserId();
         //从数据库中获得视频链接
         String videoUrl = videoMapper.getVideoUrlByVideoId(videoId);
-        LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(VideoUserLike::getVideoId, videoId).eq(VideoUserLike::getUserId, userId);
-        List<VideoUserLike> list = this.list(queryWrapper);
+        LambdaQueryWrapper<VideoUserFavorites> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoUserFavorites::getVideoId, videoId).eq(VideoUserFavorites::getUserId, userId);
+        List<VideoUserFavorites> list = this.list(queryWrapper);
         if (StringUtils.isNull(list) || list.isEmpty()) {
-            VideoUserLike videoUserLike = new VideoUserLike();
-            videoUserLike.setVideoId(videoId);
-            videoUserLike.setUserId(userId);
-            videoUserLike.setCreateTime(LocalDateTime.now());
-            //将本条点赞信息存储到redis
+            VideoUserFavorites videoUserFavorites = new VideoUserFavorites();
+            videoUserFavorites.setVideoId(videoId);
+            videoUserFavorites.setUserId(userId);
+            videoUserFavorites.setCreateTime(LocalDateTime.now());
+            //将本条点赞信息存储到redis（key为videoId,value为videoUrl）
             likeNumIncrease(videoId, videoUrl);
-            return this.save(videoUserLike);
+            return this.save(videoUserFavorites);
         } else {
             //将本条点赞信息从redis
             likeNumDecrease(videoId, videoUrl);
@@ -68,13 +68,13 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
     }
 
     /**
-     * 用户查询自己点赞过的视频（收藏列表）
+     * 获取用户的收藏列表
      *
      * @param userId
      * @return
      */
     @Override
-    public List<VideoUserVo> userLikes(Long userId) {
+    public List<VideoUserVo> userFavorites(Long userId) {
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Video::getUserId, userId);
         List<VideoUserVo> videoUserVos = new ArrayList<>();
@@ -87,14 +87,9 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
         return videoUserVos;
     }
 
-    /**
-     * 缓存中点赞量自增一
-     *
-     * @param videoId
-     */
     public void likeNumIncrease(String videoId, String videoUrl) {
         // 缓存中点赞量自增一
-        redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_KEY + videoId, videoUrl, 1);
+        redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_FAVORITY_NUM_KEY + videoId, videoUrl, 1);
     }
 
     /**
@@ -104,7 +99,6 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
      */
     public void likeNumDecrease(String videoId, String videoUrl) {
         // 缓存中阅读量自增一
-        redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_KEY + videoId, videoUrl, -1);
+        redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_FAVORITY_NUM_KEY + videoId, videoUrl, -1);
     }
-
 }

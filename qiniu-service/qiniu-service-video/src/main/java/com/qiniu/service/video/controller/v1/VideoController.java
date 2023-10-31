@@ -51,9 +51,9 @@ public class VideoController {
      * @param videoBindDto
      * @return
      */
-    @PostMapping("/bind")
-    public R<Video> bindVideoAndUser(@RequestBody VideoBindDto videoBindDto) {
-        Video video = videoService.bindVideoAndUser(videoBindDto);
+    @PostMapping("/publish")
+    public R<Video> videoPublish(@RequestBody VideoBindDto videoBindDto) {
+        Video video = videoService.videoPublish(videoBindDto);
         return R.ok(video);
     }
 

@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,15 +36,33 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
     RedisService redisService;
 
     @Override
-    public void saveVideoCategoriesToRedis() {
+    public List<String> saveVideoCategoriesToRedis() {
         // 查询数据库获取视频分类列表
         List<VideoCategory> videoCategories = videoCategoryMapper.getAllVideoCategory();
         if (videoCategories.isEmpty()) {
-            return;
+            return  new ArrayList<>();
         }
         List<String> nameList = videoCategories.stream().map(VideoCategory::getName).collect(Collectors.toList());
         redisService.setCacheList(VideoCacheConstants.VIDEO_CATEGORY_PREFIX, nameList);
         log.debug("视频分类存入缓存：{}", nameList.toString());
+        return nameList;
+    }
+
+    /**
+     * 获取所有的分类列表
+     */
+    @Override
+    public List<String> selectAllCategory() {
+
+        List<String> videoCategoryNames=new ArrayList<>();
+        List<String> cacheList = redisService.getCacheList(VideoCacheConstants.VIDEO_CATEGORY_PREFIX);
+        if (cacheList.isEmpty()) {
+            cacheList = saveVideoCategoriesToRedis();
+        }
+        for (String o : cacheList) {
+            videoCategoryNames.add(o);
+        }
+        return  videoCategoryNames;
     }
 
 }

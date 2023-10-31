@@ -2,40 +2,41 @@ package com.qiniu.service.video.controller.v1;
 
 import com.qiniu.common.domain.R;
 import com.qiniu.model.video.vo.VideoUserVo;
-import com.qiniu.service.video.service.IVideoUserLikeService;
+import com.qiniu.service.video.service.IVideoUserFavoritesService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
 
 /**
- * 点赞表(VideoUserLike)表控制层
+ * 视频收藏表(VideoUserFavorites)表控制层
  *
  * @author lzq
- * @since 2023-10-30 14:32:56
+ * @since 2023-10-31 15:57:37
  */
 @RestController
 @RequestMapping("/api/v1")
-public class VideoUserLikeController {
-
+public class VideoUserFavoritesController {
+    
     @Resource
-    private IVideoUserLikeService videoUserLikeService;
-
+    private IVideoUserFavoritesService videoUserFavoritesService;
 
     /**
-     * 用户点赞
+     * 用户收藏
      * @param videoId
      * @return
      */
-    @GetMapping("/like/{videoId}")
+    @GetMapping("/favority/{videoId}")
     public R<Boolean> getDetails(@PathVariable("videoId") String videoId) {
-        return R.ok(videoUserLikeService.videoLike(videoId));
+
+        return R.ok(videoUserFavoritesService.videoFavorites(videoId));
     }
 
-    @GetMapping("/user/like/{userId}")
+    @GetMapping("/user/favority/{userId}")
     public R<List<VideoUserVo>> getUserLikes(@PathVariable("userId") Long userId) {
-        List<VideoUserVo> videoUserVos = videoUserLikeService.userLikes(userId);
+        List<VideoUserVo> videoUserVos = videoUserFavoritesService.userFavorites(userId);
         return R.ok(videoUserVos);
     }
+
 }
 

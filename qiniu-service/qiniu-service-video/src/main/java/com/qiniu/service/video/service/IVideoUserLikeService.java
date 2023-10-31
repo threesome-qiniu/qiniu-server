@@ -1,10 +1,10 @@
 package com.qiniu.service.video.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.domain.VideoUserLike;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import com.qiniu.model.video.vo.VideoUserVo;
+
+import java.util.List;
 
 /**
  * 点赞表(VideoUserLike)表服务接口
@@ -15,4 +15,6 @@ import org.springframework.data.domain.PageRequest;
 public interface IVideoUserLikeService extends IService<VideoUserLike> {
 
     boolean videoLike(String videoId);
+
+    List<VideoUserVo> userLikes(Long userId);
 }

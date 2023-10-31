@@ -12,4 +12,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class VideoBindDto extends Video {
+
+    //分类名称
+    private String categoryName;
 }
