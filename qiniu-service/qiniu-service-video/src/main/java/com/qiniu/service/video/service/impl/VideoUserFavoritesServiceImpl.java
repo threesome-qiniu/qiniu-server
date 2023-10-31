@@ -47,8 +47,6 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
     @Override
     public boolean videoFavorites(String videoId) {
         Long userId = UserContext.getUser().getUserId();
-        //从数据库中获得视频链接
-        String videoUrl = videoMapper.getVideoUrlByVideoId(videoId);
         LambdaQueryWrapper<VideoUserFavorites> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(VideoUserFavorites::getVideoId, videoId).eq(VideoUserFavorites::getUserId, userId);
         List<VideoUserFavorites> list = this.list(queryWrapper);
@@ -58,11 +56,11 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
             videoUserFavorites.setUserId(userId);
             videoUserFavorites.setCreateTime(LocalDateTime.now());
             //将本条点赞信息存储到redis（key为videoId,value为videoUrl）
-            likeNumIncrease(videoId, videoUrl);
+            favoriteNumIncrease(videoId);
             return this.save(videoUserFavorites);
         } else {
             //将本条点赞信息从redis
-            likeNumDecrease(videoId, videoUrl);
+            favoriteNumDecrease(videoId);
             return this.remove(queryWrapper);
         }
     }
@@ -87,18 +85,11 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
         return videoUserVos;
     }
 
-    public void likeNumIncrease(String videoId, String videoUrl) {
-        // 缓存中点赞量自增一
-        redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_FAVORITY_NUM_KEY + videoId, videoUrl, 1);
+    private void favoriteNumIncrease(String videoId) {
+        redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, videoId, 1);
     }
 
-    /**
-     * 缓存中点赞量自增一
-     *
-     * @param videoId
-     */
-    public void likeNumDecrease(String videoId, String videoUrl) {
-        // 缓存中阅读量自增一
-        redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_FAVORITY_NUM_KEY + videoId, videoUrl, -1);
+    private void favoriteNumDecrease(String videoId) {
+        redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, videoId, -1);
     }
 }
