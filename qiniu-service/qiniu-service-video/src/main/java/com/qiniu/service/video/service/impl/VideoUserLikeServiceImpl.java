@@ -9,11 +9,14 @@ import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.model.user.domain.User;
 import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.domain.VideoUserLike;
+import com.qiniu.model.video.vo.VideoUserLikeVo;
 import com.qiniu.service.video.constants.VideoCacheConstants;
 import com.qiniu.service.video.mapper.VideoMapper;
 import com.qiniu.service.video.mapper.VideoUserLikeMapper;
 import com.qiniu.service.video.service.IVideoUserLikeService;
+import kotlin.collections.ArrayDeque;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -21,6 +24,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,6 +41,9 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
 
     @Resource
     private RedisService redisService;
+
+    @Autowired
+    private VideoMapper videoMapper;
 
     /**
      * 向视频点赞表插入点赞信息
@@ -55,22 +62,51 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
             videoUserLike.setVideoId(videoId);
             videoUserLike.setUserId(userId);
             videoUserLike.setCreateTime(LocalDateTime.now());
+            //将本条点赞信息存储到redis
+            likeNumIncrease(videoId);
             return this.save(videoUserLike);
         } else {
+            //将本条点赞信息从redis
+            likeNumDecrease(videoId);
             return this.remove(queryWrapper);
         }
     }
 
-//    @PostConstruct
-//    public void init() {
-//        log.info(" 视频点赞量写入缓存开始==>");
-//        List<VideoUserLike> videoUserLikeList = list();
-//        Map<String, Long> videoUserLikeMap = videoUserLikeList.stream().collect(Collectors.toMap(VideoUserLike::getVideoId, VideoUserLike::getId));
-//        redisService.setCacheMap(VideoCacheConstants.VIDEO_INFO_PREFIX, videoUserLikeMap);
-//
-//        log.info("<==视频点赞量写入缓存成功");
-//    }
-//
+    /**
+     * 用户查询自己点赞过的视频（收藏列表）
+     * @param userId
+     * @return
+     */
+    @Override
+    public List<VideoUserLikeVo> userLikes(Long userId) {
+        LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Video::getUserId, userId);
+        List<VideoUserLikeVo> videoUserLikeVos = new ArrayList<>();
+        List<Video> list = videoMapper.selectList(queryWrapper);
+        for (Video video : list) {
+            VideoUserLikeVo videoUserLikeVo = new VideoUserLikeVo();
+            BeanUtils.copyProperties(video, videoUserLikeVo );
+            videoUserLikeVos.add(videoUserLikeVo);
+        }
+        return videoUserLikeVos;
+    }
 
+    /**
+     * 缓存中点赞量自增一
+     * @param videoId
+     */
+    public void likeNumIncrease(String videoId) {
+        // 缓存中点赞量自增一
+        redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_KEY, videoId, 1);
+    }
+
+    /**
+     * 缓存中点赞量自增一
+     * @param videoId
+     */
+    public void likeNumDecrease(String videoId) {
+        // 缓存中阅读量自增一
+        redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_KEY, videoId, -1);
+    }
 
 }
