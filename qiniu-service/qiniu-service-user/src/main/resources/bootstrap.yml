@@ -20,3 +20,7 @@ spring:
 #      transport:
 #        dashboard: localhost:8090
 #      eager: true
+logging:
+  level:
+    com.qiniu: debug
+    org.springframework: warn
