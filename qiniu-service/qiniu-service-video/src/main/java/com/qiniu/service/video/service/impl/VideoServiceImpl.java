@@ -7,10 +7,14 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.qiniu.common.context.UserContext;
 import com.qiniu.common.exception.CustomException;
+import com.qiniu.common.service.RedisService;
 import com.qiniu.common.utils.bean.BeanCopyUtils;
 import com.qiniu.common.utils.file.PathUtils;
 import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.common.utils.uniqueid.IdGenerator;
+import com.qiniu.feign.user.RemoteUserService;
+import com.qiniu.model.search.vo.VideoSearchVO;
+import com.qiniu.model.user.domain.User;
 import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.dto.VideoFeedDTO;
 import com.qiniu.model.video.domain.VideoCategory;
@@ -20,7 +24,6 @@ import com.qiniu.model.video.dto.VideoBindDto;
 import com.qiniu.model.video.vo.VideoVO;
 import com.qiniu.service.video.constants.QiniuVideoOssConstants;
 import com.qiniu.service.video.mapper.VideoCategoryMapper;
-import com.qiniu.service.video.mapper.VideoCategoryRelationMapper;
 import com.qiniu.service.video.mapper.VideoMapper;
 import com.qiniu.service.video.service.IVideoCategoryRelationService;
 import com.qiniu.service.video.service.IVideoService;
@@ -62,6 +65,12 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     @Resource
     private RabbitTemplate rabbitTemplate;
 
+    @Resource
+    private RemoteUserService remoteUserService;
+
+    @Resource
+    private RedisService redisService;
+
     @Override
     public String uploadVideo(MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
@@ -94,11 +103,11 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         video.setCreateTime(LocalDateTime.now());
         video.setCreateBy(userId.toString());
         //将前端接受的video_id存入VideoCategoryRelation（视频分类关联表）
-        VideoCategoryRelation videoCategoryRelation =new VideoCategoryRelation();
+        VideoCategoryRelation videoCategoryRelation = new VideoCategoryRelation();
         videoCategoryRelation.setVideoId(video.getVideoId());
         //通过categoryName查询出对应的id
         LambdaQueryWrapper<VideoCategory> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(VideoCategory::getName,videoBindDto.getCategoryName());
+        queryWrapper.eq(VideoCategory::getName, videoBindDto.getCategoryName());
         VideoCategory videoCategory = videoCategoryMapper.selectOne(queryWrapper);
         //将分类id赋值给videoCategoryRelation对象
         videoCategoryRelation.setCategoryId(videoCategory.getId());
@@ -108,7 +117,25 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         videoCategoryRelationService.saveVideoCategoryRelation(videoCategoryRelation);
         if (save) {
             // 1.发送整个video对象发送消息，
-            String msg = JSON.toJSONString(video);
+            // TODO 待添加视频封面
+            VideoSearchVO videoSearchVO = new VideoSearchVO();
+            videoSearchVO.setVideoId(video.getVideoId());
+            videoSearchVO.setVideoTitle(video.getVideoTitle());
+            videoSearchVO.setPublishTime(video.getCreateTime());
+            videoSearchVO.setCoverImage("null");
+            videoSearchVO.setVideoUrl(video.getVideoUrl());
+            videoSearchVO.setUserId(userId);
+            // 获取用户信息
+            User userCache = redisService.getCacheObject("userinfo:" + userId);
+            if (StringUtils.isNotNull(userCache)) {
+                videoSearchVO.setUserNickName(userCache.getNickName());
+                videoSearchVO.setUserAvatar(userCache.getAvatar());
+            } else {
+                User remoteUser = remoteUserService.userInfoById(userId).getData();
+                videoSearchVO.setUserNickName(remoteUser.getNickName());
+                videoSearchVO.setUserAvatar(remoteUser.getAvatar());
+            }
+            String msg = JSON.toJSONString(videoSearchVO);
             // 2.利用消息后置处理器添加消息头
             rabbitTemplate.convertAndSend(ESSYNC_DELAYED_EXCHANGE, ESSYNC_ROUTING_KEY, msg, message -> {
                 // 3.添加延迟消息属性，设置1分钟
@@ -157,6 +184,8 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         Video one;
         try {
             one = getOne(queryWrapper);
+            // TODO 浏览自增1存入redis
+
             if (StringUtils.isNull(one)) {
                 return null;
             }
