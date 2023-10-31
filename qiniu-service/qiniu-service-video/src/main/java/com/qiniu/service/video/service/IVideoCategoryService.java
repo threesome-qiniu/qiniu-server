@@ -5,6 +5,8 @@ import com.qiniu.model.video.domain.VideoCategory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.List;
+
 /**
  * (VideoCategory)表服务接口
  *
@@ -13,5 +15,7 @@ import org.springframework.data.domain.PageRequest;
  */
 public interface IVideoCategoryService extends IService<VideoCategory> {
 
-    void saveVideoCategoriesToRedis();
+    List<String> saveVideoCategoriesToRedis();
+
+    List<String> selectAllCategory();
 }
