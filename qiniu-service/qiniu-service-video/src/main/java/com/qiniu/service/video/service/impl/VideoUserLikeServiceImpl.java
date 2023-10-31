@@ -15,6 +15,7 @@ import com.qiniu.service.video.service.IVideoUserLikeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -90,7 +91,8 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
      *
      * @param videoId
      */
-    private void likeNumIncrement(String videoId) {
+    @Async
+    protected void likeNumIncrement(String videoId) {
         redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY , videoId, 1);
     }
 
@@ -99,7 +101,8 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
      *
      * @param videoId
      */
-    private void likeNumDecrement(String videoId) {
+    @Async
+    protected void likeNumDecrement(String videoId) {
         redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, videoId, -1);
     }
 
