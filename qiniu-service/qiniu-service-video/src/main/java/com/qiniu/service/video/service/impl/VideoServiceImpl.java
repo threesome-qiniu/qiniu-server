@@ -14,7 +14,6 @@ import com.qiniu.common.utils.uniqueid.IdGenerator;
 import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.dto.VideoPageDto;
 import com.qiniu.model.video.dto.VideoBindDto;
-import com.qiniu.model.video.mq.VideoDelayedQueueConstant;
 import com.qiniu.service.video.constants.QiniuVideoOssConstants;
 import com.qiniu.service.video.mapper.VideoMapper;
 import com.qiniu.service.video.service.IVideoService;
@@ -28,8 +27,7 @@ import javax.annotation.Resource;
 import java.time.LocalDateTime;
 
 import static com.qiniu.model.common.enums.HttpCodeEnum.*;
-import static com.qiniu.model.video.mq.VideoDelayedQueueConstant.ESSYNC_DELAYED_EXCHANGE;
-import static com.qiniu.model.video.mq.VideoDelayedQueueConstant.ESSYNC_ROUTING_KEY;
+import static com.qiniu.model.video.mq.VideoDelayedQueueConstant.*;
 
 /**
  * 视频表(Video)表服务实现类
@@ -86,7 +84,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             // 2.利用消息后置处理器添加消息头
             rabbitTemplate.convertAndSend(ESSYNC_DELAYED_EXCHANGE, ESSYNC_ROUTING_KEY, msg, message -> {
                 // 3.添加延迟消息属性，设置1分钟
-                message.getMessageProperties().setDelay(60 * 1000);
+                message.getMessageProperties().setDelay(ESSYNC_DELAYED_TIME);
                 return message;
             });
             log.debug(" ==> {} 发送了一条消息 ==> {}", ESSYNC_DELAYED_EXCHANGE, msg);
