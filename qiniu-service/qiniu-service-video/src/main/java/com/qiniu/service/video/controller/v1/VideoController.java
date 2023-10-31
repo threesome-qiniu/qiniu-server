@@ -1,10 +1,13 @@
 package com.qiniu.service.video.controller.v1;
 
 import com.qiniu.common.domain.R;
+import com.qiniu.common.utils.bean.BeanCopyUtils;
 import com.qiniu.common.utils.file.PathUtils;
 import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.dto.VideoBindDto;
+import com.qiniu.model.video.dto.VideoFeedDTO;
 import com.qiniu.model.video.dto.VideoPageDto;
+import com.qiniu.model.video.vo.VideoVO;
 import com.qiniu.service.video.constants.QiniuVideoOssConstants;
 import com.qiniu.service.video.service.IVideoService;
 import com.qiniu.starter.file.service.FileStorageService;
@@ -25,6 +28,14 @@ public class VideoController {
 
     @Resource
     private IVideoService videoService;
+
+    /**
+     * 视频流接口
+     */
+    @PostMapping("/feed")
+    public R<VideoVO> feed(@RequestBody VideoFeedDTO videoFeedDTO) {
+        return R.ok(videoService.feedVideo(videoFeedDTO));
+    }
 
     /**
      * 视频上传

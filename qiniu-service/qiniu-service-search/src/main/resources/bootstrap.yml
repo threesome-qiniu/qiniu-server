@@ -17,11 +17,6 @@ spring:
           - dataId: shared-mysql-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
           - dataId: shared-rabbitmq-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
           - dataId: shared-elasticsearch-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-  data:
-    mongodb:
-      host: 106.14.105.101
-      port: 27017
-      database: qiniu-video-search-history
 logging:
   level:
     com.qiniu: debug

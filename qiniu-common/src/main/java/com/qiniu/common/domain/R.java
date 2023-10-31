@@ -43,7 +43,7 @@ public class R<T> implements Serializable {
     }
 
     public static <T> R<T> fail(T data) {
-        return restResult(data, FAIL, null);
+        return restResult(data, FAIL, "操作成功");
     }
 
     public static <T> R<T> fail(T data, String msg) {

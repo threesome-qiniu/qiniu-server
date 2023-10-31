@@ -3,17 +3,19 @@ package com.qiniu.service.video.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.qiniu.common.context.UserContext;
 import com.qiniu.common.exception.CustomException;
 import com.qiniu.common.utils.bean.BeanCopyUtils;
 import com.qiniu.common.utils.file.PathUtils;
+import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.common.utils.uniqueid.IdGenerator;
 import com.qiniu.model.video.domain.Video;
+import com.qiniu.model.video.dto.VideoFeedDTO;
 import com.qiniu.model.video.dto.VideoPageDto;
 import com.qiniu.model.video.dto.VideoBindDto;
+import com.qiniu.model.video.vo.VideoVO;
 import com.qiniu.service.video.constants.QiniuVideoOssConstants;
 import com.qiniu.service.video.mapper.VideoMapper;
 import com.qiniu.service.video.service.IVideoService;
@@ -105,7 +107,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Override
     public IPage<Video> queryUserVideoPage(VideoPageDto pageDto) {
-        if (com.qiniu.common.utils.string.StringUtils.isNull(pageDto.getUserId())) {
+        if (StringUtils.isNull(pageDto.getUserId())) {
             return new Page<>();
         }
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
@@ -114,7 +116,35 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         return this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
     }
 
-//    @PostConstruct
+    /**
+     * 视频feed接口
+     *
+     * @param videoFeedDTO createTime
+     * @return video
+     */
+    @Override
+    public VideoVO feedVideo(VideoFeedDTO videoFeedDTO) {
+        LocalDateTime createTime = videoFeedDTO.getCreateTime();
+        LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
+        // 小于等于createTime的一条数据
+        queryWrapper.lt(Video::getCreateTime, StringUtils.isNull(createTime) ? LocalDateTime.now() : createTime).orderByDesc(Video::getCreateTime).last("limit 1");
+        Video one;
+        try {
+            one = getOne(queryWrapper);
+            if (StringUtils.isNull(one)) {
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        // TODO 封装点赞数，观看量，评论量
+        VideoVO videoVO = BeanCopyUtils.copyBean(one, VideoVO.class);
+        videoVO.setCommentNum(0L);
+        return videoVO;
+    }
+
+    //    @PostConstruct
 //    public void init() {
 //        log.info("新闻浏览量写入缓存开始==>");
 //        List<AppNews> appNewsList = list();

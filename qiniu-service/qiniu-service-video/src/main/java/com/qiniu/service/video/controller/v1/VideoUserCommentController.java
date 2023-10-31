@@ -5,16 +5,15 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.qiniu.common.context.UserContext;
 import com.qiniu.common.domain.R;
 import com.qiniu.common.domain.vo.PageDataInfo;
+import com.qiniu.common.service.RedisService;
 import com.qiniu.common.utils.bean.BeanCopyUtils;
 import com.qiniu.common.utils.string.StringUtils;
-import com.qiniu.common.utils.uniqueid.IdGenerator;
 import com.qiniu.feign.user.RemoteUserService;
 import com.qiniu.model.user.domain.User;
 import com.qiniu.model.video.domain.VideoUserComment;
 import com.qiniu.model.video.dto.VideoUserCommentPageDTO;
 import com.qiniu.model.video.vo.VideoUserCommentVO;
 import com.qiniu.service.video.service.IVideoUserCommentService;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -38,6 +37,9 @@ public class VideoUserCommentController {
     @Resource
     private RemoteUserService remoteUserService;
 
+    @Resource
+    private RedisService redisService;
+
     /**
      * 分页查询评论集合树
      */
@@ -55,27 +57,45 @@ public class VideoUserCommentController {
             // 获取用户详情
             VideoUserCommentVO appNewsCommentVO = BeanCopyUtils.copyBean(r, VideoUserCommentVO.class);
             Long userId = r.getUserId();
-            User user = remoteUserService.userInfoById(userId).getData();
-            if (StringUtils.isNotNull(user)) {
-                appNewsCommentVO.setNickName(user.getNickName());
-                appNewsCommentVO.setAvatar(user.getAvatar());
+            // 先走redis，有就直接返回
+            User userCache = redisService.getCacheObject("userinfo:" + userId);
+            if (StringUtils.isNotNull(userCache)) {
+                appNewsCommentVO.setNickName(userCache.getNickName());
+                appNewsCommentVO.setAvatar(userCache.getAvatar());
+            } else {
+                User user = remoteUserService.userInfoById(userId).getData();
+                if (StringUtils.isNotNull(user)) {
+                    appNewsCommentVO.setNickName(user.getNickName());
+                    appNewsCommentVO.setAvatar(user.getAvatar());
+                }
             }
             Long commentId = r.getCommentId();
             List<VideoUserComment> children = this.videoUserCommentService.getChildren(commentId);
             List<VideoUserCommentVO> childrenVOS = BeanCopyUtils.copyBeanList(children, VideoUserCommentVO.class);
             childrenVOS.forEach(c -> {
-                User cUser = remoteUserService.userInfoById(c.getUserId()).getData();
-                if (StringUtils.isNotNull(cUser)) {
-                    c.setNickName(cUser.getNickName());
-                    c.setAvatar(cUser.getAvatar());
+                User userCache2 = redisService.getCacheObject("userinfo:" + c.getUserId());
+                if (StringUtils.isNotNull(userCache2)) {
+                    c.setNickName(userCache2.getNickName());
+                    c.setAvatar(userCache2.getAvatar());
+                } else {
+                    User cUser = remoteUserService.userInfoById(c.getUserId()).getData();
+                    if (StringUtils.isNotNull(cUser)) {
+                        c.setNickName(cUser.getNickName());
+                        c.setAvatar(cUser.getAvatar());
+                    }
                 }
                 if (!c.getParentId().equals(commentId)) {
                     // 回复了回复
                     VideoUserComment byId = this.videoUserCommentService.getById(c.getParentId());
                     c.setReplayUserId(byId.getUserId());
-                    User byUser = remoteUserService.userInfoById(c.getUserId()).getData();
-                    if (StringUtils.isNotNull(byUser)) {
-                        c.setReplayUserNickName(byUser.getNickName());
+                    User userCache3 = redisService.getCacheObject("userinfo:" + byId.getUserId());
+                    if (StringUtils.isNotNull(userCache2)) {
+                        c.setReplayUserNickName(userCache3.getNickName());
+                    } else {
+                        User byUser = remoteUserService.userInfoById(byId.getUserId()).getData();
+                        if (StringUtils.isNotNull(byUser)) {
+                            c.setReplayUserNickName(byUser.getNickName());
+                        }
                     }
                 }
             });
