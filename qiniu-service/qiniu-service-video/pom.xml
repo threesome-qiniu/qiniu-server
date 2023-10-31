@@ -35,7 +35,11 @@
             <groupId>com.qiniu</groupId>
             <artifactId>qiniu-starter-file</artifactId>
             <version>1.0.0</version>
-            <scope>compile</scope>
+        </dependency>
+        <!-- amqp -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
 
     </dependencies>

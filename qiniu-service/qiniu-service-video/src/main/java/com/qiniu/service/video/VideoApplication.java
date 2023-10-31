@@ -5,10 +5,13 @@ import com.qiniu.common.annotations.EnableUserTokenInterceptor;
 import com.qiniu.common.config.MybatisPlusConfig;
 import com.qiniu.common.swagger.Swagger2Configuration;
 import com.qiniu.feign.user.RemoteUserService;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -25,12 +28,19 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableUserTokenInterceptor
 @EnableRedisConfig
 @EnableScheduling
-@Import({MybatisPlusConfig.class,Swagger2Configuration.class})
+@Import({MybatisPlusConfig.class, Swagger2Configuration.class})
 public class VideoApplication {
     public static void main(String[] args) {
+        SpringApplication.run(VideoApplication.class, args);
+    }
 
-        SpringApplication.run(VideoApplication.class,args);
-
-
+    /**
+     * mq的消息转换器防止乱码
+     */
+    @Bean
+    public MessageConverter jacksonMessageConverter() {
+        Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter();
+        converter.setCreateMessageIds(true);
+        return converter;
     }
 }
