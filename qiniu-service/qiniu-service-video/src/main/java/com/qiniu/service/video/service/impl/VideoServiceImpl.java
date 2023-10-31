@@ -12,15 +12,21 @@ import com.qiniu.common.utils.bean.BeanCopyUtils;
 import com.qiniu.common.utils.file.PathUtils;
 import com.qiniu.common.utils.uniqueid.IdGenerator;
 import com.qiniu.model.video.domain.Video;
+import com.qiniu.model.video.domain.VideoCategory;
+import com.qiniu.model.video.domain.VideoCategoryRelation;
 import com.qiniu.model.video.dto.VideoPageDto;
 import com.qiniu.model.video.dto.VideoBindDto;
 import com.qiniu.service.video.constants.QiniuVideoOssConstants;
+import com.qiniu.service.video.mapper.VideoCategoryMapper;
+import com.qiniu.service.video.mapper.VideoCategoryRelationMapper;
 import com.qiniu.service.video.mapper.VideoMapper;
+import com.qiniu.service.video.service.IVideoCategoryRelationService;
 import com.qiniu.service.video.service.IVideoService;
 import com.qiniu.starter.file.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -46,6 +52,12 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     private FileStorageService fileStorageService;
 
     @Resource
+    private IVideoCategoryRelationService videoCategoryRelationService;
+
+    @Resource
+    private VideoCategoryMapper videoCategoryMapper;
+
+    @Resource
     private RabbitTemplate rabbitTemplate;
 
     @Override
@@ -62,8 +74,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         return video;
     }
 
+    @Transactional
     @Override
-    public Video bindVideoAndUser(VideoBindDto videoBindDto) {
+    public Video videoPublish(VideoBindDto videoBindDto) {
         Long userId = UserContext.getUser().getUserId();
         //判断传过来的数据是否符合数据库字段标准
         if (videoBindDto.getVideoTitle().length() > 30) {
@@ -72,12 +85,25 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         if (videoBindDto.getVideoDesc().length() > 200) {
             throw new CustomException(BIND_CONTENT_DESC_FAIL);
         }
+
         Video video = BeanCopyUtils.copyBean(videoBindDto, Video.class);
         video.setVideoId(IdGenerator.generatorShortId());
         video.setUserId(userId);
         video.setCreateTime(LocalDateTime.now());
         video.setCreateBy(userId.toString());
+        //将前端接受的video_id存入VideoCategoryRelation（视频分类关联表）
+        VideoCategoryRelation videoCategoryRelation =new VideoCategoryRelation();
+        videoCategoryRelation.setVideoId(video.getVideoId());
+        //通过categoryName查询出对应的id
+        LambdaQueryWrapper<VideoCategory> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoCategory::getName,videoBindDto.getCategoryName());
+        VideoCategory videoCategory = videoCategoryMapper.selectOne(queryWrapper);
+        //将分类id赋值给videoCategoryRelation对象
+        videoCategoryRelation.setCategoryId(videoCategory.getId());
+        //先将video对象存入video表中
         boolean save = this.save(video);
+        //再将videoCategoryRelation对象存入video_category_relation表中
+        videoCategoryRelationService.saveVideoCategoryRelation(videoCategoryRelation);
         if (save) {
             // 1.发送整个video对象发送消息，
             String msg = JSON.toJSONString(video);
@@ -113,14 +139,5 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         queryWrapper.like(StringUtils.isNotEmpty(pageDto.getVideoTitle()), Video::getVideoTitle, pageDto.getVideoTitle());
         return this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
     }
-
-//    @PostConstruct
-//    public void init() {
-//        log.info("新闻浏览量写入缓存开始==>");
-//        List<AppNews> appNewsList = list();
-//        Map<String, Integer> newsViewMap = appNewsList.stream().collect(Collectors.toMap(AppNews::getNewsId, AppNews::getViewNum));
-//        redisCache.setCacheMap(CacheConstants.NEWS_VIEW_NUM_KEY, newsViewMap);
-//        log.info("<==新闻浏览量写入缓存成功");
-//    }
 
 }

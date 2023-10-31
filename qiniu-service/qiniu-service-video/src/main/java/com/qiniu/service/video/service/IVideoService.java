@@ -31,7 +31,7 @@ public interface IVideoService extends IService<Video> {
      * @param videoBindDto
      * @return
      */
-    Video bindVideoAndUser(VideoBindDto videoBindDto);
+    Video videoPublish(VideoBindDto videoBindDto);
 
     /**
      * 分页我的视频
