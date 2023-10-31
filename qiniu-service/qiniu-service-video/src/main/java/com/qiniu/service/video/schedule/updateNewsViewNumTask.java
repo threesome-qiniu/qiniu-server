@@ -32,8 +32,8 @@ public class updateNewsViewNumTask {
     private IVideoService videoService;
 
     @Scheduled(fixedDelay = 1000*60)
-    public void updateViewCount() {
-        log.info("开始从redis更新视频浏览量==>");
+    public void updateLikeCount() {
+        log.info("开始从redis更新视频点赞量==>");
         //获取redis中的浏览量
         Map<String, Integer> viewNumMap = redisService.getCacheMap(VideoCacheConstants.VIDEO_LIKE_NUM_KEY);
         List<Video> newsList = viewNumMap.entrySet().stream().map(entry -> {
@@ -45,5 +45,21 @@ public class updateNewsViewNumTask {
         //更新数据库
         videoService.updateBatchById(newsList);
         log.info("<==视频点赞量数据库与redis同步成功");
+    }
+
+    @Scheduled(fixedDelay = 1000*60)
+    public void updateFavorityCount() {
+        log.info("开始从redis更新视频收藏量==>");
+        //获取redis中的浏览量
+        Map<String, Integer> viewNumMap = redisService.getCacheMap(VideoCacheConstants.VIDEO_FAVORITY_NUM_KEY);
+        List<Video> newsList = viewNumMap.entrySet().stream().map(entry -> {
+            Video an = new Video();
+            an.setVideoId(entry.getKey());
+            an.setLikeNum(Long.valueOf(entry.getValue()));
+            return an;
+        }).collect(Collectors.toList());
+        //更新数据库
+        videoService.updateBatchById(newsList);
+        log.info("<==视频收藏量数据库与redis同步成功");
     }
 }

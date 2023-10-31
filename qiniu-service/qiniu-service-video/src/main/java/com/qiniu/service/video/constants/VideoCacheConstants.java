@@ -14,4 +14,5 @@ public class VideoCacheConstants {
     public static final long VIDEO_INFO_EXPIRE_TIME = 3600 * 24; //1天
 
     public static final String VIDEO_LIKE_NUM_KEY = "video:";
+    public static final String VIDEO_FAVORITY_NUM_KEY = "favority:";
 }

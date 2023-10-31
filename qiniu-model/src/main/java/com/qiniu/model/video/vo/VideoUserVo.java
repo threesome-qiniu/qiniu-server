@@ -1,8 +1,6 @@
 package com.qiniu.model.video.vo;
 
-import com.qiniu.model.video.domain.Video;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * 功能：
@@ -10,9 +8,9 @@ import lombok.EqualsAndHashCode;
  * 日期：2023/10/31 9:23
  */
 @Data
-public class VideoUserLikeVo {
+public class VideoUserVo {
     // 视频链接
-    private String url;
+    private String videoUrl;
     // 视频播放量
     private Long viewNum;
     // 视频点赞量

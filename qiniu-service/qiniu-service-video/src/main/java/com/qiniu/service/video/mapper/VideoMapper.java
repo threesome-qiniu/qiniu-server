@@ -12,5 +12,8 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface VideoMapper extends BaseMapper<Video>{
+
+    String getVideoUrlByVideoId(String videoId);
+
 }
 

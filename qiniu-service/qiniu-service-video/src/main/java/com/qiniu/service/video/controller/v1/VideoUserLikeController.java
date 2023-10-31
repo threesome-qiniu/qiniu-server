@@ -1,12 +1,8 @@
 package com.qiniu.service.video.controller.v1;
 
 import com.qiniu.common.domain.R;
-import com.qiniu.model.video.domain.Video;
-import com.qiniu.model.video.domain.VideoUserLike;
-import com.qiniu.model.video.vo.VideoUserLikeVo;
+import com.qiniu.model.video.vo.VideoUserVo;
 import com.qiniu.service.video.service.IVideoUserLikeService;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -37,9 +33,9 @@ public class VideoUserLikeController {
     }
 
     @GetMapping("/user/like/{userId}")
-    public R<List<VideoUserLikeVo>> getUserLikes(@PathVariable("userId") Long userId) {
-        List<VideoUserLikeVo> videoUserLikeVos = videoUserLikeService.userLikes(userId);
-        return R.ok(videoUserLikeVos);
+    public R<List<VideoUserVo>> getUserLikes(@PathVariable("userId") Long userId) {
+        List<VideoUserVo> videoUserVos = videoUserLikeService.userLikes(userId);
+        return R.ok(videoUserVos);
     }
 }
 

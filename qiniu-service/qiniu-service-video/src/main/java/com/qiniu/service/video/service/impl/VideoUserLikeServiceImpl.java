@@ -2,32 +2,25 @@ package com.qiniu.service.video.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.qiniu.common.constant.UserConstants;
 import com.qiniu.common.context.UserContext;
 import com.qiniu.common.service.RedisService;
 import com.qiniu.common.utils.string.StringUtils;
-import com.qiniu.model.user.domain.User;
 import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.domain.VideoUserLike;
-import com.qiniu.model.video.vo.VideoUserLikeVo;
+import com.qiniu.model.video.vo.VideoUserVo;
 import com.qiniu.service.video.constants.VideoCacheConstants;
 import com.qiniu.service.video.mapper.VideoMapper;
 import com.qiniu.service.video.mapper.VideoUserLikeMapper;
 import com.qiniu.service.video.service.IVideoUserLikeService;
-import kotlin.collections.ArrayDeque;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 点赞表(VideoUserLike)表服务实现类
@@ -54,6 +47,8 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
     @Override
     public boolean videoLike(String videoId) {
         Long userId = UserContext.getUser().getUserId();
+        //从数据库中获得视频链接
+        String videoUrl = videoMapper.getVideoUrlByVideoId(videoId);
         LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(VideoUserLike::getVideoId, videoId).eq(VideoUserLike::getUserId, userId);
         List<VideoUserLike> list = this.list(queryWrapper);
@@ -63,50 +58,53 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
             videoUserLike.setUserId(userId);
             videoUserLike.setCreateTime(LocalDateTime.now());
             //将本条点赞信息存储到redis
-            likeNumIncrease(videoId);
+            likeNumIncrease(videoId, videoUrl);
             return this.save(videoUserLike);
         } else {
             //将本条点赞信息从redis
-            likeNumDecrease(videoId);
+            likeNumDecrease(videoId, videoUrl);
             return this.remove(queryWrapper);
         }
     }
 
     /**
      * 用户查询自己点赞过的视频（收藏列表）
+     *
      * @param userId
      * @return
      */
     @Override
-    public List<VideoUserLikeVo> userLikes(Long userId) {
+    public List<VideoUserVo> userLikes(Long userId) {
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Video::getUserId, userId);
-        List<VideoUserLikeVo> videoUserLikeVos = new ArrayList<>();
+        List<VideoUserVo> videoUserVos = new ArrayList<>();
         List<Video> list = videoMapper.selectList(queryWrapper);
         for (Video video : list) {
-            VideoUserLikeVo videoUserLikeVo = new VideoUserLikeVo();
-            BeanUtils.copyProperties(video, videoUserLikeVo );
-            videoUserLikeVos.add(videoUserLikeVo);
+            VideoUserVo videoUserVo = new VideoUserVo();
+            BeanUtils.copyProperties(video, videoUserVo);
+            videoUserVos.add(videoUserVo);
         }
-        return videoUserLikeVos;
+        return videoUserVos;
     }
 
     /**
      * 缓存中点赞量自增一
+     *
      * @param videoId
      */
-    public void likeNumIncrease(String videoId) {
+    public void likeNumIncrease(String videoId, String videoUrl) {
         // 缓存中点赞量自增一
-        redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_KEY, videoId, 1);
+        redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_KEY + videoId, videoUrl, 1);
     }
 
     /**
      * 缓存中点赞量自增一
+     *
      * @param videoId
      */
-    public void likeNumDecrease(String videoId) {
+    public void likeNumDecrease(String videoId, String videoUrl) {
         // 缓存中阅读量自增一
-        redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_KEY, videoId, -1);
+        redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_KEY + videoId, videoUrl, -1);
     }
 
 }

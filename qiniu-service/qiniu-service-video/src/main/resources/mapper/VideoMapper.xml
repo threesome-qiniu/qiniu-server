@@ -2,5 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.qiniu.service.video.mapper.VideoMapper">
 
+    <select id="getVideoUrlByVideoId" resultType="java.lang.String">
+        SELECT video_url FROM video WHERE video_id = #{videoId}
+    </select>
 </mapper>
 

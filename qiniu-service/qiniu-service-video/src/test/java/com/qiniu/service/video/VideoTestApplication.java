@@ -2,12 +2,11 @@ package com.qiniu.service.video;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.qiniu.common.context.UserContext;
 import com.qiniu.common.service.RedisService;
 import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.feign.user.RemoteUserService;
 import com.qiniu.model.video.domain.VideoUserLike;
-import com.qiniu.model.video.vo.VideoUserLikeVo;
+import com.qiniu.model.video.vo.VideoUserVo;
 import com.qiniu.service.video.constants.VideoCacheConstants;
 import com.qiniu.service.video.service.IVideoCategoryService;
 import com.qiniu.service.video.service.IVideoService;
@@ -57,8 +56,8 @@ public class VideoTestApplication {
 
     @Test
     void userLikesTest(){
-        List<VideoUserLikeVo> videoUserLikeVos = videoUserLikeService.userLikes(3L);
-        System.out.println(videoUserLikeVos.size());
+        List<VideoUserVo> videoUserVos = videoUserLikeService.userLikes(3L);
+        System.out.println(videoUserVos.size());
     }
 
     @Test
