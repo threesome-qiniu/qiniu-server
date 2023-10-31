@@ -1,5 +1,6 @@
 package com.qiniu.service.video.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -13,11 +14,13 @@ import com.qiniu.common.utils.uniqueid.IdGenerator;
 import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.dto.VideoPageDto;
 import com.qiniu.model.video.dto.VideoBindDto;
+import com.qiniu.model.video.mq.VideoDelayedQueueConstant;
 import com.qiniu.service.video.constants.QiniuVideoOssConstants;
 import com.qiniu.service.video.mapper.VideoMapper;
 import com.qiniu.service.video.service.IVideoService;
 import com.qiniu.starter.file.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,6 +28,8 @@ import javax.annotation.Resource;
 import java.time.LocalDateTime;
 
 import static com.qiniu.model.common.enums.HttpCodeEnum.*;
+import static com.qiniu.model.video.mq.VideoDelayedQueueConstant.ESSYNC_DELAYED_EXCHANGE;
+import static com.qiniu.model.video.mq.VideoDelayedQueueConstant.ESSYNC_ROUTING_KEY;
 
 /**
  * 视频表(Video)表服务实现类
@@ -41,6 +46,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Resource
     private FileStorageService fileStorageService;
+
+    @Resource
+    private RabbitTemplate rabbitTemplate;
 
     @Override
     public String uploadVideo(MultipartFile file) {
@@ -71,8 +79,21 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         video.setUserId(userId);
         video.setCreateTime(LocalDateTime.now());
         video.setCreateBy(userId.toString());
-        this.save(video);
-        return video;
+        boolean save = this.save(video);
+        if (save) {
+            // 1.发送整个video对象发送消息，
+            String msg = JSON.toJSONString(video);
+            // 2.利用消息后置处理器添加消息头
+            rabbitTemplate.convertAndSend(ESSYNC_DELAYED_EXCHANGE, ESSYNC_ROUTING_KEY, msg, message -> {
+                // 3.添加延迟消息属性，设置1分钟
+                message.getMessageProperties().setDelay(60 * 1000);
+                return message;
+            });
+            log.debug(" ==> {} 发送了一条消息 ==> {}", ESSYNC_DELAYED_EXCHANGE, msg);
+            return video;
+        } else {
+            throw new CustomException(null);
+        }
     }
 
     @Override
