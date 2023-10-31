@@ -68,5 +68,9 @@ public class VideoController {
         return R.ok(videoService.queryUserVideoPage(pageDto));
     }
 
+    @PostMapping("/mylikepage")
+    public R<?> myLikePage(@RequestBody VideoPageDto pageDto) {
+        return R.ok(videoService.queryMyLikeVideoPage(pageDto));
+    }
 }
 

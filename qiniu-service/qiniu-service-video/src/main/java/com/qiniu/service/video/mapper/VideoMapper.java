@@ -2,7 +2,10 @@ package com.qiniu.service.video.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.qiniu.model.video.domain.Video;
+import com.qiniu.model.video.dto.VideoPageDto;
 import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
 
 /**
  * 视频表(Video)表数据库访问层
@@ -14,6 +17,8 @@ import org.apache.ibatis.annotations.Mapper;
 public interface VideoMapper extends BaseMapper<Video>{
 
     String getVideoUrlByVideoId(String videoId);
+
+    List<Video> getUserLikesVideos(Long userId, int pageNum, int pageSize);
 
 }
 

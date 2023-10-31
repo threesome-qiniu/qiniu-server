@@ -16,6 +16,7 @@ import com.qiniu.model.video.domain.VideoCategory;
 import com.qiniu.model.video.domain.VideoCategoryRelation;
 import com.qiniu.model.video.dto.VideoPageDto;
 import com.qiniu.model.video.dto.VideoBindDto;
+import com.qiniu.model.video.vo.VideoUserLikeVo;
 import com.qiniu.service.video.constants.QiniuVideoOssConstants;
 import com.qiniu.service.video.mapper.VideoCategoryMapper;
 import com.qiniu.service.video.mapper.VideoCategoryRelationMapper;
@@ -31,6 +32,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.qiniu.model.common.enums.HttpCodeEnum.*;
 import static com.qiniu.model.video.mq.VideoDelayedQueueConstant.*;
@@ -92,11 +95,11 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         video.setCreateTime(LocalDateTime.now());
         video.setCreateBy(userId.toString());
         //将前端接受的video_id存入VideoCategoryRelation（视频分类关联表）
-        VideoCategoryRelation videoCategoryRelation =new VideoCategoryRelation();
+        VideoCategoryRelation videoCategoryRelation = new VideoCategoryRelation();
         videoCategoryRelation.setVideoId(video.getVideoId());
         //通过categoryName查询出对应的id
         LambdaQueryWrapper<VideoCategory> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(VideoCategory::getName,videoBindDto.getCategoryName());
+        queryWrapper.eq(VideoCategory::getName, videoBindDto.getCategoryName());
         VideoCategory videoCategory = videoCategoryMapper.selectOne(queryWrapper);
         //将分类id赋值给videoCategoryRelation对象
         videoCategoryRelation.setCategoryId(videoCategory.getId());
@@ -139,5 +142,22 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         queryWrapper.like(StringUtils.isNotEmpty(pageDto.getVideoTitle()), Video::getVideoTitle, pageDto.getVideoTitle());
         return this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
     }
+
+    /**
+     * 分页查询用户的点赞列表
+     * @param pageDto
+     * @return
+     */
+    @Override
+    public List<VideoUserLikeVo> queryMyLikeVideoPage(VideoPageDto pageDto) {
+        Long userId = UserContext.getUser().getUserId();
+        List<Video> userLikedVideos = videoMapper.getUserLikesVideos(userId, (pageDto.getPageNum() - 1) * pageDto.getPageSize(), pageDto.getPageSize());
+        ArrayList<VideoUserLikeVo> objects = new ArrayList<>();
+        for (Video userLikedVideo : userLikedVideos) {
+            objects.add(BeanCopyUtils.copyBean(userLikedVideo, VideoUserLikeVo.class));
+        }
+        return objects;
+    }
+
 
 }
