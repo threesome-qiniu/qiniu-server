@@ -21,4 +21,9 @@ public class VideoDelayedQueueConstant {
      */
     public static final String ESSYNC_ROUTING_KEY = "video.esSync";
 
+    /**
+     * video同步es延时时间，默认1分钟
+     */
+    public static final Integer ESSYNC_DELAYED_TIME = 60 * 1000;
+
 }
