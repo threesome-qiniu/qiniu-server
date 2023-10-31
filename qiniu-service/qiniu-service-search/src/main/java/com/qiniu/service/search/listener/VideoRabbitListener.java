@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 public class VideoRabbitListener {
 
     /**
-     * 延时消息
+     * video延时消息
      */
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(name = VideoDelayedQueueConstant.ESSYNC_DIRECT_QUEUE, durable = "true"),

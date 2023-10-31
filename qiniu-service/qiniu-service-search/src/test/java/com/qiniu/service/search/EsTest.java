@@ -2,7 +2,6 @@ package com.qiniu.service.search;
 
 import org.elasticsearch.client.RestHighLevelClient;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;

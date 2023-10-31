@@ -5,10 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.dto.VideoPageDto;
 import com.qiniu.model.video.dto.VideoBindDto;
-import com.qiniu.model.video.vo.VideoUserLikeVo;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 /**
  * 视频表(Video)表服务接口
@@ -52,6 +49,13 @@ public interface IVideoService extends IService<Video> {
      */
     IPage<Video> queryUserVideoPage(VideoPageDto pageDto);
 
+    /**
+     * 视频feed接口
+     *
+     * @param videoFeedDTO createTime
+     * @return video
+     */
+    VideoVO feedVideo(VideoFeedDTO videoFeedDTO);
 
 
     List<VideoUserLikeVo> queryMyLikeVideoPage(VideoPageDto pageDto);
