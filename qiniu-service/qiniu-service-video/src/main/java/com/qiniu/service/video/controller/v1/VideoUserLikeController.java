@@ -32,6 +32,11 @@ public class VideoUserLikeController {
         return R.ok(videoUserLikeService.videoLike(videoId));
     }
 
+    /**
+     * 用户点赞分页查询
+     * @param userId
+     * @return
+     */
     @GetMapping("/user/like/{userId}")
     public R<List<VideoUserVo>> getUserLikes(@PathVariable("userId") Long userId) {
         List<VideoUserVo> videoUserVos = videoUserLikeService.userLikes(userId);

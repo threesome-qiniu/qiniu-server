@@ -8,7 +8,7 @@ import lombok.Data;
  * 日期：2023/10/31 19:20
  */
 @Data
-public class VideoUserLikeVo {
+public class VideoUserLikeAndFavoriteVo {
 
     private String videoTitle;
     private String videoDesc;

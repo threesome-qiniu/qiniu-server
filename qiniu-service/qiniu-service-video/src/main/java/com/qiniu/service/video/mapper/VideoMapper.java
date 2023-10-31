@@ -20,5 +20,7 @@ public interface VideoMapper extends BaseMapper<Video>{
 
     List<Video> getUserLikesVideos(Long userId, int pageNum, int pageSize);
 
+    List<Video> getUserFavoritesVideos(Long userId, int pageNum, int pageSize);
+
 }
 

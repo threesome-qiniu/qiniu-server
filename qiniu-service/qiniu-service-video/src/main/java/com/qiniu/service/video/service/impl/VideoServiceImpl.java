@@ -1,9 +1,9 @@
 package com.qiniu.service.video.service.impl;
 
+import com.qiniu.common.utils.string.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.qiniu.common.context.UserContext;
@@ -12,8 +12,11 @@ import com.qiniu.common.utils.bean.BeanCopyUtils;
 import com.qiniu.common.utils.file.PathUtils;
 import com.qiniu.common.utils.uniqueid.IdGenerator;
 import com.qiniu.model.video.domain.Video;
+import com.qiniu.model.video.dto.VideoFeedDTO;
 import com.qiniu.model.video.dto.VideoPageDto;
 import com.qiniu.model.video.dto.VideoBindDto;
+import com.qiniu.model.video.vo.VideoUserLikeAndFavoriteVo;
+import com.qiniu.model.video.vo.VideoVO;
 import com.qiniu.service.video.constants.QiniuVideoOssConstants;
 import com.qiniu.service.video.mapper.VideoMapper;
 import com.qiniu.service.video.service.IVideoService;
@@ -25,6 +28,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.qiniu.model.common.enums.HttpCodeEnum.*;
 import static com.qiniu.model.video.mq.VideoDelayedQueueConstant.*;
@@ -156,15 +161,30 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      * @return
      */
     @Override
-    public List<VideoUserLikeVo> queryMyLikeVideoPage(VideoPageDto pageDto) {
+    public List<VideoUserLikeAndFavoriteVo> queryMyLikeVideoPage(VideoPageDto pageDto) {
         Long userId = UserContext.getUser().getUserId();
         List<Video> userLikedVideos = videoMapper.getUserLikesVideos(userId, (pageDto.getPageNum() - 1) * pageDto.getPageSize(), pageDto.getPageSize());
-        ArrayList<VideoUserLikeVo> objects = new ArrayList<>();
+        ArrayList<VideoUserLikeAndFavoriteVo> objects = new ArrayList<>();
         for (Video userLikedVideo : userLikedVideos) {
-            objects.add(BeanCopyUtils.copyBean(userLikedVideo, VideoUserLikeVo.class));
+            objects.add(BeanCopyUtils.copyBean(userLikedVideo, VideoUserLikeAndFavoriteVo.class));
         }
         return objects;
     }
 
+    /**
+     * 分页查询用户的点赞列表
+     * @param pageDto
+     * @return
+     */
+    @Override
+    public List<VideoUserLikeAndFavoriteVo> queryMyFavoritesVideoPage(VideoPageDto pageDto) {
+        Long userId = UserContext.getUser().getUserId();
+        List<Video> userLikedVideos = videoMapper.getUserFavoritesVideos(userId, (pageDto.getPageNum() - 1) * pageDto.getPageSize(), pageDto.getPageSize());
+        ArrayList<VideoUserLikeAndFavoriteVo> objects = new ArrayList<>();
+        for (Video userLikedVideo : userLikedVideos) {
+            objects.add(BeanCopyUtils.copyBean(userLikedVideo, VideoUserLikeAndFavoriteVo.class));
+        }
+        return objects;
+    }
 
 }
