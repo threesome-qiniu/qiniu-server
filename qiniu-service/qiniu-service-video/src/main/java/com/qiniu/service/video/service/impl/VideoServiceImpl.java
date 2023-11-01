@@ -1,6 +1,5 @@
 package com.qiniu.service.video.service.impl;
 
-import com.qiniu.common.utils.string.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -9,7 +8,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.qiniu.common.context.UserContext;
 import com.qiniu.common.exception.CustomException;
 import com.qiniu.common.service.RedisService;
-import com.qiniu.common.service.RedisService;
 import com.qiniu.common.utils.bean.BeanCopyUtils;
 import com.qiniu.common.utils.file.PathUtils;
 import com.qiniu.common.utils.string.StringUtils;
@@ -17,19 +15,20 @@ import com.qiniu.common.utils.uniqueid.IdGenerator;
 import com.qiniu.feign.user.RemoteUserService;
 import com.qiniu.model.search.vo.VideoSearchVO;
 import com.qiniu.model.user.domain.User;
-import com.qiniu.feign.user.RemoteUserService;
 import com.qiniu.model.video.domain.Video;
-<<<<<<<<< Temporary merge branch 1
-import com.qiniu.model.video.dto.VideoFeedDTO;
 import com.qiniu.model.video.domain.VideoCategory;
 import com.qiniu.model.video.domain.VideoCategoryRelation;
-import com.qiniu.model.video.dto.VideoPageDto;
+import com.qiniu.model.video.domain.VideoUserComment;
 import com.qiniu.model.video.dto.VideoBindDto;
+import com.qiniu.model.video.dto.VideoFeedDTO;
+import com.qiniu.model.video.dto.VideoPageDto;
 import com.qiniu.model.video.vo.VideoUserLikeAndFavoriteVo;
 import com.qiniu.model.video.vo.VideoVO;
 import com.qiniu.service.video.constants.QiniuVideoOssConstants;
+import com.qiniu.service.video.constants.VideoCacheConstants;
 import com.qiniu.service.video.mapper.VideoCategoryMapper;
 import com.qiniu.service.video.mapper.VideoMapper;
+import com.qiniu.service.video.mapper.VideoUserCommentMapper;
 import com.qiniu.service.video.service.IVideoCategoryRelationService;
 import com.qiniu.service.video.service.IVideoService;
 import com.qiniu.starter.file.service.FileStorageService;
@@ -44,7 +43,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.qiniu.model.common.enums.HttpCodeEnum.*;
+import static com.qiniu.model.common.enums.HttpCodeEnum.BIND_CONTENT_DESC_FAIL;
+import static com.qiniu.model.common.enums.HttpCodeEnum.BIND_CONTENT_TITLE_FAIL;
 import static com.qiniu.model.video.mq.VideoDelayedQueueConstant.*;
 
 /**
@@ -77,6 +77,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Resource
     private RedisService redisService;
+
+    @Resource
+    private VideoUserCommentMapper videoUserCommentMapper;
 
     @Override
     public String uploadVideo(MultipartFile file) {
@@ -176,7 +179,6 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         return this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
     }
 
-<<<<<<<<< Temporary merge branch 1
     /**
      * 视频feed接口
      *
@@ -193,7 +195,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         try {
             one = getOne(queryWrapper);
             // TODO 浏览自增1存入redis
-
+            viewNumIncrement(one.getVideoId());
             if (StringUtils.isNull(one)) {
                 return null;
             }
@@ -203,7 +205,16 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         }
         // TODO 封装点赞数，观看量，评论量
         VideoVO videoVO = BeanCopyUtils.copyBean(one, VideoVO.class);
-        videoVO.setCommentNum(0L);
+        int  cacheLikeNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, one.getVideoId());
+        int cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, one.getVideoId());
+        int cacheFavoriteNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, one.getVideoId());
+        videoVO.setLikeNum(Long.valueOf(cacheLikeNum));
+        videoVO.setViewNum(Long.valueOf(cacheViewNum));
+        videoVO.setFavoritesNum(Long.valueOf(cacheFavoriteNum));
+        LambdaQueryWrapper<VideoUserComment> commentQW = new LambdaQueryWrapper<>();
+        commentQW.eq(VideoUserComment::getVideoId, one.getVideoId());
+        List<VideoUserComment> videoUserComments = videoUserCommentMapper.selectList(commentQW);
+        videoVO.setCommentNum((long) videoUserComments.size());
         return videoVO;
     }
 
@@ -245,6 +256,10 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             objects.add(BeanCopyUtils.copyBean(userLikedVideo, VideoUserLikeAndFavoriteVo.class));
         }
         return objects;
+    }
+
+    private void viewNumIncrement(String videoId) {
+        redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY , videoId, 1);
     }
 
 }

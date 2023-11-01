@@ -15,4 +15,9 @@ public class VideoCacheConstants {
 
     public static final String VIDEO_LIKE_NUM_MAP_KEY = "video:like:num";
     public static final String VIDEO_FAVORITE_NUM_MAP_KEY = "video:favorite:num";
+
+
+    public static final String VIDEO_VIEW_NUM_MAP_KEY = "video:view:num";
+
+
 }
