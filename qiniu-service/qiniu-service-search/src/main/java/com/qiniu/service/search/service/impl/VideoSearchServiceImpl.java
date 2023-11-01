@@ -1,7 +1,10 @@
 package com.qiniu.service.search.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.qiniu.common.context.UserContext;
+import com.qiniu.common.exception.CustomException;
 import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.model.search.dto.VideoSearchKeywordDTO;
 import com.qiniu.service.search.domain.VideoSearchVO;
@@ -11,11 +14,14 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.support.WriteRequest;
+import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
@@ -45,7 +51,7 @@ public class VideoSearchServiceImpl implements VideoSearchService {
     private RestHighLevelClient restHighLevelClient;
 
     /**
-     * 视频同步到es
+     * 视频同步新增到es
      */
     @Override
     public void videoSync(String json) {
@@ -62,13 +68,47 @@ public class VideoSearchServiceImpl implements VideoSearchService {
     }
 
     /**
+     * 更新视频索引文档
+     *
+     * @param json
+     */
+    @Override
+    public void updateVideoDoc(String json) {
+        VideoSearchVO videoSearchVO = JSON.parseObject(json, VideoSearchVO.class);
+        UpdateRequest updateRequest = new UpdateRequest(INDEX_VIDEO, videoSearchVO.getVideoId());
+        updateRequest.doc(json, XContentType.JSON);
+        updateRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
+        try {
+            restHighLevelClient.update(updateRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            log.error("failed to update document to elasticsearch,the doc is:{},the exception is {}", json, e.getMessage());
+        }
+    }
+
+    /**
+     * 删除文档
+     *
+     * @param videoId
+     */
+    @Override
+    public void deleteVideoDoc(String videoId) {
+        DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(INDEX_VIDEO);
+        deleteByQueryRequest.setQuery(new TermsQueryBuilder("videoId", videoId));
+        deleteByQueryRequest.setRefresh(true);
+        try {
+            restHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            log.error("failed to delete the document in elasticsearch,the doc id is:{},the exception is {}", videoId, e.getMessage());
+        }
+    }
+
+    /**
      * es分页搜索视频
      *
-     * @param dto
-     *     String keyword;
-     *     private Integer pageNum;
-     *     private Integer pageSize;
-     *     最小时间  minBehotTime;
+     * @param dto String keyword;
+     *            private Integer pageNum;
+     *            private Integer pageSize;
+     *            最小时间  minBehotTime;
      * @return
      */
     @Override
@@ -124,7 +164,7 @@ public class VideoSearchServiceImpl implements VideoSearchService {
                 map.put("videoTitle", map.get("videoTitle"));
             }
             VideoSearchVO videoSearchVO = new VideoSearchVO();
-            BeanUtils.populate(videoSearchVO,map);
+            BeanUtils.populate(videoSearchVO, map);
             result.add(videoSearchVO);
         }
         result.forEach(System.out::println);

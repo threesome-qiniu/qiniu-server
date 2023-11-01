@@ -14,11 +14,21 @@ import java.util.List;
 public interface VideoSearchService {
 
     /**
-     * 视频同步到es
+     * 视频同步新增到es
      *
      * @param json videoSearchVO json
      */
     void videoSync(String json);
+
+    /**
+     * 更新视频索引文档
+     */
+    void updateVideoDoc(String json);
+
+    /**
+     * 删除文档
+     */
+    void deleteVideoDoc(String videoId);
 
     /**
      * es分页搜索视频
