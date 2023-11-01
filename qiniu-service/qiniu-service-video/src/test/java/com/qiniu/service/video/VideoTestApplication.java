@@ -5,9 +5,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qiniu.common.service.RedisService;
 import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.feign.user.RemoteUserService;
+import com.qiniu.model.video.domain.VideoSensitive;
 import com.qiniu.model.video.domain.VideoUserLike;
 import com.qiniu.model.video.vo.VideoUserVo;
 import com.qiniu.service.video.constants.VideoCacheConstants;
+import com.qiniu.service.video.mapper.VideoSensitiveMapper;
 import com.qiniu.service.video.service.IVideoCategoryService;
 import com.qiniu.service.video.service.IVideoService;
 import com.qiniu.service.video.service.IVideoUserLikeService;
@@ -38,6 +40,9 @@ public class VideoTestApplication {
 
     @Autowired
     private RedisService redisService;
+
+    @Autowired
+    private VideoSensitiveMapper videoSensitiveMapper;
 
     @Resource
     private RemoteUserService remoteUserService;
@@ -110,5 +115,25 @@ public class VideoTestApplication {
         videoCategoryService.selectAllCategory();
 
     }
+
+    @Test
+    void sensitiveTest(){
+        String s1="冰毒";
+        String s2="海洛因";
+        String s3="正常";
+        String s4="这个是假冰毒呀";
+        String s5="这个是假冰毒";
+        String s6="冰毒的一百种测法";
+
+
+
+        LambdaQueryWrapper<VideoSensitive> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(VideoSensitive::getId)
+                .like(VideoSensitive::getSensitives, s1)
+                .or(w -> w.like(VideoSensitive::getSensitives, s3));
+        List<VideoSensitive> videoSensitives = videoSensitiveMapper.selectList(queryWrapper);
+        videoSensitives.size();
+    }
+
 
 }

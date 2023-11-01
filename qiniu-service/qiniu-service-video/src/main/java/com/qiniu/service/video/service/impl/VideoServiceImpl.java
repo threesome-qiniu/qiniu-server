@@ -15,11 +15,8 @@ import com.qiniu.common.utils.uniqueid.IdGenerator;
 import com.qiniu.feign.user.RemoteUserService;
 import com.qiniu.model.search.vo.VideoSearchVO;
 import com.qiniu.model.user.domain.User;
-import com.qiniu.model.video.domain.Video;
+import com.qiniu.model.video.domain.*;
 import com.qiniu.model.video.dto.VideoFeedDTO;
-import com.qiniu.model.video.domain.VideoCategory;
-import com.qiniu.model.video.domain.VideoCategoryRelation;
-import com.qiniu.model.video.domain.VideoUserComment;
 import com.qiniu.model.video.dto.VideoBindDto;
 import com.qiniu.model.video.dto.VideoPageDto;
 import com.qiniu.model.video.vo.VideoUserLikeAndFavoriteVo;
@@ -28,6 +25,7 @@ import com.qiniu.service.video.constants.QiniuVideoOssConstants;
 import com.qiniu.service.video.constants.VideoCacheConstants;
 import com.qiniu.service.video.mapper.VideoCategoryMapper;
 import com.qiniu.service.video.mapper.VideoMapper;
+import com.qiniu.service.video.mapper.VideoSensitiveMapper;
 import com.qiniu.service.video.mapper.VideoUserCommentMapper;
 import com.qiniu.service.video.service.IVideoCategoryRelationService;
 import com.qiniu.service.video.service.IVideoService;
@@ -82,6 +80,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     @Resource
     private VideoUserCommentMapper videoUserCommentMapper;
 
+    @Resource
+    private VideoSensitiveMapper videoSensitiveMapper;
+
 
     @Override
     public String uploadVideo(MultipartFile file) {
@@ -101,12 +102,23 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     @Override
     public String videoPublish(VideoBindDto videoBindDto) {
         Long userId = UserContext.getUser().getUserId();
+        //从数据库获得敏感信息
         //判断传过来的数据是否符合数据库字段标准
         if (videoBindDto.getVideoTitle().length() > 30) {
             throw new CustomException(BIND_CONTENT_TITLE_FAIL);
         }
         if (videoBindDto.getVideoDesc().length() > 200) {
             throw new CustomException(BIND_CONTENT_DESC_FAIL);
+        }
+        //构建敏感词查询条件
+        LambdaQueryWrapper<VideoSensitive> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(VideoSensitive::getId)
+                .like(VideoSensitive::getSensitives, videoBindDto.getVideoTitle())
+                .or(w -> w.like(VideoSensitive::getSensitives, videoBindDto.getVideoDesc()));
+        List<VideoSensitive> videoSensitives = videoSensitiveMapper.selectList(queryWrapper);
+        //如果结果不为空，证明有敏感词，提示异常
+        if (!videoSensitives.isEmpty()) {
+            throw new CustomException(SENSITIVEWORD_ERROR);
         }
         //将传过来的数据拷贝到要存储的对象中
         Video video = BeanCopyUtils.copyBean(videoBindDto, Video.class);
