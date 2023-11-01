@@ -68,9 +68,6 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     private IVideoCategoryRelationService videoCategoryRelationService;
 
     @Resource
-    private VideoCategoryMapper videoCategoryMapper;
-
-    @Resource
     private RabbitTemplate rabbitTemplate;
 
     @Resource
@@ -204,29 +201,20 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             e.printStackTrace();
             return null;
         }
-        // TODO 封装点赞数，观看量，评论量
+        // 封装点赞数，观看量，评论量
         VideoVO videoVO = BeanCopyUtils.copyBean(one, VideoVO.class);
-        int cacheLikeNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, one.getVideoId());
-        int cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, one.getVideoId());
-        int cacheFavoriteNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, one.getVideoId());
-        videoVO.setLikeNum(Long.valueOf(cacheLikeNum));
-        videoVO.setViewNum(Long.valueOf(cacheViewNum));
-        videoVO.setFavoritesNum(Long.valueOf(cacheFavoriteNum));
+        Integer cacheLikeNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, one.getVideoId());
+        Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, one.getVideoId());
+        Integer cacheFavoriteNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, one.getVideoId());
+        videoVO.setLikeNum(StringUtils.isNull(cacheLikeNum) ? 0L : cacheLikeNum);
+        videoVO.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
+        videoVO.setFavoritesNum(StringUtils.isNull(cacheFavoriteNum) ? 0L : cacheFavoriteNum);
         LambdaQueryWrapper<VideoUserComment> commentQW = new LambdaQueryWrapper<>();
         commentQW.eq(VideoUserComment::getVideoId, one.getVideoId());
         List<VideoUserComment> videoUserComments = videoUserCommentMapper.selectList(commentQW);
         videoVO.setCommentNum((long) videoUserComments.size());
         return videoVO;
     }
-
-    //    @PostConstruct
-//    public void init() {
-//        log.info("新闻浏览量写入缓存开始==>");
-//        List<AppNews> appNewsList = list();
-//        Map<String, Integer> newsViewMap = appNewsList.stream().collect(Collectors.toMap(AppNews::getNewsId, AppNews::getViewNum));
-//        redisCache.setCacheMap(CacheConstants.NEWS_VIEW_NUM_KEY, newsViewMap);
-//        log.info("<==新闻浏览量写入缓存成功");
-//    }
 
     /**
      * 分页查询用户的点赞列表
