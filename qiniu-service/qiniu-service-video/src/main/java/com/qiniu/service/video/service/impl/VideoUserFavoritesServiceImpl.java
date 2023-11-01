@@ -14,6 +14,7 @@ import com.qiniu.service.video.mapper.VideoUserFavoritesMapper;
 import com.qiniu.service.video.service.IVideoUserFavoritesService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -85,11 +86,13 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
         return videoUserVos;
     }
 
-    private void favoriteNumIncrease(String videoId) {
+    @Async
+    protected void favoriteNumIncrease(String videoId) {
         redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, videoId, 1);
     }
 
-    private void favoriteNumDecrease(String videoId) {
+    @Async
+    protected void favoriteNumDecrease(String videoId) {
         redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, videoId, -1);
     }
 }
