@@ -81,6 +81,7 @@ public class VideoTestApplication {
             videoUserLikeService.remove(queryWrapper);
         }
 
+
     }
 
     public void likeNumIncrease(String videoId) {
@@ -96,6 +97,18 @@ public class VideoTestApplication {
     public void likeNumDecrease(String videoId) {
         // 缓存中阅读量自增一
         redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, videoId, -1);
+    }
+
+    @Test
+    void saveVideoCategoriesToRedisTest() {
+        videoCategoryService.saveVideoCategoriesToRedis();
+
+    }
+
+    @Test
+    void selectAllCategoryTest() {
+        videoCategoryService.selectAllCategory();
+
     }
 
 }

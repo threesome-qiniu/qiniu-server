@@ -3,11 +3,14 @@ package com.qiniu.service.video.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import com.qiniu.common.service.RedisService;
+import com.qiniu.common.utils.bean.BeanCopyUtils;
 import com.qiniu.model.video.domain.VideoCategory;
+import com.qiniu.model.video.vo.VideoCategoryVo;
 import com.qiniu.service.video.constants.VideoCacheConstants;
 import com.qiniu.service.video.mapper.VideoCategoryMapper;
 import com.qiniu.service.video.service.IVideoCategoryService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -36,33 +39,28 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
     RedisService redisService;
 
     @Override
-    public List<String> saveVideoCategoriesToRedis() {
+    public List<VideoCategory> saveVideoCategoriesToRedis() {
         // 查询数据库获取视频分类列表
         List<VideoCategory> videoCategories = videoCategoryMapper.getAllVideoCategory();
         if (videoCategories.isEmpty()) {
-            return  new ArrayList<>();
+            return new ArrayList<>();
         }
-        List<String> nameList = videoCategories.stream().map(VideoCategory::getName).collect(Collectors.toList());
-        redisService.setCacheList(VideoCacheConstants.VIDEO_CATEGORY_PREFIX, nameList);
-        log.debug("视频分类存入缓存：{}", nameList.toString());
-        return nameList;
+        redisService.setCacheList(VideoCacheConstants.VIDEO_CATEGORY_PREFIX, videoCategories);
+        return videoCategories;
     }
 
     /**
      * 获取所有的分类列表
      */
     @Override
-    public List<String> selectAllCategory() {
+    public List<VideoCategoryVo> selectAllCategory() {
 
-        List<String> videoCategoryNames=new ArrayList<>();
-        List<String> cacheList = redisService.getCacheList(VideoCacheConstants.VIDEO_CATEGORY_PREFIX);
+        List<VideoCategory> cacheList = redisService.getCacheList(VideoCacheConstants.VIDEO_CATEGORY_PREFIX);
         if (cacheList.isEmpty()) {
             cacheList = saveVideoCategoriesToRedis();
         }
-        for (String o : cacheList) {
-            videoCategoryNames.add(o);
-        }
-        return  videoCategoryNames;
+        List<VideoCategoryVo> videoCategoryVos = BeanCopyUtils.copyBeanList(cacheList, VideoCategoryVo.class);
+        return videoCategoryVos;
     }
 
 }

@@ -14,5 +14,5 @@ import lombok.EqualsAndHashCode;
 public class VideoBindDto extends Video {
 
     //分类名称
-    private String categoryName;
+    private Long categoryId;
 }

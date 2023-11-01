@@ -19,18 +19,23 @@ import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.dto.VideoFeedDTO;
 import com.qiniu.model.video.domain.VideoCategory;
 import com.qiniu.model.video.domain.VideoCategoryRelation;
-import com.qiniu.model.video.dto.VideoPageDto;
+import com.qiniu.model.video.domain.VideoUserComment;
 import com.qiniu.model.video.dto.VideoBindDto;
+import com.qiniu.model.video.dto.VideoPageDto;
 import com.qiniu.model.video.vo.VideoUserLikeAndFavoriteVo;
 import com.qiniu.model.video.vo.VideoVO;
 import com.qiniu.service.video.constants.QiniuVideoOssConstants;
+import com.qiniu.service.video.constants.VideoCacheConstants;
 import com.qiniu.service.video.mapper.VideoCategoryMapper;
 import com.qiniu.service.video.mapper.VideoMapper;
+import com.qiniu.service.video.mapper.VideoUserCommentMapper;
+import com.qiniu.service.video.service.IVideoCategoryRelationService;
 import com.qiniu.service.video.service.IVideoService;
 import com.qiniu.starter.file.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -60,6 +65,12 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     private FileStorageService fileStorageService;
 
     @Resource
+    private IVideoCategoryRelationService videoCategoryRelationService;
+
+    @Resource
+    private VideoCategoryMapper videoCategoryMapper;
+
+    @Resource
     private RabbitTemplate rabbitTemplate;
 
     @Resource
@@ -69,7 +80,8 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     private RedisService redisService;
 
     @Resource
-    private VideoCategoryMapper videoCategoryMapper;
+    private VideoUserCommentMapper videoUserCommentMapper;
+
 
     @Override
     public String uploadVideo(MultipartFile file) {
@@ -85,8 +97,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         return video;
     }
 
+    @Transactional
     @Override
-    public Video videoPublish(VideoBindDto videoBindDto) {
+    public String videoPublish(VideoBindDto videoBindDto) {
         Long userId = UserContext.getUser().getUserId();
         //判断传过来的数据是否符合数据库字段标准
         if (videoBindDto.getVideoTitle().length() > 30) {
@@ -95,22 +108,23 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         if (videoBindDto.getVideoDesc().length() > 200) {
             throw new CustomException(BIND_CONTENT_DESC_FAIL);
         }
+        //将传过来的数据拷贝到要存储的对象中
         Video video = BeanCopyUtils.copyBean(videoBindDto, Video.class);
-        video.setVideoId(IdGenerator.generatorShortId());
+        //生成id
+        String videoId = IdGenerator.generatorShortId();
+        //向新的对象中封装信息
+        video.setVideoId(videoId);
         video.setUserId(userId);
         video.setCreateTime(LocalDateTime.now());
         video.setCreateBy(userId.toString());
-        //将前端接受的video_id存入VideoCategoryRelation（视频分类关联表）
-        VideoCategoryRelation videoCategoryRelation = new VideoCategoryRelation();
+        //将前端传递的分类拷贝到关联表对象
+        VideoCategoryRelation videoCategoryRelation = BeanCopyUtils.copyBean(videoBindDto, VideoCategoryRelation.class);
+        //video_id存入VideoCategoryRelation（视频分类关联表）
         videoCategoryRelation.setVideoId(video.getVideoId());
-        //通过categoryName查询出对应的id
-        LambdaQueryWrapper<VideoCategory> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(VideoCategory::getName, videoBindDto.getCategoryName());
-        VideoCategory videoCategory = videoCategoryMapper.selectOne(queryWrapper);
-        //将分类id赋值给videoCategoryRelation对象
-        videoCategoryRelation.setCategoryId(videoCategory.getId());
         //先将video对象存入video表中
         boolean save = this.save(video);
+        //再将videoCategoryRelation对象存入video_category_relation表中
+        videoCategoryRelationService.saveVideoCategoryRelation(videoCategoryRelation);
         if (save) {
             // 1.发送整个video对象发送消息，
             // TODO 待添加视频封面
@@ -140,7 +154,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 return message;
             });
             log.debug(" ==> {} 发送了一条消息 ==> {}", ESSYNC_DELAYED_EXCHANGE, msg);
-            return video;
+            return videoId;
         } else {
             throw new CustomException(null);
         }
@@ -157,7 +171,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Override
     public IPage<Video> queryUserVideoPage(VideoPageDto pageDto) {
-        if (com.qiniu.common.utils.string.StringUtils.isNull(pageDto.getUserId())) {
+        if (StringUtils.isNull(pageDto.getUserId())) {
             return new Page<>();
         }
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
@@ -182,7 +196,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         try {
             one = getOne(queryWrapper);
             // TODO 浏览自增1存入redis
-
+            viewNumIncrement(one.getVideoId());
             if (StringUtils.isNull(one)) {
                 return null;
             }
@@ -192,7 +206,16 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         }
         // TODO 封装点赞数，观看量，评论量
         VideoVO videoVO = BeanCopyUtils.copyBean(one, VideoVO.class);
-        videoVO.setCommentNum(0L);
+        int cacheLikeNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, one.getVideoId());
+        int cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, one.getVideoId());
+        int cacheFavoriteNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, one.getVideoId());
+        videoVO.setLikeNum(Long.valueOf(cacheLikeNum));
+        videoVO.setViewNum(Long.valueOf(cacheViewNum));
+        videoVO.setFavoritesNum(Long.valueOf(cacheFavoriteNum));
+        LambdaQueryWrapper<VideoUserComment> commentQW = new LambdaQueryWrapper<>();
+        commentQW.eq(VideoUserComment::getVideoId, one.getVideoId());
+        List<VideoUserComment> videoUserComments = videoUserCommentMapper.selectList(commentQW);
+        videoVO.setCommentNum((long) videoUserComments.size());
         return videoVO;
     }
 
@@ -237,6 +260,10 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             objects.add(BeanCopyUtils.copyBean(userLikedVideo, VideoUserLikeAndFavoriteVo.class));
         }
         return objects;
+    }
+
+    private void viewNumIncrement(String videoId) {
+        redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, videoId, 1);
     }
 
 }

@@ -52,9 +52,9 @@ public class VideoController {
      * @return
      */
     @PostMapping("/publish")
-    public R<Video> videoPublish(@RequestBody VideoBindDto videoBindDto) {
-        Video video = videoService.videoPublish(videoBindDto);
-        return R.ok(video);
+    public R<?> videoPublish(@RequestBody VideoBindDto videoBindDto) {
+        String videoId = videoService.videoPublish(videoBindDto);
+        return R.ok(videoId);
     }
 
     /**
