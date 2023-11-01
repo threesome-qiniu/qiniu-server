@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.qiniu.common.context.UserContext;
 import com.qiniu.common.service.RedisService;
+import com.qiniu.common.utils.bean.BeanCopyUtils;
 import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.domain.VideoUserLike;
@@ -15,12 +16,14 @@ import com.qiniu.service.video.service.IVideoUserLikeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 点赞表(VideoUserLike)表服务实现类
@@ -75,14 +78,8 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
     public List<VideoUserVo> userLikes(Long userId) {
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Video::getUserId, userId);
-        List<VideoUserVo> videoUserVos = new ArrayList<>();
         List<Video> list = videoMapper.selectList(queryWrapper);
-        for (Video video : list) {
-            VideoUserVo videoUserVo = new VideoUserVo();
-            BeanUtils.copyProperties(video, videoUserVo);
-            videoUserVos.add(videoUserVo);
-        }
-        return videoUserVos;
+        return list.stream().map(l -> BeanCopyUtils.copyBean(l, VideoUserVo.class)).collect(Collectors.toList());
     }
 
     /**
@@ -90,7 +87,8 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
      *
      * @param videoId
      */
-    private void likeNumIncrement(String videoId) {
+    @Async
+    protected void likeNumIncrement(String videoId) {
         redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY , videoId, 1);
     }
 
@@ -99,7 +97,8 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
      *
      * @param videoId
      */
-    private void likeNumDecrement(String videoId) {
+    @Async
+    protected void likeNumDecrement(String videoId) {
         redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, videoId, -1);
     }
 

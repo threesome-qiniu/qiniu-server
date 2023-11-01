@@ -45,6 +45,12 @@ public class VideoSearchServiceImpl implements VideoSearchService {
         }
     }
 
+    /**
+     * es搜索视频
+     *
+     * @param keyword
+     * @return
+     */
     @Override
     public List<Video> searchVideoFromES(String keyword) {
         return null;
