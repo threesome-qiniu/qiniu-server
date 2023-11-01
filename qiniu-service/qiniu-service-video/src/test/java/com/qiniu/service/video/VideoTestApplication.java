@@ -55,14 +55,14 @@ public class VideoTestApplication {
     }
 
     @Test
-    void userLikesTest(){
+    void userLikesTest() {
         List<VideoUserVo> videoUserVos = videoUserLikeService.userLikes(3L);
         System.out.println(videoUserVos.size());
     }
 
     @Test
-    void videoLikeTest(){
-        String videoId="11685954002238832647a8379a1";
+    void videoLikeTest() {
+        String videoId = "11685954002238832647a8379a1";
         Long userId = 2L;
         LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(VideoUserLike::getVideoId, videoId).eq(VideoUserLike::getUserId, userId);
@@ -78,24 +78,24 @@ public class VideoTestApplication {
         } else {
             //将本条点赞信息从redis
             likeNumDecrease(videoId);
-           videoUserLikeService.remove(queryWrapper);
+            videoUserLikeService.remove(queryWrapper);
         }
-
 
     }
 
     public void likeNumIncrease(String videoId) {
         // 缓存中点赞量自增一
-        redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_KEY, videoId, 1);
+        redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, videoId, 1);
     }
 
     /**
      * 缓存中点赞量自增一
+     *
      * @param videoId
      */
     public void likeNumDecrease(String videoId) {
         // 缓存中阅读量自增一
-        redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_KEY, videoId, -1);
+        redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, videoId, -1);
     }
 
 }
