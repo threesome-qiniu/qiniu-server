@@ -6,8 +6,11 @@ import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.dto.VideoFeedDTO;
 import com.qiniu.model.video.dto.VideoPageDto;
 import com.qiniu.model.video.dto.VideoBindDto;
+import com.qiniu.model.video.vo.VideoUserLikeAndFavoriteVo;
 import com.qiniu.model.video.vo.VideoVO;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
  * 视频表(Video)表服务接口
@@ -58,4 +61,19 @@ public interface IVideoService extends IService<Video> {
      * @return video
      */
     VideoVO feedVideo(VideoFeedDTO videoFeedDTO);
+
+    /**
+     * 用户点赞列表分页接口
+     * @param pageDto
+     * @return
+     */
+
+    List<VideoUserLikeAndFavoriteVo> queryMyLikeVideoPage(VideoPageDto pageDto);
+
+    /**
+     * 用户收藏列表分页接口
+     * @param pageDto
+     * @return
+     */
+    List<VideoUserLikeAndFavoriteVo> queryMyFavoritesVideoPage(VideoPageDto pageDto);
 }

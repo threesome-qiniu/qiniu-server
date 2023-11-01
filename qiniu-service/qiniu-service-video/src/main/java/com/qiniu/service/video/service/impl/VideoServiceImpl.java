@@ -1,5 +1,6 @@
 package com.qiniu.service.video.service.impl;
 
+import com.qiniu.common.utils.string.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -10,7 +11,6 @@ import com.qiniu.common.exception.CustomException;
 import com.qiniu.common.service.RedisService;
 import com.qiniu.common.utils.bean.BeanCopyUtils;
 import com.qiniu.common.utils.file.PathUtils;
-import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.common.utils.uniqueid.IdGenerator;
 import com.qiniu.feign.user.RemoteUserService;
 import com.qiniu.model.search.vo.VideoSearchVO;
@@ -21,21 +21,22 @@ import com.qiniu.model.video.domain.VideoCategory;
 import com.qiniu.model.video.domain.VideoCategoryRelation;
 import com.qiniu.model.video.dto.VideoPageDto;
 import com.qiniu.model.video.dto.VideoBindDto;
+import com.qiniu.model.video.vo.VideoUserLikeAndFavoriteVo;
 import com.qiniu.model.video.vo.VideoVO;
 import com.qiniu.service.video.constants.QiniuVideoOssConstants;
 import com.qiniu.service.video.mapper.VideoCategoryMapper;
 import com.qiniu.service.video.mapper.VideoMapper;
-import com.qiniu.service.video.service.IVideoCategoryRelationService;
 import com.qiniu.service.video.service.IVideoService;
 import com.qiniu.starter.file.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.qiniu.model.common.enums.HttpCodeEnum.*;
 import static com.qiniu.model.video.mq.VideoDelayedQueueConstant.*;
@@ -55,12 +56,6 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Resource
     private FileStorageService fileStorageService;
-
-    @Resource
-    private IVideoCategoryRelationService videoCategoryRelationService;
-
-    @Resource
-    private VideoCategoryMapper videoCategoryMapper;
 
     @Resource
     private RabbitTemplate rabbitTemplate;
@@ -85,7 +80,6 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         return video;
     }
 
-    @Transactional
     @Override
     public Video videoPublish(VideoBindDto videoBindDto) {
         Long userId = UserContext.getUser().getUserId();
@@ -96,7 +90,6 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         if (videoBindDto.getVideoDesc().length() > 200) {
             throw new CustomException(BIND_CONTENT_DESC_FAIL);
         }
-
         Video video = BeanCopyUtils.copyBean(videoBindDto, Video.class);
         video.setVideoId(IdGenerator.generatorShortId());
         video.setUserId(userId);
@@ -113,8 +106,6 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         videoCategoryRelation.setCategoryId(videoCategory.getId());
         //先将video对象存入video表中
         boolean save = this.save(video);
-        //再将videoCategoryRelation对象存入video_category_relation表中
-        videoCategoryRelationService.saveVideoCategoryRelation(videoCategoryRelation);
         if (save) {
             // 1.发送整个video对象发送消息，
             // TODO 待添加视频封面
@@ -160,7 +151,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Override
     public IPage<Video> queryUserVideoPage(VideoPageDto pageDto) {
-        if (StringUtils.isNull(pageDto.getUserId())) {
+        if (com.qiniu.common.utils.string.StringUtils.isNull(pageDto.getUserId())) {
             return new Page<>();
         }
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
@@ -207,5 +198,36 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 //        redisCache.setCacheMap(CacheConstants.NEWS_VIEW_NUM_KEY, newsViewMap);
 //        log.info("<==新闻浏览量写入缓存成功");
 //    }
+    /**
+     * 分页查询用户的点赞列表
+     * @param pageDto
+     * @return
+     */
+    @Override
+    public List<VideoUserLikeAndFavoriteVo> queryMyLikeVideoPage(VideoPageDto pageDto) {
+        Long userId = UserContext.getUser().getUserId();
+        List<Video> userLikedVideos = videoMapper.getUserLikesVideos(userId, (pageDto.getPageNum() - 1) * pageDto.getPageSize(), pageDto.getPageSize());
+        ArrayList<VideoUserLikeAndFavoriteVo> objects = new ArrayList<>();
+        for (Video userLikedVideo : userLikedVideos) {
+            objects.add(BeanCopyUtils.copyBean(userLikedVideo, VideoUserLikeAndFavoriteVo.class));
+        }
+        return objects;
+    }
+
+    /**
+     * 分页查询用户的点赞列表
+     * @param pageDto
+     * @return
+     */
+    @Override
+    public List<VideoUserLikeAndFavoriteVo> queryMyFavoritesVideoPage(VideoPageDto pageDto) {
+        Long userId = UserContext.getUser().getUserId();
+        List<Video> userLikedVideos = videoMapper.getUserFavoritesVideos(userId, (pageDto.getPageNum() - 1) * pageDto.getPageSize(), pageDto.getPageSize());
+        ArrayList<VideoUserLikeAndFavoriteVo> objects = new ArrayList<>();
+        for (Video userLikedVideo : userLikedVideos) {
+            objects.add(BeanCopyUtils.copyBean(userLikedVideo, VideoUserLikeAndFavoriteVo.class));
+        }
+        return objects;
+    }
 
 }
