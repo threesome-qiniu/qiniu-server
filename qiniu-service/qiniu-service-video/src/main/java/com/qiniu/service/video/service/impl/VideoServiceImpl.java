@@ -1,5 +1,6 @@
 package com.qiniu.service.video.service.impl;
 
+import com.qiniu.common.utils.string.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -16,12 +17,14 @@ import com.qiniu.feign.user.RemoteUserService;
 import com.qiniu.model.search.vo.VideoSearchVO;
 import com.qiniu.model.user.domain.User;
 import com.qiniu.model.video.domain.Video;
+import com.qiniu.model.video.dto.VideoFeedDTO;
 import com.qiniu.model.video.domain.VideoCategory;
 import com.qiniu.model.video.domain.VideoCategoryRelation;
 import com.qiniu.model.video.domain.VideoUserComment;
 import com.qiniu.model.video.dto.VideoBindDto;
 import com.qiniu.model.video.dto.VideoFeedDTO;
 import com.qiniu.model.video.dto.VideoPageDto;
+import com.qiniu.model.video.dto.VideoBindDto;
 import com.qiniu.model.video.vo.VideoUserLikeAndFavoriteVo;
 import com.qiniu.model.video.vo.VideoVO;
 import com.qiniu.service.video.constants.QiniuVideoOssConstants;
@@ -40,11 +43,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-import static com.qiniu.model.common.enums.HttpCodeEnum.BIND_CONTENT_DESC_FAIL;
-import static com.qiniu.model.common.enums.HttpCodeEnum.BIND_CONTENT_TITLE_FAIL;
+import static com.qiniu.model.common.enums.HttpCodeEnum.*;
 import static com.qiniu.model.video.mq.VideoDelayedQueueConstant.*;
 
 /**
@@ -81,6 +85,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     @Resource
     private VideoUserCommentMapper videoUserCommentMapper;
 
+    @Resource
+    private VideoCategoryMapper videoCategoryMapper;
+
     @Override
     public String uploadVideo(MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
@@ -106,7 +113,6 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         if (videoBindDto.getVideoDesc().length() > 200) {
             throw new CustomException(BIND_CONTENT_DESC_FAIL);
         }
-
         Video video = BeanCopyUtils.copyBean(videoBindDto, Video.class);
         video.setVideoId(IdGenerator.generatorShortId());
         video.setUserId(userId);
@@ -131,7 +137,8 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             VideoSearchVO videoSearchVO = new VideoSearchVO();
             videoSearchVO.setVideoId(video.getVideoId());
             videoSearchVO.setVideoTitle(video.getVideoTitle());
-            videoSearchVO.setPublishTime(video.getCreateTime());
+            // localdatetime转换为date
+            videoSearchVO.setPublishTime(Date.from(video.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
             videoSearchVO.setCoverImage("null");
             videoSearchVO.setVideoUrl(video.getVideoUrl());
             videoSearchVO.setUserId(userId);
@@ -226,8 +233,10 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 //        redisCache.setCacheMap(CacheConstants.NEWS_VIEW_NUM_KEY, newsViewMap);
 //        log.info("<==新闻浏览量写入缓存成功");
 //    }
+
     /**
      * 分页查询用户的点赞列表
+     *
      * @param pageDto
      * @return
      */
@@ -244,6 +253,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     /**
      * 分页查询用户的点赞列表
+     *
      * @param pageDto
      * @return
      */

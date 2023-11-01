@@ -1,6 +1,7 @@
 package com.qiniu.service.search.service;
 
-import com.qiniu.model.video.domain.Video;
+import com.qiniu.model.search.dto.VideoSearchKeywordDTO;
+import com.qiniu.service.search.domain.VideoSearchVO;
 
 import java.util.List;
 
@@ -20,11 +21,10 @@ public interface VideoSearchService {
     void videoSync(String json);
 
     /**
-     * es搜索视频
+     * es分页搜索视频
      *
-     * @param keyword
-     * @return
+     * @param dto
      */
-    List<Video> searchVideoFromES(String keyword);
+    List<VideoSearchVO> searchVideoFromES(VideoSearchKeywordDTO dto) throws Exception;
 
 }

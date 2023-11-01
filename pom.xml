@@ -50,6 +50,7 @@
         <oshi.version>6.2.2</oshi.version>
         <lang3.version>3.5</lang3.version>
         <commons.io.version>2.13.0</commons.io.version>
+        <commons-beanutils.version>1.9.3</commons-beanutils.version>
         <commons.codec.version>1.12</commons.codec.version>
         <commons.fileupload.version>1.4</commons.fileupload.version>
         <commons.collections.version>3.2.2</commons.collections.version>
@@ -177,6 +178,12 @@
                 <groupId>com.alibaba.fastjson2</groupId>
                 <artifactId>fastjson2</artifactId>
                 <version>${fastjson.version}</version>
+            </dependency>
+            <!--beanutils-->
+            <dependency>
+                <groupId>commons-beanutils</groupId>
+                <artifactId>commons-beanutils</artifactId>
+                <version>${commons-beanutils.version}</version>
             </dependency>
             <!-- Apache 工具包 commons-io -->
             <dependency>

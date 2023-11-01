@@ -1,7 +1,13 @@
-package com.qiniu.model.search.vo;
+package com.qiniu.service.search.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.springframework.data.elasticsearch.annotations.DateFormat;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -12,6 +18,7 @@ import java.util.Date;
  * 视频搜索返回体
  **/
 @Data
+@Document(indexName = "search_video", createIndex = true)
 public class VideoSearchVO {
 
     // 视频id

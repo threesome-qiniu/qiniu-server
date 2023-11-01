@@ -22,6 +22,11 @@ public class UserContext {
         return USER_THREAD_LOCAL.get();
     }
 
+    /// 获取用户ID
+    public static Long getUserId() {
+        return getUser().getUserId();
+    }
+
     //清理
     public static void clear() {
         USER_THREAD_LOCAL.remove();

@@ -1,9 +1,11 @@
 package com.qiniu.model.search.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * VideoSearchWordDTO
@@ -26,7 +28,7 @@ public class VideoSearchKeywordDTO {
     /**
      * 最小时间
      */
-    LocalDateTime minBehotTime;
+    private Date minBehotTime;
 
     public int getFromIndex() {
         if (this.pageNum < 1) {

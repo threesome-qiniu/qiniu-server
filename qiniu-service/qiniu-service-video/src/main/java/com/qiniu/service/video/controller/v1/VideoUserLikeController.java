@@ -21,9 +21,9 @@ public class VideoUserLikeController {
     @Resource
     private IVideoUserLikeService videoUserLikeService;
 
-
     /**
      * 用户点赞
+     *
      * @param videoId
      * @return
      */
