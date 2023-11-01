@@ -68,7 +68,6 @@ public interface IVideoService extends IService<Video> {
      * @param pageDto
      * @return
      */
-
     List<VideoUserLikeAndFavoriteVo> queryMyLikeVideoPage(VideoPageDto pageDto);
 
     /**
