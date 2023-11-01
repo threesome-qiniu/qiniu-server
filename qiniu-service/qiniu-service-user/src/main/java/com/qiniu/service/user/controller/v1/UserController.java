@@ -21,6 +21,7 @@ import com.qiniu.starter.file.service.FileStorageService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -163,6 +164,9 @@ public class UserController {
     @PostMapping("/avatar")
     public R<String> avatar(@RequestParam("file") MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
+        if (StringUtils.isNull(originalFilename)) {
+            throw new CustomException(HttpCodeEnum.IMAGE_TYPE_FOLLOW);
+        }
         //对原始文件名进行判断
         if (originalFilename.endsWith(".png")
                 || originalFilename.endsWith(".jpg")
@@ -172,7 +176,7 @@ public class UserController {
             String url = fileStorageService.uploadImgFile(file, QiniuUserOssConstants.PREFIX_URL, filePath);
             return R.ok(url);
         } else {
-            throw new CustomException(HttpCodeEnum.FILE_TYPE_ERROR);
+            throw new CustomException(HttpCodeEnum.IMAGE_TYPE_FOLLOW);
         }
     }
 

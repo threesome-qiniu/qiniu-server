@@ -1,6 +1,10 @@
 package com.qiniu.service.user.controller.v1;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.qiniu.common.domain.R;
+import com.qiniu.common.domain.vo.PageDataInfo;
+import com.qiniu.model.common.dto.PageDTO;
+import com.qiniu.model.user.domain.User;
 import com.qiniu.model.user.domain.UserFollow;
 import com.qiniu.service.user.service.IUserFollowService;
 import org.springframework.data.domain.PageRequest;
@@ -37,6 +41,14 @@ public class UserFollowController {
         return R.ok(userFollowService.unFollowUser(userId));
     }
 
+    /**
+     * 分页查询我的关注列表
+     */
+    @PostMapping("/followpage")
+    public PageDataInfo followPage(@RequestBody PageDTO pageDTO) {
+        IPage<User> userIPage = userFollowService.followPage(pageDTO);
+        return PageDataInfo.genPageData(userIPage.getRecords(), userIPage.getTotal());
+    }
 
 }
 
