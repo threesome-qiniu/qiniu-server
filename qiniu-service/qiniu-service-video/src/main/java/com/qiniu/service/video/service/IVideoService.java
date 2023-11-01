@@ -36,7 +36,7 @@ public interface IVideoService extends IService<Video> {
      * @param videoBindDto
      * @return
      */
-    Video videoPublish(VideoBindDto videoBindDto);
+    String videoPublish(VideoBindDto videoBindDto);
 
     /**
      * 分页我的视频
@@ -64,6 +64,7 @@ public interface IVideoService extends IService<Video> {
 
     /**
      * 用户点赞列表分页接口
+     *
      * @param pageDto
      * @return
      */
@@ -72,6 +73,7 @@ public interface IVideoService extends IService<Video> {
 
     /**
      * 用户收藏列表分页接口
+     *
      * @param pageDto
      * @return
      */
