@@ -1,19 +1,35 @@
 package com.qiniu.service.search.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.qiniu.model.search.vo.VideoSearchVO;
-import com.qiniu.model.video.domain.Video;
+import com.qiniu.common.context.UserContext;
+import com.qiniu.common.utils.string.StringUtils;
+import com.qiniu.model.search.dto.VideoSearchKeywordDTO;
+import com.qiniu.service.search.domain.VideoSearchVO;
 import com.qiniu.service.search.service.VideoSearchService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.beanutils.BeanUtils;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.*;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import static com.qiniu.service.search.constant.ESIndexConstants.INDEX_VIDEO;
 
 /**
  * VideoSearchServiceImpl
@@ -34,7 +50,7 @@ public class VideoSearchServiceImpl implements VideoSearchService {
     @Override
     public void videoSync(String json) {
         VideoSearchVO videoSearchVO = JSON.parseObject(json, VideoSearchVO.class);
-        IndexRequest indexRequest = new IndexRequest("search_video");
+        IndexRequest indexRequest = new IndexRequest(INDEX_VIDEO);
         indexRequest.id(videoSearchVO.getVideoId());
         indexRequest.source(json, XContentType.JSON);
         try {
@@ -46,13 +62,72 @@ public class VideoSearchServiceImpl implements VideoSearchService {
     }
 
     /**
-     * es搜索视频
+     * es分页搜索视频
      *
-     * @param keyword
+     * @param dto
+     *     String keyword;
+     *     private Integer pageNum;
+     *     private Integer pageSize;
+     *     最小时间  minBehotTime;
      * @return
      */
     @Override
-    public List<Video> searchVideoFromES(String keyword) {
-        return null;
+    public List<VideoSearchVO> searchVideoFromES(VideoSearchKeywordDTO dto) throws IOException, InvocationTargetException, IllegalAccessException {
+        //1.参数校验
+        if (StringUtils.isNull(dto) || StringUtils.isBlank(dto.getKeyword())) {
+            return null;
+        }
+        Long userId = UserContext.getUserId();
+        //异步调用 保存搜索记录
+        if (StringUtils.isNull(userId) && dto.getFromIndex() == 0) {
+//            apUserSearchService.insert(dto.getSearchWords(), user.getId());
+        }
+        //2.设置查询条件
+        SearchRequest searchRequest = new SearchRequest(INDEX_VIDEO);
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        //布尔查询videoTitle或者userNickName
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        QueryStringQueryBuilder queryStringQueryBuilder = QueryBuilders.queryStringQuery(dto.getKeyword()).field("videoTitle").field("userNickName").defaultOperator(Operator.OR);
+        boolQueryBuilder.must(queryStringQueryBuilder);
+        //查询小于mindate的数据
+        RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("publishTime").lt(dto.getMinBehotTime().getTime());
+        boolQueryBuilder.filter(rangeQueryBuilder);
+        //分页查询
+        searchSourceBuilder.from(dto.getPageNum());
+        searchSourceBuilder.size(dto.getPageSize());
+        //按照发布时间倒序查询
+        searchSourceBuilder.sort("publishTime", SortOrder.DESC);
+        //设置高亮  videoTitle
+        HighlightBuilder highlightBuilder = new HighlightBuilder();
+        highlightBuilder.field("videoTitle");
+        highlightBuilder.preTags("<font class='keyword-hint'>");
+        highlightBuilder.postTags("</font>");
+        searchSourceBuilder.highlighter(highlightBuilder);
+        searchSourceBuilder.query(boolQueryBuilder);
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+        //3.结果封装返回
+        List<VideoSearchVO> result = new ArrayList<>();
+
+        SearchHit[] hits = searchResponse.getHits().getHits();
+        for (SearchHit hit : hits) {
+            String source = hit.getSourceAsString();
+            Map map = JSON.parseObject(source, Map.class);
+            //处理高亮
+            if (hit.getHighlightFields() != null && hit.getHighlightFields().size() > 0) {
+                Text[] titles = hit.getHighlightFields().get("videoTitle").getFragments();
+                String title = org.apache.commons.lang3.StringUtils.join(titles);
+                //高亮标题
+                map.put("videoTitle", title);
+            } else {
+                //原始标题
+                map.put("videoTitle", map.get("videoTitle"));
+            }
+            VideoSearchVO videoSearchVO = new VideoSearchVO();
+            BeanUtils.populate(videoSearchVO,map);
+            result.add(videoSearchVO);
+        }
+        result.forEach(System.out::println);
+        return result;
     }
 }

@@ -35,7 +35,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static com.qiniu.model.common.enums.HttpCodeEnum.*;
@@ -65,6 +67,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Resource
     private RedisService redisService;
+
+    @Resource
+    private VideoCategoryMapper videoCategoryMapper;
 
     @Override
     public String uploadVideo(MultipartFile file) {
@@ -112,7 +117,8 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             VideoSearchVO videoSearchVO = new VideoSearchVO();
             videoSearchVO.setVideoId(video.getVideoId());
             videoSearchVO.setVideoTitle(video.getVideoTitle());
-            videoSearchVO.setPublishTime(video.getCreateTime());
+            // localdatetime转换为date
+            videoSearchVO.setPublishTime(Date.from(video.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
             videoSearchVO.setCoverImage("null");
             videoSearchVO.setVideoUrl(video.getVideoUrl());
             videoSearchVO.setUserId(userId);
@@ -198,8 +204,10 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 //        redisCache.setCacheMap(CacheConstants.NEWS_VIEW_NUM_KEY, newsViewMap);
 //        log.info("<==新闻浏览量写入缓存成功");
 //    }
+
     /**
      * 分页查询用户的点赞列表
+     *
      * @param pageDto
      * @return
      */
@@ -216,6 +224,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     /**
      * 分页查询用户的点赞列表
+     *
      * @param pageDto
      * @return
      */
