@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * @since 2023-10-30 14:32:56
  */
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/like")
 public class VideoUserLikeController {
 
     @Resource
@@ -37,17 +37,18 @@ public class VideoUserLikeController {
      * @param videoId
      * @return
      */
-    @GetMapping("/like/{videoId}")
+    @GetMapping("/{videoId}")
     public R<Boolean> getDetails(@PathVariable("videoId") String videoId) {
         return R.ok(videoUserLikeService.videoLike(videoId));
     }
 
     /**
      * 用户点赞分页查询
+     *
      * @param userId
      * @return
      */
-    @GetMapping("/user/like/{userId}")
+    @GetMapping("/user/{userId}")
     public R<List<VideoUserVo>> getUserLikes(@PathVariable("userId") Long userId) {
         List<VideoUserVo> videoUserVos = videoUserLikeService.userLikes(userId);
         return R.ok(videoUserVos);
