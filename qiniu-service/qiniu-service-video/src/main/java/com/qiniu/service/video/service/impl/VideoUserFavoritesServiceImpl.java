@@ -1,12 +1,15 @@
 package com.qiniu.service.video.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.qiniu.common.context.UserContext;
 import com.qiniu.common.service.RedisService;
 import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.domain.VideoUserFavorites;
+import com.qiniu.model.video.dto.VideoPageDto;
 import com.qiniu.model.video.vo.VideoUserVo;
 import com.qiniu.service.video.constants.VideoCacheConstants;
 import com.qiniu.service.video.mapper.VideoMapper;
@@ -84,6 +87,17 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
             videoUserVos.add(videoUserVo);
         }
         return videoUserVos;
+    }
+
+    /**
+     * @param pageDto
+     * @return
+     */
+    @Override
+    public IPage queryFavoritePage(VideoPageDto pageDto) {
+        LambdaQueryWrapper<VideoUserFavorites> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoUserFavorites::getUserId,UserContext.getUserId());
+        return this.page(new Page<>(pageDto.getPageNum(),pageDto.getPageSize()),queryWrapper);
     }
 
     @Async
