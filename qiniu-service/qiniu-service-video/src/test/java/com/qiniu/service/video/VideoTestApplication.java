@@ -209,7 +209,7 @@ public class VideoTestApplication {
         int insert = videoMapper.insert(video);
         //再将videoCategoryRelation对象存入video_category_relation表中
         videoCategoryRelationService.saveVideoCategoryRelation(videoCategoryRelation);
-        if (insert!=0) {
+        if (insert != 0) {
             // 1.发送整个video对象发送消息，
             // TODO 待添加视频封面
             VideoSearchVO videoSearchVO = new VideoSearchVO();
@@ -236,7 +236,7 @@ public class VideoTestApplication {
     }
 
     @Test
-    void uerLikePageTest(){
+    void uerLikePageTest() {
         Long userId = 3L;
         List<Video> userLikedVideos = videoMapper.getUserLikesVideos(userId, 0, 10);
         Page<VideoUserLikeAndFavoriteVo> objectPage = new Page<>();

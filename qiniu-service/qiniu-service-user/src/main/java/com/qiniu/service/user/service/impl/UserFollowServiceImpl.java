@@ -15,8 +15,6 @@ import com.qiniu.service.user.mapper.UserFollowMapper;
 import com.qiniu.service.user.service.IUserFollowService;
 import com.qiniu.service.user.service.IUserService;
 import org.springframework.stereotype.Service;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
 import javax.annotation.Resource;
 import java.util.List;
