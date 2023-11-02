@@ -1,0 +1,22 @@
+server:
+  port: 9701
+spring:
+  application:
+    name: qiniu-notice
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 106.14.105.101:8848
+      config:
+        server-addr: 106.14.105.101:8848
+        file-extension: yml
+        shared-configs:
+          - dataId: shared-mysql-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+          - dataId: shared-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+          - dataId: shared-rabbitmq-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+logging:
+  level:
+    com.qiniu: debug
+    org.springframework: warn
