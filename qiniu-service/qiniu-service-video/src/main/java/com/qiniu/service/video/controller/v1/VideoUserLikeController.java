@@ -48,7 +48,10 @@ public class VideoUserLikeController {
     public PageDataInfo myLikePage(@RequestBody VideoPageDto pageDto) {
         IPage<VideoUserLike> likeIPage = videoUserLikeService.queryMyLikeVideoPage(pageDto);
         List<String> videoIds = likeIPage.getRecords().stream().map(VideoUserLike::getVideoId).collect(Collectors.toList());
-        List<Video> videos = videoService.queryVideoByVideoIds(videoIds);
+        if (videoIds.isEmpty()){
+            return PageDataInfo.genPageData(null,0);
+        }
+        List<Video> videos = videoService.queryVideoByVideoIds(videoIds );
         return PageDataInfo.genPageData(videos, likeIPage.getTotal());
     }
 

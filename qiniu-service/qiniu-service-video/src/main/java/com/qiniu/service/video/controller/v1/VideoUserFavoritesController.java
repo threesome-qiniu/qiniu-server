@@ -51,6 +51,9 @@ public class VideoUserFavoritesController {
     public PageDataInfo myFavoritePage(@RequestBody VideoPageDto pageDto) {
         IPage<VideoUserFavorites> favoritesPage = videoUserFavoritesService.queryFavoritePage(pageDto);
         List<String> videoIds = favoritesPage.getRecords().stream().map(VideoUserFavorites::getVideoId).collect(Collectors.toList());
+        if (videoIds.isEmpty()){
+            return PageDataInfo.genPageData(null,0);
+        }
         return PageDataInfo.genPageData(videoService.queryVideoByVideoIds(videoIds), favoritesPage.getTotal());
     }
 }
