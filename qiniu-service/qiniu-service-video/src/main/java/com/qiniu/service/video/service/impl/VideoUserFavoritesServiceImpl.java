@@ -7,22 +7,18 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.qiniu.common.context.UserContext;
 import com.qiniu.common.service.RedisService;
 import com.qiniu.common.utils.string.StringUtils;
-import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.domain.VideoUserFavorites;
 import com.qiniu.model.video.dto.VideoPageDto;
-import com.qiniu.model.video.vo.VideoUserVo;
 import com.qiniu.service.video.constants.VideoCacheConstants;
 import com.qiniu.service.video.mapper.VideoMapper;
 import com.qiniu.service.video.mapper.VideoUserFavoritesMapper;
 import com.qiniu.service.video.service.IVideoUserFavoritesService;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -67,26 +63,6 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
             favoriteNumDecrease(videoId);
             return this.remove(queryWrapper);
         }
-    }
-
-    /**
-     * 获取用户的收藏列表
-     *
-     * @param userId
-     * @return
-     */
-    @Override
-    public List<VideoUserVo> userFavorites(Long userId) {
-        LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Video::getUserId, userId);
-        List<VideoUserVo> videoUserVos = new ArrayList<>();
-        List<Video> list = videoMapper.selectList(queryWrapper);
-        for (Video video : list) {
-            VideoUserVo videoUserVo = new VideoUserVo();
-            BeanUtils.copyProperties(video, videoUserVo);
-            videoUserVos.add(videoUserVo);
-        }
-        return videoUserVos;
     }
 
     /**

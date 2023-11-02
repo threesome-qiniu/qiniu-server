@@ -6,27 +6,21 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.qiniu.common.context.UserContext;
 import com.qiniu.common.service.RedisService;
-import com.qiniu.common.utils.bean.BeanCopyUtils;
 import com.qiniu.common.utils.string.StringUtils;
-import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.domain.VideoUserLike;
 import com.qiniu.model.video.dto.VideoPageDto;
-import com.qiniu.model.video.vo.VideoUserVo;
 import com.qiniu.service.video.constants.VideoCacheConstants;
 import com.qiniu.service.video.mapper.VideoMapper;
 import com.qiniu.service.video.mapper.VideoUserLikeMapper;
 import com.qiniu.service.video.service.IVideoUserLikeService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 点赞表(VideoUserLike)表服务实现类
@@ -69,20 +63,6 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
             likeNumDecrement(videoId);
             return this.remove(queryWrapper);
         }
-    }
-
-    /**
-     * 用户查询自己点赞过的视频（收藏列表）
-     *
-     * @param userId
-     * @return
-     */
-    @Override
-    public List<VideoUserVo> userLikes(Long userId) {
-        LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Video::getUserId, userId);
-        List<Video> list = videoMapper.selectList(queryWrapper);
-        return list.stream().map(l -> BeanCopyUtils.copyBean(l, VideoUserVo.class)).collect(Collectors.toList());
     }
 
     /**

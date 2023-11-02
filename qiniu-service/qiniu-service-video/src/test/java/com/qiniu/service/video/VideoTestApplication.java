@@ -21,7 +21,6 @@ import com.qiniu.model.video.domain.VideoSensitive;
 import com.qiniu.model.video.domain.VideoUserLike;
 import com.qiniu.model.video.dto.VideoBindDto;
 import com.qiniu.model.video.vo.VideoUserLikeAndFavoriteVo;
-import com.qiniu.model.video.vo.VideoUserVo;
 import com.qiniu.service.video.constants.VideoCacheConstants;
 import com.qiniu.service.video.mapper.VideoMapper;
 import com.qiniu.service.video.mapper.VideoSensitiveMapper;
@@ -40,8 +39,6 @@ import java.util.Date;
 import java.util.List;
 
 import static com.qiniu.model.common.enums.HttpCodeEnum.*;
-import static com.qiniu.model.video.mq.VideoDelayedQueueConstant.*;
-import static com.qiniu.model.video.mq.VideoDelayedQueueConstant.ESSYNC_DELAYED_EXCHANGE;
 
 /**
  * 功能：
@@ -85,12 +82,6 @@ public class VideoTestApplication {
     void getUser() {
         videoCategoryService.saveVideoCategoriesToRedis();
 
-    }
-
-    @Test
-    void userLikesTest() {
-        List<VideoUserVo> videoUserVos = videoUserLikeService.userLikes(3L);
-        System.out.println(videoUserVos.size());
     }
 
     @Test

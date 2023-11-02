@@ -6,7 +6,6 @@ import com.qiniu.common.domain.vo.PageDataInfo;
 import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.domain.VideoUserLike;
 import com.qiniu.model.video.dto.VideoPageDto;
-import com.qiniu.model.video.vo.VideoUserVo;
 import com.qiniu.service.video.service.IVideoService;
 import com.qiniu.service.video.service.IVideoUserLikeService;
 import org.springframework.web.bind.annotation.*;
@@ -44,16 +43,7 @@ public class VideoUserLikeController {
 
     /**
      * 用户点赞分页查询
-     *
-     * @param userId
-     * @return
      */
-    @GetMapping("/user/{userId}")
-    public R<List<VideoUserVo>> getUserLikes(@PathVariable("userId") Long userId) {
-        List<VideoUserVo> videoUserVos = videoUserLikeService.userLikes(userId);
-        return R.ok(videoUserVos);
-    }
-
     @PostMapping("/mylikepage")
     public PageDataInfo myLikePage(@RequestBody VideoPageDto pageDto) {
         IPage<VideoUserLike> likeIPage = videoUserLikeService.queryMyLikeVideoPage(pageDto);

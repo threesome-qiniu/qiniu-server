@@ -243,7 +243,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     @Override
     public List<Video> queryVideoByVideoIds(List<String> videoIds) {
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(Video::getVideoId,videoIds);
+        queryWrapper.in(Video::getVideoId, videoIds);
         return this.list(queryWrapper);
     }
 }

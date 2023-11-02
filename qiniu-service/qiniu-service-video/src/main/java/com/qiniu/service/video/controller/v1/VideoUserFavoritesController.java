@@ -5,8 +5,6 @@ import com.qiniu.common.domain.R;
 import com.qiniu.common.domain.vo.PageDataInfo;
 import com.qiniu.model.video.domain.VideoUserFavorites;
 import com.qiniu.model.video.dto.VideoPageDto;
-import com.qiniu.model.video.vo.VideoUserVo;
-import com.qiniu.service.video.mapper.VideoMapper;
 import com.qiniu.service.video.service.IVideoService;
 import com.qiniu.service.video.service.IVideoUserFavoritesService;
 import org.springframework.web.bind.annotation.*;
@@ -43,12 +41,12 @@ public class VideoUserFavoritesController {
         return R.ok(videoUserFavoritesService.videoFavorites(videoId));
     }
 
-    @GetMapping("/user/{userId}")
-    public R<List<VideoUserVo>> getUserLikes(@PathVariable("userId") Long userId) {
-        List<VideoUserVo> videoUserVos = videoUserFavoritesService.userFavorites(userId);
-        return R.ok(videoUserVos);
-    }
-
+    /**
+     * 分页我的收藏
+     *
+     * @param pageDto
+     * @return
+     */
     @PostMapping("/myfavoritepage")
     public PageDataInfo myFavoritePage(@RequestBody VideoPageDto pageDto) {
         IPage<VideoUserFavorites> favoritesPage = videoUserFavoritesService.queryFavoritePage(pageDto);
