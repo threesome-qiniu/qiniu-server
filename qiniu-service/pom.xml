@@ -15,6 +15,8 @@
         <module>qiniu-service-user</module>
         <module>qiniu-service-video</module>
         <module>qiniu-service-search</module>
+        <module>qiniu-service-social</module>
+        <module>qiniu-service-behave</module>
     </modules>
 
     <dependencies>
