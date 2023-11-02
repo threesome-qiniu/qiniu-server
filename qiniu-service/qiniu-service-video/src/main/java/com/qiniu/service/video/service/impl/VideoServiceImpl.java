@@ -212,7 +212,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 queryWrapper2.lt(Video::getCreateTime, LocalDateTime.now()).orderByDesc(Video::getCreateTime).last("limit 1");
                 one = getOne(queryWrapper2);
             }
-            // TODO 浏览自增1存入redis
+            // 浏览自增1存入redis
             viewNumIncrement(one.getVideoId());
             if (StringUtils.isNull(one)) {
                 return null;
