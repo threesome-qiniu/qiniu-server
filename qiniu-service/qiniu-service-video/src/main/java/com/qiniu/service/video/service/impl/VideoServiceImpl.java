@@ -201,11 +201,17 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     public VideoVO feedVideo(VideoFeedDTO videoFeedDTO) {
         LocalDateTime createTime = videoFeedDTO.getCreateTime();
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
-        // 小于等于createTime的一条数据
+        // 小于 createTime 的一条数据
         queryWrapper.lt(Video::getCreateTime, StringUtils.isNull(createTime) ? LocalDateTime.now() : createTime).orderByDesc(Video::getCreateTime).last("limit 1");
         Video one;
         try {
             one = getOne(queryWrapper);
+            if (StringUtils.isNull(one)) {
+                LambdaQueryWrapper<Video> queryWrapper2 = new LambdaQueryWrapper<>();
+                // 小于 LocalDateTime.now() 的一条数据
+                queryWrapper2.lt(Video::getCreateTime, LocalDateTime.now()).orderByDesc(Video::getCreateTime).last("limit 1");
+                one = getOne(queryWrapper2);
+            }
             // TODO 浏览自增1存入redis
             viewNumIncrement(one.getVideoId());
             if (StringUtils.isNull(one)) {
