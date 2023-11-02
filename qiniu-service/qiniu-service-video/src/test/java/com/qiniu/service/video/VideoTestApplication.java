@@ -1,15 +1,27 @@
 package com.qiniu.service.video;
 
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.qiniu.common.context.UserContext;
+import com.qiniu.common.exception.CustomException;
 import com.qiniu.common.service.RedisService;
+import com.qiniu.common.utils.bean.BeanCopyUtils;
 import com.qiniu.common.utils.string.StringUtils;
+import com.qiniu.common.utils.uniqueid.IdGenerator;
 import com.qiniu.feign.user.RemoteUserService;
+import com.qiniu.model.search.vo.VideoSearchVO;
+import com.qiniu.model.user.domain.User;
+import com.qiniu.model.video.domain.Video;
+import com.qiniu.model.video.domain.VideoCategoryRelation;
 import com.qiniu.model.video.domain.VideoSensitive;
 import com.qiniu.model.video.domain.VideoUserLike;
+import com.qiniu.model.video.dto.VideoBindDto;
 import com.qiniu.model.video.vo.VideoUserVo;
 import com.qiniu.service.video.constants.VideoCacheConstants;
+import com.qiniu.service.video.mapper.VideoMapper;
 import com.qiniu.service.video.mapper.VideoSensitiveMapper;
+import com.qiniu.service.video.service.IVideoCategoryRelationService;
 import com.qiniu.service.video.service.IVideoCategoryService;
 import com.qiniu.service.video.service.IVideoService;
 import com.qiniu.service.video.service.IVideoUserLikeService;
@@ -19,7 +31,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
+
+import static com.qiniu.model.common.enums.HttpCodeEnum.*;
+import static com.qiniu.model.video.mq.VideoDelayedQueueConstant.*;
+import static com.qiniu.model.video.mq.VideoDelayedQueueConstant.ESSYNC_DELAYED_EXCHANGE;
 
 /**
  * 功能：
@@ -46,6 +64,12 @@ public class VideoTestApplication {
 
     @Resource
     private RemoteUserService remoteUserService;
+
+    @Resource
+    private IVideoCategoryRelationService videoCategoryRelationService;
+
+    @Resource
+    private VideoMapper videoMapper;
 
 //    void bindTest(){
 //        VideoBindDto videoBindDto = new VideoBindDto();
@@ -117,14 +141,13 @@ public class VideoTestApplication {
     }
 
     @Test
-    void sensitiveTest(){
-        String s1="冰毒";
-        String s2="海洛因";
-        String s3="正常";
-        String s4="这个是假冰毒呀";
-        String s5="这个是假冰毒";
-        String s6="冰毒的一百种测法";
-
+    void sensitiveTest() {
+        String s1 = "冰毒";
+        String s2 = "海洛因";
+        String s3 = "正常";
+        String s4 = "这个是假冰毒呀";
+        String s5 = "这个是假冰毒";
+        String s6 = "冰毒的一百种测法";
 
 
         LambdaQueryWrapper<VideoSensitive> queryWrapper = new LambdaQueryWrapper<>();
@@ -133,6 +156,79 @@ public class VideoTestApplication {
                 .or(w -> w.like(VideoSensitive::getSensitives, s3));
         List<VideoSensitive> videoSensitives = videoSensitiveMapper.selectList(queryWrapper);
         videoSensitives.size();
+    }
+
+    @Test
+    void publishTest() {
+        Long userId = 3L;
+        String videoTitle = "御姐";
+        String videoDesc = "甜心大姐姐";
+        String videoUrl = "http://s38bf8bdn.hb-bkt.clouddn.com/2023/11/02/d1e511dd3e754c3fa23e872f608dd914.mp4";
+        Long categoryId = 1L;
+        String coverImage = "头像路径测试";
+        VideoBindDto videoBindDto = new VideoBindDto();
+        videoBindDto.setVideoTitle(videoTitle);
+        videoBindDto.setVideoDesc(videoDesc);
+        videoBindDto.setVideoUrl(videoUrl);
+        videoBindDto.setCategoryId(categoryId);
+        videoBindDto.setCoverImage(coverImage);
+        if (videoBindDto.getVideoTitle().length() > 30) {
+            throw new CustomException(BIND_CONTENT_TITLE_FAIL);
+        }
+        if (videoBindDto.getVideoDesc().length() > 200) {
+            throw new CustomException(BIND_CONTENT_DESC_FAIL);
+        }
+        //构建敏感词查询条件
+        LambdaQueryWrapper<VideoSensitive> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(VideoSensitive::getId)
+                .like(VideoSensitive::getSensitives, videoBindDto.getVideoTitle())
+                .or(w -> w.like(VideoSensitive::getSensitives, videoBindDto.getVideoDesc()));
+        List<VideoSensitive> videoSensitives = videoSensitiveMapper.selectList(queryWrapper);
+        //如果结果不为空，证明有敏感词，提示异常
+        if (!videoSensitives.isEmpty()) {
+            throw new CustomException(SENSITIVEWORD_ERROR);
+        }
+        //将传过来的数据拷贝到要存储的对象中
+        Video video = BeanCopyUtils.copyBean(videoBindDto, Video.class);
+        //生成id
+        String videoId = IdGenerator.generatorShortId();
+        //向新的对象中封装信息
+        video.setVideoId(videoId);
+        video.setUserId(userId);
+        video.setCreateTime(LocalDateTime.now());
+        video.setCreateBy(userId.toString());
+        //将前端传递的分类拷贝到关联表对象
+        VideoCategoryRelation videoCategoryRelation = BeanCopyUtils.copyBean(videoBindDto, VideoCategoryRelation.class);
+        //video_id存入VideoCategoryRelation（视频分类关联表）
+        videoCategoryRelation.setVideoId(video.getVideoId());
+        //先将video对象存入video表中
+        int insert = videoMapper.insert(video);
+        //再将videoCategoryRelation对象存入video_category_relation表中
+        videoCategoryRelationService.saveVideoCategoryRelation(videoCategoryRelation);
+        if (insert!=0) {
+            // 1.发送整个video对象发送消息，
+            // TODO 待添加视频封面
+            VideoSearchVO videoSearchVO = new VideoSearchVO();
+            videoSearchVO.setVideoId(video.getVideoId());
+            videoSearchVO.setVideoTitle(video.getVideoTitle());
+            // localdatetime转换为date
+            videoSearchVO.setPublishTime(Date.from(video.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
+            videoSearchVO.setCoverImage("null");
+            videoSearchVO.setVideoUrl(video.getVideoUrl());
+            videoSearchVO.setUserId(userId);
+            // 获取用户信息
+            User userCache = redisService.getCacheObject("userinfo:" + userId);
+            if (StringUtils.isNotNull(userCache)) {
+                videoSearchVO.setUserNickName(userCache.getNickName());
+                videoSearchVO.setUserAvatar(userCache.getAvatar());
+            } else {
+                User remoteUser = remoteUserService.userInfoById(userId).getData();
+                videoSearchVO.setUserNickName(remoteUser.getNickName());
+                videoSearchVO.setUserAvatar(remoteUser.getAvatar());
+            }
+        } else {
+            throw new CustomException(null);
+        }
     }
 
 

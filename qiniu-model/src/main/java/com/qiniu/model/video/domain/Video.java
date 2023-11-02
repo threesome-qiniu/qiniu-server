@@ -58,5 +58,10 @@ public class Video implements Serializable {
      */
     private LocalDateTime updateTime;
 
+    /**
+     * 视频封面地址
+     */
+    private String coverImage;
+
 }
 
