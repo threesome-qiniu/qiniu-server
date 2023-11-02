@@ -122,7 +122,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
         // todo 查出video敏感词表所有敏感词集合
         boolean b = sensitiveCheck(videoBindDto.getVideoTitle() + videoBindDto.getVideoDesc());
-        if(b){
+        if (b) {
             // 存在敏感词抛异常
             throw new CustomException(SENSITIVEWORD_ERROR);
         }
@@ -139,14 +139,16 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         video.setUserId(userId);
         video.setCreateTime(LocalDateTime.now());
         video.setCreateBy(userId.toString());
-        //将前端传递的分类拷贝到关联表对象
-        VideoCategoryRelation videoCategoryRelation = BeanCopyUtils.copyBean(videoBindDto, VideoCategoryRelation.class);
-        //video_id存入VideoCategoryRelation（视频分类关联表）
-        videoCategoryRelation.setVideoId(video.getVideoId());
-        //先将video对象存入video表中
+        // TODO 前端不传不用处理 将前端传递的分类拷贝到关联表对象
+        if (videoBindDto.getCategoryId() != null) {
+            VideoCategoryRelation videoCategoryRelation = BeanCopyUtils.copyBean(videoBindDto, VideoCategoryRelation.class);
+            // video_id存入VideoCategoryRelation（视频分类关联表）
+            videoCategoryRelation.setVideoId(video.getVideoId());
+            // 再将videoCategoryRelation对象存入video_category_relation表中
+            videoCategoryRelationService.saveVideoCategoryRelation(videoCategoryRelation);
+        }
+        // 将video对象存入video表中
         boolean save = this.save(video);
-        //再将videoCategoryRelation对象存入video_category_relation表中
-        videoCategoryRelationService.saveVideoCategoryRelation(videoCategoryRelation);
         if (save) {
             // 1.发送整个video对象发送消息，
             // 待添加视频封面
