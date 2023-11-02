@@ -1,6 +1,9 @@
 package com.qiniu.service.user.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.qiniu.model.common.dto.PageDTO;
+import com.qiniu.model.user.domain.User;
 import com.qiniu.model.user.domain.UserFollow;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,7 +25,16 @@ public interface IUserFollowService extends IService<UserFollow> {
 
     /**
      * 取消关注
+     *
      * @param userId 取消关注用户id
      */
     boolean unFollowUser(Long userId);
+
+    /**
+     * 分页查询用户关注列表
+     *
+     * @param pageDTO 分页对象
+     * @return IPage<User>
+     */
+    IPage<User> followPage(PageDTO pageDTO);
 }

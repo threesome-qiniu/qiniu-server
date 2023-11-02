@@ -28,7 +28,7 @@ public class MongoTest {
     @Test
     void testInsert() {
         VideoSearchHistory videoSearchHistory = new VideoSearchHistory();
-        videoSearchHistory.setKeyword("第3条搜索记录");
+        videoSearchHistory.setKeyword("第1条搜索记录");
         videoSearchHistory.setUserId(2L);
         videoSearchHistory.setCreatedTime(LocalDateTime.now());
         VideoSearchHistory insert = mongoTemplate.insert(videoSearchHistory);

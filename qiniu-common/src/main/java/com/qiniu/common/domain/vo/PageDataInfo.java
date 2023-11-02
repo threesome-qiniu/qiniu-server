@@ -38,4 +38,15 @@ public class PageDataInfo implements Serializable {
      */
     private long total;
 
+    /**
+     * 返回分页数据
+     *
+     * @param rows
+     * @param total
+     * @return
+     */
+    public static PageDataInfo genPageData(List<?> rows, long total) {
+        return new PageDataInfo(R.SUCCESS, "OK", rows, total);
+    }
+
 }
