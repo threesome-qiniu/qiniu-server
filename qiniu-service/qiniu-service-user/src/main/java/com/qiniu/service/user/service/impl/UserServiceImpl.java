@@ -7,8 +7,12 @@ import com.qiniu.common.context.UserContext;
 import com.qiniu.common.exception.CustomException;
 import com.qiniu.common.service.RedisService;
 import com.qiniu.common.utils.IdUtils;
+import com.qiniu.common.utils.IpUtils;
 import com.qiniu.common.utils.JwtUtil;
+import com.qiniu.common.utils.ServletUtils;
 import com.qiniu.common.utils.audit.SensitiveWordUtil;
+import com.qiniu.common.utils.date.DateUtils;
+import com.qiniu.common.utils.executor.AsyncExecutor;
 import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.model.common.enums.HttpCodeEnum;
 import com.qiniu.model.user.domain.User;
@@ -17,14 +21,17 @@ import com.qiniu.model.user.dto.LoginUserDTO;
 import com.qiniu.model.user.dto.RegisterBody;
 import com.qiniu.model.user.dto.UpdatePasswordDTO;
 import com.qiniu.service.user.constants.UserCacheConstants;
+import com.qiniu.service.user.factory.AsyncFactory;
 import com.qiniu.service.user.mapper.UserMapper;
 import com.qiniu.service.user.service.IUserSensitiveService;
 import com.qiniu.service.user.service.IUserService;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -76,11 +83,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         pswd = DigestUtils.md5DigestAsHex((pswd + salt).getBytes());
         if (pswd.equals(dbUser.getPassword())) {
             // TODO 异步记录登录信息
-
+            recordLoginUserInfo(dbUser.getUserId());
             return JwtUtil.getToken(dbUser.getUserId());
         } else {
             throw new CustomException(USER_NOT_EXISTS);
         }
+    }
+
+    /**
+     * 记录登录信息
+     *
+     * @param userId 用户ID
+     */
+    @Async
+    public void recordLoginUserInfo(Long userId) {
+        User user = new User();
+        user.setUserId(userId);
+        user.setLoginIp(IpUtils.getIpAddr(ServletUtils.getRequest()));
+        user.setLoginDate(LocalDateTime.now());
+        this.updateById(user);
     }
 
     @Override
@@ -111,6 +132,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         user.setPassword(enPasswd);
         user.setSalt(fastUUID);
         user.setNickName(IdUtils.shortUUID());
+        user.setCreateTime(LocalDateTime.now());
         return this.save(user);
     }
 
