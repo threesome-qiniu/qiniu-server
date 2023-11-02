@@ -20,5 +20,5 @@ public interface IVideoUserFavoritesService extends IService<VideoUserFavorites>
 
     List<VideoUserVo> userFavorites(Long userId);
 
-    IPage queryFavoritePage(VideoPageDto pageDto);
+    IPage<VideoUserFavorites> queryFavoritePage(VideoPageDto pageDto);
 }

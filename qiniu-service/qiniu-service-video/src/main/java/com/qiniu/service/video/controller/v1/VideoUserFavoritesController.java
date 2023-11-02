@@ -22,9 +22,9 @@ import java.util.stream.Collectors;
  * @since 2023-10-31 15:57:37
  */
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/favorite")
 public class VideoUserFavoritesController {
-    
+
     @Resource
     private IVideoUserFavoritesService videoUserFavoritesService;
 
@@ -33,27 +33,28 @@ public class VideoUserFavoritesController {
 
     /**
      * 用户收藏
+     *
      * @param videoId
      * @return
      */
-    @GetMapping("/favority/{videoId}")
+    @GetMapping("/{videoId}")
     public R<Boolean> getDetails(@PathVariable("videoId") String videoId) {
 
         return R.ok(videoUserFavoritesService.videoFavorites(videoId));
     }
 
-    @GetMapping("/user/favority/{userId}")
+    @GetMapping("/user/{userId}")
     public R<List<VideoUserVo>> getUserLikes(@PathVariable("userId") Long userId) {
         List<VideoUserVo> videoUserVos = videoUserFavoritesService.userFavorites(userId);
         return R.ok(videoUserVos);
     }
 
-        @PostMapping("/myfavoritepage")
+    @PostMapping("/myfavoritepage")
     public PageDataInfo myFavoritePage(@RequestBody VideoPageDto pageDto) {
-            IPage<VideoUserFavorites> favoritesPage = videoUserFavoritesService.queryFavoritePage(pageDto);
-            List<String> videoIds = favoritesPage.getRecords().stream().map(VideoUserFavorites::getVideoId).collect(Collectors.toList());
+        IPage<VideoUserFavorites> favoritesPage = videoUserFavoritesService.queryFavoritePage(pageDto);
+        List<String> videoIds = favoritesPage.getRecords().stream().map(VideoUserFavorites::getVideoId).collect(Collectors.toList());
 
-            return PageDataInfo.genPageData(videoService.queryVideoByVideoIds(videoIds),favoritesPage.getTotal());
+        return PageDataInfo.genPageData(videoService.queryVideoByVideoIds(videoIds), favoritesPage.getTotal());
     }
 }
 

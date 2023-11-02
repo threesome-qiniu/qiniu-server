@@ -92,7 +92,7 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
      */
     @Async
     protected void likeNumIncrement(String videoId) {
-        redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY , videoId, 1);
+        redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, videoId, 1);
     }
 
     /**
@@ -114,7 +114,7 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
     @Override
     public IPage<VideoUserLike> queryMyLikeVideoPage(VideoPageDto pageDto) {
         LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(VideoUserLike::getUserId,UserContext.getUserId());
-        return this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()),queryWrapper);
+        queryWrapper.eq(VideoUserLike::getUserId, UserContext.getUserId());
+        return this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
     }
 }
