@@ -19,5 +19,7 @@ public class VideoCacheConstants {
 
     public static final String VIDEO_VIEW_NUM_MAP_KEY = "video:view:num";
 
+    public static final String VIDEO_VIEW_COVER_IMAGE_KEY = "?vframe/jpg/offset/1";
+
 
 }

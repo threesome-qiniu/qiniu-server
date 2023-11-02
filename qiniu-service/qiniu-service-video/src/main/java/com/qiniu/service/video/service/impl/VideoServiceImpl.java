@@ -1,7 +1,5 @@
 package com.qiniu.service.video.service.impl;
 
-import com.baomidou.mybatisplus.core.metadata.OrderItem;
-import com.qiniu.common.domain.vo.PageDataInfo;
 import com.qiniu.common.utils.audit.SensitiveWordUtil;
 import com.qiniu.common.utils.string.StringUtils;
 import com.alibaba.fastjson.JSON;
@@ -18,20 +16,17 @@ import com.qiniu.common.utils.uniqueid.IdGenerator;
 import com.qiniu.feign.user.RemoteUserService;
 import com.qiniu.model.search.vo.VideoSearchVO;
 import com.qiniu.model.user.domain.User;
-import com.qiniu.model.user.domain.UserSensitive;
 import com.qiniu.model.video.domain.*;
 import com.qiniu.model.video.dto.VideoFeedDTO;
-import com.qiniu.model.video.dto.VideoBindDto;
+import com.qiniu.model.video.dto.VideoPublishDto;
 import com.qiniu.model.video.dto.VideoPageDto;
-import com.qiniu.model.video.vo.VideoUserLikeAndFavoriteVo;
 import com.qiniu.model.video.vo.VideoVO;
 import com.qiniu.service.video.constants.QiniuVideoOssConstants;
 import com.qiniu.service.video.constants.VideoCacheConstants;
-import com.qiniu.service.video.mapper.VideoCategoryMapper;
 import com.qiniu.service.video.mapper.VideoMapper;
-import com.qiniu.service.video.mapper.VideoSensitiveMapper;
 import com.qiniu.service.video.mapper.VideoUserCommentMapper;
 import com.qiniu.service.video.service.IVideoCategoryRelationService;
+import com.qiniu.service.video.service.IVideoSensitiveService;
 import com.qiniu.service.video.service.IVideoService;
 import com.qiniu.starter.file.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +38,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -84,7 +78,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     private VideoUserCommentMapper videoUserCommentMapper;
 
     @Resource
-    private VideoSensitiveMapper videoSensitiveMapper;
+    private IVideoSensitiveService videoSensitiveService;
 
 
     @Override
@@ -103,35 +97,24 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Transactional
     @Override
-    public String videoPublish(VideoBindDto videoBindDto) {
+    public String videoPublish(VideoPublishDto videoPublishDto) {
         Long userId = UserContext.getUser().getUserId();
         //从数据库获得敏感信息
         //判断传过来的数据是否符合数据库字段标准
-        if (videoBindDto.getVideoTitle().length() > 30) {
+        if (videoPublishDto.getVideoTitle().length() > 30) {
             throw new CustomException(BIND_CONTENT_TITLE_FAIL);
         }
-        if (videoBindDto.getVideoDesc().length() > 200) {
+        if (videoPublishDto.getVideoDesc().length() > 200) {
             throw new CustomException(BIND_CONTENT_DESC_FAIL);
         }
-        //构建敏感词查询条件
-//        LambdaQueryWrapper<VideoSensitive> queryWrapper = new LambdaQueryWrapper<>();
-//        queryWrapper.select(VideoSensitive::getId)
-//                .like(VideoSensitive::getSensitives, videoBindDto.getVideoTitle())
-//                .or(w -> w.like(VideoSensitive::getSensitives, videoBindDto.getVideoDesc()));
-//        List<VideoSensitive> videoSensitives = videoSensitiveMapper.selectList(queryWrapper);
-
-        // todo 查出video敏感词表所有敏感词集合
-        boolean b = sensitiveCheck(videoBindDto.getVideoTitle() + videoBindDto.getVideoDesc());
+        // 查出video敏感词表所有敏感词集合
+        boolean b = sensitiveCheck(videoPublishDto.getVideoTitle() + videoPublishDto.getVideoDesc());
         if (b) {
             // 存在敏感词抛异常
             throw new CustomException(SENSITIVEWORD_ERROR);
         }
-        //如果结果不为空，证明有敏感词，提示异常
-//        if (!videoSensitives.isEmpty()) {
-//            throw new CustomException(SENSITIVEWORD_ERROR);
-//        }
         //将传过来的数据拷贝到要存储的对象中
-        Video video = BeanCopyUtils.copyBean(videoBindDto, Video.class);
+        Video video = BeanCopyUtils.copyBean(videoPublishDto, Video.class);
         //生成id
         String videoId = IdGenerator.generatorShortId();
         //向新的对象中封装信息
@@ -139,9 +122,11 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         video.setUserId(userId);
         video.setCreateTime(LocalDateTime.now());
         video.setCreateBy(userId.toString());
-        // TODO 前端不传不用处理 将前端传递的分类拷贝到关联表对象
-        if (videoBindDto.getCategoryId() != null) {
-            VideoCategoryRelation videoCategoryRelation = BeanCopyUtils.copyBean(videoBindDto, VideoCategoryRelation.class);
+        video.setCoverImage(StringUtils.isNull(videoPublishDto.getCoverImage()) ?
+                video.getVideoUrl() + VideoCacheConstants.VIDEO_VIEW_COVER_IMAGE_KEY : videoPublishDto.getCoverImage());
+        //前端不传不用处理 将前端传递的分类拷贝到关联表对象
+        if (StringUtils.isNotNull(videoPublishDto.getCategoryId())) {
+            VideoCategoryRelation videoCategoryRelation = BeanCopyUtils.copyBean(videoPublishDto, VideoCategoryRelation.class);
             // video_id存入VideoCategoryRelation（视频分类关联表）
             videoCategoryRelation.setVideoId(video.getVideoId());
             // 再将videoCategoryRelation对象存入video_category_relation表中
@@ -157,8 +142,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             videoSearchVO.setVideoTitle(video.getVideoTitle());
             // localdatetime转换为date
             videoSearchVO.setPublishTime(Date.from(video.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
-            // TODO 传进来肯定强制待视频url，如是前端没带封面，后端自动生成视频封面 coverImage = videoUrl + "?vframe/jpg/offset/1"
-            videoSearchVO.setCoverImage(videoBindDto.getCoverImage());
+            videoSearchVO.setCoverImage(video.getCoverImage());
             videoSearchVO.setVideoUrl(video.getVideoUrl());
             videoSearchVO.setUserId(userId);
             // 获取用户信息
@@ -189,10 +173,10 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      * 敏感词检测
      */
     private boolean sensitiveCheck(String str) {
-        LambdaQueryWrapper<UserSensitive> userSensitiveLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        userSensitiveLambdaQueryWrapper.select(UserSensitive::getSensitives);
-        List<String> userSensitives = userSensitiveService.list(userSensitiveLambdaQueryWrapper).stream().map(UserSensitive::getSensitives).collect(Collectors.toList());
-        SensitiveWordUtil.initMap(userSensitives);
+        LambdaQueryWrapper<VideoSensitive> userSensitiveLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        userSensitiveLambdaQueryWrapper.select(VideoSensitive::getSensitives);
+        List<String> videoSensitives = videoSensitiveService.list(userSensitiveLambdaQueryWrapper).stream().map(VideoSensitive::getSensitives).collect(Collectors.toList());
+        SensitiveWordUtil.initMap(videoSensitives);
         //是否包含敏感词
         Map<String, Integer> map = SensitiveWordUtil.matchWords(str);
         // 存在敏感词

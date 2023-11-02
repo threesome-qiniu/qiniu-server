@@ -2,12 +2,10 @@ package com.qiniu.service.video.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.qiniu.common.domain.vo.PageDataInfo;
 import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.dto.VideoFeedDTO;
 import com.qiniu.model.video.dto.VideoPageDto;
-import com.qiniu.model.video.dto.VideoBindDto;
-import com.qiniu.model.video.vo.VideoUserLikeAndFavoriteVo;
+import com.qiniu.model.video.dto.VideoPublishDto;
 import com.qiniu.model.video.vo.VideoVO;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,10 +32,10 @@ public interface IVideoService extends IService<Video> {
     /**
      * 发布视频
      *
-     * @param videoBindDto
+     * @param videoPublishDto
      * @return
      */
-    String videoPublish(VideoBindDto videoBindDto);
+    String videoPublish(VideoPublishDto videoPublishDto);
 
     /**
      * 分页我的视频

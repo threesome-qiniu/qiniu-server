@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class VideoBindDto extends Video {
+public class VideoPublishDto extends Video {
 
     //分类名称
     private Long categoryId;

@@ -1,12 +1,8 @@
 package com.qiniu.service.video;
 
 
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.qiniu.common.context.UserContext;
 import com.qiniu.common.exception.CustomException;
 import com.qiniu.common.service.RedisService;
 import com.qiniu.common.utils.bean.BeanCopyUtils;
@@ -19,7 +15,7 @@ import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.domain.VideoCategoryRelation;
 import com.qiniu.model.video.domain.VideoSensitive;
 import com.qiniu.model.video.domain.VideoUserLike;
-import com.qiniu.model.video.dto.VideoBindDto;
+import com.qiniu.model.video.dto.VideoPublishDto;
 import com.qiniu.model.video.vo.VideoUserLikeAndFavoriteVo;
 import com.qiniu.service.video.constants.VideoCacheConstants;
 import com.qiniu.service.video.mapper.VideoMapper;
@@ -161,30 +157,30 @@ public class VideoTestApplication {
         String videoUrl = "http://s38bf8bdn.hb-bkt.clouddn.com/2023/11/02/d1e511dd3e754c3fa23e872f608dd914.mp4";
         Long categoryId = 1L;
         String coverImage = "头像路径测试";
-        VideoBindDto videoBindDto = new VideoBindDto();
-        videoBindDto.setVideoTitle(videoTitle);
-        videoBindDto.setVideoDesc(videoDesc);
-        videoBindDto.setVideoUrl(videoUrl);
-        videoBindDto.setCategoryId(categoryId);
-        videoBindDto.setCoverImage(coverImage);
-        if (videoBindDto.getVideoTitle().length() > 30) {
+        VideoPublishDto videoPublishDto = new VideoPublishDto();
+        videoPublishDto.setVideoTitle(videoTitle);
+        videoPublishDto.setVideoDesc(videoDesc);
+        videoPublishDto.setVideoUrl(videoUrl);
+        videoPublishDto.setCategoryId(categoryId);
+        videoPublishDto.setCoverImage(coverImage);
+        if (videoPublishDto.getVideoTitle().length() > 30) {
             throw new CustomException(BIND_CONTENT_TITLE_FAIL);
         }
-        if (videoBindDto.getVideoDesc().length() > 200) {
+        if (videoPublishDto.getVideoDesc().length() > 200) {
             throw new CustomException(BIND_CONTENT_DESC_FAIL);
         }
         //构建敏感词查询条件
         LambdaQueryWrapper<VideoSensitive> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.select(VideoSensitive::getId)
-                .like(VideoSensitive::getSensitives, videoBindDto.getVideoTitle())
-                .or(w -> w.like(VideoSensitive::getSensitives, videoBindDto.getVideoDesc()));
+                .like(VideoSensitive::getSensitives, videoPublishDto.getVideoTitle())
+                .or(w -> w.like(VideoSensitive::getSensitives, videoPublishDto.getVideoDesc()));
         List<VideoSensitive> videoSensitives = videoSensitiveMapper.selectList(queryWrapper);
         //如果结果不为空，证明有敏感词，提示异常
         if (!videoSensitives.isEmpty()) {
             throw new CustomException(SENSITIVEWORD_ERROR);
         }
         //将传过来的数据拷贝到要存储的对象中
-        Video video = BeanCopyUtils.copyBean(videoBindDto, Video.class);
+        Video video = BeanCopyUtils.copyBean(videoPublishDto, Video.class);
         //生成id
         String videoId = IdGenerator.generatorShortId();
         //向新的对象中封装信息
@@ -193,7 +189,7 @@ public class VideoTestApplication {
         video.setCreateTime(LocalDateTime.now());
         video.setCreateBy(userId.toString());
         //将前端传递的分类拷贝到关联表对象
-        VideoCategoryRelation videoCategoryRelation = BeanCopyUtils.copyBean(videoBindDto, VideoCategoryRelation.class);
+        VideoCategoryRelation videoCategoryRelation = BeanCopyUtils.copyBean(videoPublishDto, VideoCategoryRelation.class);
         //video_id存入VideoCategoryRelation（视频分类关联表）
         videoCategoryRelation.setVideoId(video.getVideoId());
         //先将video对象存入video表中
