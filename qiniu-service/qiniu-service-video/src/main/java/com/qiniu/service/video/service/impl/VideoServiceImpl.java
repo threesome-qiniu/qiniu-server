@@ -2,6 +2,7 @@ package com.qiniu.service.video.service.impl;
 
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.qiniu.common.domain.vo.PageDataInfo;
+import com.qiniu.common.utils.audit.SensitiveWordUtil;
 import com.qiniu.common.utils.string.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -17,6 +18,7 @@ import com.qiniu.common.utils.uniqueid.IdGenerator;
 import com.qiniu.feign.user.RemoteUserService;
 import com.qiniu.model.search.vo.VideoSearchVO;
 import com.qiniu.model.user.domain.User;
+import com.qiniu.model.user.domain.UserSensitive;
 import com.qiniu.model.video.domain.*;
 import com.qiniu.model.video.dto.VideoFeedDTO;
 import com.qiniu.model.video.dto.VideoBindDto;
@@ -44,6 +46,8 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.qiniu.model.common.enums.HttpCodeEnum.*;
 import static com.qiniu.model.video.mq.VideoDelayedQueueConstant.*;
@@ -110,15 +114,22 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             throw new CustomException(BIND_CONTENT_DESC_FAIL);
         }
         //构建敏感词查询条件
-        LambdaQueryWrapper<VideoSensitive> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.select(VideoSensitive::getId)
-                .like(VideoSensitive::getSensitives, videoBindDto.getVideoTitle())
-                .or(w -> w.like(VideoSensitive::getSensitives, videoBindDto.getVideoDesc()));
-        List<VideoSensitive> videoSensitives = videoSensitiveMapper.selectList(queryWrapper);
-        //如果结果不为空，证明有敏感词，提示异常
-        if (!videoSensitives.isEmpty()) {
+//        LambdaQueryWrapper<VideoSensitive> queryWrapper = new LambdaQueryWrapper<>();
+//        queryWrapper.select(VideoSensitive::getId)
+//                .like(VideoSensitive::getSensitives, videoBindDto.getVideoTitle())
+//                .or(w -> w.like(VideoSensitive::getSensitives, videoBindDto.getVideoDesc()));
+//        List<VideoSensitive> videoSensitives = videoSensitiveMapper.selectList(queryWrapper);
+
+        // todo 查出video敏感词表所有敏感词集合
+        boolean b = sensitiveCheck(videoBindDto.getVideoTitle() + videoBindDto.getVideoDesc());
+        if(b){
+            // 存在敏感词抛异常
             throw new CustomException(SENSITIVEWORD_ERROR);
         }
+        //如果结果不为空，证明有敏感词，提示异常
+//        if (!videoSensitives.isEmpty()) {
+//            throw new CustomException(SENSITIVEWORD_ERROR);
+//        }
         //将传过来的数据拷贝到要存储的对象中
         Video video = BeanCopyUtils.copyBean(videoBindDto, Video.class);
         //生成id
@@ -138,13 +149,14 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         videoCategoryRelationService.saveVideoCategoryRelation(videoCategoryRelation);
         if (save) {
             // 1.发送整个video对象发送消息，
-            // TODO 待添加视频封面
+            // 待添加视频封面
             VideoSearchVO videoSearchVO = new VideoSearchVO();
             videoSearchVO.setVideoId(video.getVideoId());
             videoSearchVO.setVideoTitle(video.getVideoTitle());
             // localdatetime转换为date
             videoSearchVO.setPublishTime(Date.from(video.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
-            videoSearchVO.setCoverImage("null");
+            // TODO 传进来肯定强制待视频url，如是前端没带封面，后端自动生成视频封面 coverImage = videoUrl + "?vframe/jpg/offset/1"
+            videoSearchVO.setCoverImage(videoBindDto.getCoverImage());
             videoSearchVO.setVideoUrl(video.getVideoUrl());
             videoSearchVO.setUserId(userId);
             // 获取用户信息
@@ -169,6 +181,20 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         } else {
             throw new CustomException(null);
         }
+    }
+
+    /**
+     * 敏感词检测
+     */
+    private boolean sensitiveCheck(String str) {
+        LambdaQueryWrapper<UserSensitive> userSensitiveLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        userSensitiveLambdaQueryWrapper.select(UserSensitive::getSensitives);
+        List<String> userSensitives = userSensitiveService.list(userSensitiveLambdaQueryWrapper).stream().map(UserSensitive::getSensitives).collect(Collectors.toList());
+        SensitiveWordUtil.initMap(userSensitives);
+        //是否包含敏感词
+        Map<String, Integer> map = SensitiveWordUtil.matchWords(str);
+        // 存在敏感词
+        return map.size() > 0;
     }
 
     @Override

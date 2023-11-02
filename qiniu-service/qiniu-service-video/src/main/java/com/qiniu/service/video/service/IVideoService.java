@@ -32,7 +32,7 @@ public interface IVideoService extends IService<Video> {
     Video selectById(String id);
 
     /**
-     * 上传
+     * 发布视频
      *
      * @param videoBindDto
      * @return
