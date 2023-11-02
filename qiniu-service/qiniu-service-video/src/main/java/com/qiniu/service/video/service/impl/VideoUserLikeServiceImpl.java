@@ -1,6 +1,8 @@
 package com.qiniu.service.video.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.qiniu.common.context.UserContext;
 import com.qiniu.common.service.RedisService;
@@ -8,6 +10,7 @@ import com.qiniu.common.utils.bean.BeanCopyUtils;
 import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.domain.VideoUserLike;
+import com.qiniu.model.video.dto.VideoPageDto;
 import com.qiniu.model.video.vo.VideoUserVo;
 import com.qiniu.service.video.constants.VideoCacheConstants;
 import com.qiniu.service.video.mapper.VideoMapper;
@@ -102,4 +105,16 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
         redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, videoId, -1);
     }
 
+    /**
+     * 分页查询我的视频
+     *
+     * @param pageDto
+     * @return
+     */
+    @Override
+    public IPage<VideoUserLike> queryMyLikeVideoPage(VideoPageDto pageDto) {
+        LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoUserLike::getUserId,UserContext.getUserId());
+        return this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()),queryWrapper);
+    }
 }

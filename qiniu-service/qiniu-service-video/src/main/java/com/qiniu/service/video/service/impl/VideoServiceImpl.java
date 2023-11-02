@@ -1,5 +1,7 @@
 package com.qiniu.service.video.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.OrderItem;
+import com.qiniu.common.domain.vo.PageDataInfo;
 import com.qiniu.common.utils.string.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -228,42 +230,20 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         return videoVO;
     }
 
-    /**
-     * 分页查询用户的点赞列表
-     *
-     * @param pageDto
-     * @return
-     */
-    @Override
-    public List<VideoUserLikeAndFavoriteVo> queryMyLikeVideoPage(VideoPageDto pageDto) {
-        Long userId = UserContext.getUser().getUserId();
-        List<Video> userLikedVideos = videoMapper.getUserLikesVideos(userId, (pageDto.getPageNum() - 1) * pageDto.getPageSize(), pageDto.getPageSize());
-        ArrayList<VideoUserLikeAndFavoriteVo> objects = new ArrayList<>();
-        for (Video userLikedVideo : userLikedVideos) {
-            objects.add(BeanCopyUtils.copyBean(userLikedVideo, VideoUserLikeAndFavoriteVo.class));
-        }
-        return objects;
-    }
-
-    /**
-     * 分页查询用户的点赞列表
-     *
-     * @param pageDto
-     * @return
-     */
-    @Override
-    public List<VideoUserLikeAndFavoriteVo> queryMyFavoritesVideoPage(VideoPageDto pageDto) {
-        Long userId = UserContext.getUser().getUserId();
-        List<Video> userLikedVideos = videoMapper.getUserFavoritesVideos(userId, (pageDto.getPageNum() - 1) * pageDto.getPageSize(), pageDto.getPageSize());
-        ArrayList<VideoUserLikeAndFavoriteVo> objects = new ArrayList<>();
-        for (Video userLikedVideo : userLikedVideos) {
-            objects.add(BeanCopyUtils.copyBean(userLikedVideo, VideoUserLikeAndFavoriteVo.class));
-        }
-        return objects;
-    }
-
     private void viewNumIncrement(String videoId) {
         redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, videoId, 1);
     }
 
+    /**
+     * 根据ids查询视频
+     *
+     * @param videoIds
+     * @return
+     */
+    @Override
+    public List<Video> queryVideoByVideoIds(List<String> videoIds) {
+        LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Video::getVideoId,videoIds);
+        return this.list(queryWrapper);
+    }
 }

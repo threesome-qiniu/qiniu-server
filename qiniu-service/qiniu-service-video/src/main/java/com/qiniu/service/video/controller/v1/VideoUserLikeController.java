@@ -1,12 +1,19 @@
 package com.qiniu.service.video.controller.v1;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.qiniu.common.domain.R;
+import com.qiniu.common.domain.vo.PageDataInfo;
+import com.qiniu.model.video.domain.Video;
+import com.qiniu.model.video.domain.VideoUserLike;
+import com.qiniu.model.video.dto.VideoPageDto;
 import com.qiniu.model.video.vo.VideoUserVo;
+import com.qiniu.service.video.service.IVideoService;
 import com.qiniu.service.video.service.IVideoUserLikeService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 点赞表(VideoUserLike)表控制层
@@ -20,6 +27,9 @@ public class VideoUserLikeController {
 
     @Resource
     private IVideoUserLikeService videoUserLikeService;
+
+    @Resource
+    private IVideoService videoService;
 
     /**
      * 用户点赞
@@ -42,5 +52,14 @@ public class VideoUserLikeController {
         List<VideoUserVo> videoUserVos = videoUserLikeService.userLikes(userId);
         return R.ok(videoUserVos);
     }
+
+    @PostMapping("/mylikepage")
+    public PageDataInfo myLikePage(@RequestBody VideoPageDto pageDto) {
+        IPage<VideoUserLike> likeIPage = videoUserLikeService.queryMyLikeVideoPage(pageDto);
+        List<String> videoIds = likeIPage.getRecords().stream().map(VideoUserLike::getVideoId).collect(Collectors.toList());
+        List<Video> videos = videoService.queryVideoByVideoIds(videoIds);
+        return PageDataInfo.genPageData(videos, likeIPage.getTotal());
+    }
+
 }
 

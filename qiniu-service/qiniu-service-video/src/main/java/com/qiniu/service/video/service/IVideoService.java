@@ -2,6 +2,7 @@ package com.qiniu.service.video.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.qiniu.common.domain.vo.PageDataInfo;
 import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.dto.VideoFeedDTO;
 import com.qiniu.model.video.dto.VideoPageDto;
@@ -63,18 +64,10 @@ public interface IVideoService extends IService<Video> {
     VideoVO feedVideo(VideoFeedDTO videoFeedDTO);
 
     /**
-     * 用户点赞列表分页接口
-     *
-     * @param pageDto
+     * 根据ids查询视频
+     * @param videoIds
      * @return
      */
-    List<VideoUserLikeAndFavoriteVo> queryMyLikeVideoPage(VideoPageDto pageDto);
+    List<Video> queryVideoByVideoIds(List<String> videoIds);
 
-    /**
-     * 用户收藏列表分页接口
-     *
-     * @param pageDto
-     * @return
-     */
-    List<VideoUserLikeAndFavoriteVo> queryMyFavoritesVideoPage(VideoPageDto pageDto);
 }

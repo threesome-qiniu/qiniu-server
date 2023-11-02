@@ -1,12 +1,19 @@
 package com.qiniu.service.video.controller.v1;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.qiniu.common.domain.R;
+import com.qiniu.common.domain.vo.PageDataInfo;
+import com.qiniu.model.video.domain.VideoUserFavorites;
+import com.qiniu.model.video.dto.VideoPageDto;
 import com.qiniu.model.video.vo.VideoUserVo;
+import com.qiniu.service.video.mapper.VideoMapper;
+import com.qiniu.service.video.service.IVideoService;
 import com.qiniu.service.video.service.IVideoUserFavoritesService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 视频收藏表(VideoUserFavorites)表控制层
@@ -20,6 +27,9 @@ public class VideoUserFavoritesController {
     
     @Resource
     private IVideoUserFavoritesService videoUserFavoritesService;
+
+    @Resource
+    private IVideoService videoService;
 
     /**
      * 用户收藏
@@ -38,5 +48,12 @@ public class VideoUserFavoritesController {
         return R.ok(videoUserVos);
     }
 
+        @PostMapping("/myfavoritepage")
+    public PageDataInfo myFavoritePage(@RequestBody VideoPageDto pageDto) {
+            IPage<VideoUserFavorites> favoritesPage = videoUserFavoritesService.queryFavoritePage(pageDto);
+            List<String> videoIds = favoritesPage.getRecords().stream().map(VideoUserFavorites::getVideoId).collect(Collectors.toList());
+
+            return PageDataInfo.genPageData(videoService.queryVideoByVideoIds(videoIds),favoritesPage.getTotal());
+    }
 }
 

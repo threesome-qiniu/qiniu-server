@@ -3,6 +3,9 @@ package com.qiniu.service.video;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.metadata.OrderItem;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.qiniu.common.context.UserContext;
 import com.qiniu.common.exception.CustomException;
 import com.qiniu.common.service.RedisService;
@@ -17,6 +20,7 @@ import com.qiniu.model.video.domain.VideoCategoryRelation;
 import com.qiniu.model.video.domain.VideoSensitive;
 import com.qiniu.model.video.domain.VideoUserLike;
 import com.qiniu.model.video.dto.VideoBindDto;
+import com.qiniu.model.video.vo.VideoUserLikeAndFavoriteVo;
 import com.qiniu.model.video.vo.VideoUserVo;
 import com.qiniu.service.video.constants.VideoCacheConstants;
 import com.qiniu.service.video.mapper.VideoMapper;
@@ -231,5 +235,18 @@ public class VideoTestApplication {
         }
     }
 
+    @Test
+    void uerLikePageTest(){
+        Long userId = 3L;
+        List<Video> userLikedVideos = videoMapper.getUserLikesVideos(userId, 0, 10);
+        Page<VideoUserLikeAndFavoriteVo> objectPage = new Page<>();
+        List<VideoUserLikeAndFavoriteVo> videoUserLikeAndFavoriteVos = BeanCopyUtils.copyBeanList(userLikedVideos, VideoUserLikeAndFavoriteVo.class);
+//        for (Video userLikedVideo : userLikedVideos) {
+//            objects.add(BeanCopyUtils.copyBean(userLikedVideo, VideoUserLikeAndFavoriteVo.class));
+//        }
+        objectPage.setRecords(videoUserLikeAndFavoriteVos);
+        System.out.println(objectPage);
+
+    }
 
 }
