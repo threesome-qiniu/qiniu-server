@@ -17,6 +17,7 @@
         <module>qiniu-service-search</module>
         <module>qiniu-service-social</module>
         <module>qiniu-service-behave</module>
+        <module>qiniu-service-notice</module>
     </modules>
 
     <dependencies>
