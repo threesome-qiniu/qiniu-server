@@ -1,14 +1,22 @@
 package com.qiniu.starter.file.service.impl;
 
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.IdcardUtil;
 import com.google.gson.Gson;
 import com.qiniu.common.QiniuException;
+import com.qiniu.common.Zone;
 import com.qiniu.http.Response;
+import com.qiniu.processing.OperationManager;
 import com.qiniu.starter.file.config.QiniuOssConfig;
 import com.qiniu.starter.file.config.QiniuOssConfigProperties;
 import com.qiniu.starter.file.service.FileStorageService;
+import com.qiniu.starter.file.util.QiniuUtils;
+import com.qiniu.storage.Configuration;
 import com.qiniu.storage.UploadManager;
 import com.qiniu.storage.model.DefaultPutRet;
 import com.qiniu.util.Auth;
+import com.qiniu.util.StringMap;
+import com.qiniu.util.UrlSafeBase64;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -29,7 +37,6 @@ public class QiniuFileStorageService implements FileStorageService {
 
     @Autowired
     private QiniuOssConfigProperties qiniuOssConfigProperties;
-
 
     private final static String separator = "/";
 
@@ -76,7 +83,10 @@ public class QiniuFileStorageService implements FileStorageService {
                 DefaultPutRet putRet = new Gson().fromJson(response.bodyString(), DefaultPutRet.class);
                 System.out.println(putRet.key);
                 System.out.println(putRet.hash);
-                return prefix + filePath;
+                // 视频转码
+                return prefix + QiniuUtils.transcoding(putRet.key, qiniuOssConfigProperties.getAccessKey(),
+                        qiniuOssConfigProperties.getSecretKey(), qiniuOssConfigProperties.getBucket());
+//                return prefix + filePath;
             } catch (QiniuException ex) {
                 Response r = ex.response;
                 System.err.println(r.toString());
@@ -91,4 +101,6 @@ public class QiniuFileStorageService implements FileStorageService {
         }
         return "www";
     }
+
+
 }
