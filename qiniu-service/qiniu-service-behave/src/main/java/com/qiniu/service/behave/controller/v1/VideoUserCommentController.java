@@ -1,4 +1,4 @@
-package com.qiniu.service.video.controller.v1;
+package com.qiniu.service.behave.controller.v1;
 
 import com.alibaba.csp.sentinel.util.StringUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -13,7 +13,7 @@ import com.qiniu.model.user.domain.User;
 import com.qiniu.model.video.domain.VideoUserComment;
 import com.qiniu.model.video.dto.VideoUserCommentPageDTO;
 import com.qiniu.model.video.vo.VideoUserCommentVO;
-import com.qiniu.service.video.service.IVideoUserCommentService;
+import com.qiniu.service.behave.service.IVideoUserCommentService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;

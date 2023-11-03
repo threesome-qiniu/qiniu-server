@@ -1,4 +1,4 @@
-package com.qiniu.service.video.service.impl;
+package com.qiniu.service.behave.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -8,12 +8,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.qiniu.common.context.UserContext;
 import com.qiniu.model.video.domain.VideoUserComment;
 import com.qiniu.model.video.dto.VideoUserCommentPageDTO;
-import com.qiniu.service.video.enums.VideoCommentStatus;
-import com.qiniu.service.video.mapper.VideoUserCommentMapper;
-import com.qiniu.service.video.service.IVideoUserCommentService;
+
+import com.qiniu.service.behave.enums.VideoCommentStatus;
+import com.qiniu.service.behave.mapper.VideoUserCommentMapper;
+import com.qiniu.service.behave.service.IVideoUserCommentService;
 import org.springframework.stereotype.Service;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -58,7 +57,7 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
         LambdaUpdateWrapper<VideoUserComment> queryWrapper = new LambdaUpdateWrapper<>();
         queryWrapper.eq(VideoUserComment::getUserId, userId);
         queryWrapper.eq(VideoUserComment::getCommentId, commentId);
-        queryWrapper.set(VideoUserComment::getStatus, VideoCommentStatus.DELETED);
+        queryWrapper.set(VideoUserComment::getStatus, VideoCommentStatus.DELETED.getCode());
         // 隐式删除
         return update(queryWrapper);
     }
