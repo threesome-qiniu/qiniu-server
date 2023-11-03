@@ -8,6 +8,7 @@ import com.qiniu.common.exception.CustomException;
 import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.model.search.dto.VideoSearchKeywordDTO;
 import com.qiniu.service.search.domain.VideoSearchVO;
+import com.qiniu.service.search.service.VideoSearchHistoryService;
 import com.qiniu.service.search.service.VideoSearchService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
@@ -49,6 +50,9 @@ public class VideoSearchServiceImpl implements VideoSearchService {
 
     @Resource
     private RestHighLevelClient restHighLevelClient;
+
+    @Resource
+    private VideoSearchHistoryService videoSearchHistoryService;
 
     /**
      * 视频同步新增到es
@@ -118,9 +122,9 @@ public class VideoSearchServiceImpl implements VideoSearchService {
             return null;
         }
         Long userId = UserContext.getUserId();
-        //异步调用 保存搜索记录
-        if (StringUtils.isNull(userId) && dto.getFromIndex() == 0) {
-//            apUserSearchService.insert(dto.getSearchWords(), user.getId());
+        // 异步调用 保存搜索记录
+        if (StringUtils.isNotNull(userId) && dto.getFromIndex() == 0) {
+            videoSearchHistoryService.insert(dto.getKeyword(), userId);
         }
         //2.设置查询条件
         SearchRequest searchRequest = new SearchRequest(INDEX_VIDEO);

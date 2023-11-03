@@ -13,6 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -38,6 +39,7 @@ public class VideoSearchHistoryServiceImpl implements VideoSearchHistoryService 
      * @param keyword
      * @param userId
      */
+    @Async
     @Override
     public void insert(String keyword, Long userId) {
         // 此关联词存在就覆盖
