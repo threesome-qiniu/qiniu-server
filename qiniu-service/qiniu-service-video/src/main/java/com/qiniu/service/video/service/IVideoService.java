@@ -6,6 +6,7 @@ import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.dto.VideoFeedDTO;
 import com.qiniu.model.video.dto.VideoPageDto;
 import com.qiniu.model.video.dto.VideoPublishDto;
+import com.qiniu.model.video.vo.VideoUploadVO;
 import com.qiniu.model.video.vo.VideoVO;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,7 +26,7 @@ public interface IVideoService extends IService<Video> {
      * @param file
      * @return
      */
-    String uploadVideo(MultipartFile file);
+    VideoUploadVO uploadVideo(MultipartFile file);
 
     Video selectById(String id);
 

@@ -4,6 +4,7 @@ import com.qiniu.common.domain.R;
 import com.qiniu.model.video.dto.VideoPublishDto;
 import com.qiniu.model.video.dto.VideoFeedDTO;
 import com.qiniu.model.video.dto.VideoPageDto;
+import com.qiniu.model.video.vo.VideoUploadVO;
 import com.qiniu.model.video.vo.VideoVO;
 import com.qiniu.service.video.service.IVideoService;
 import org.springframework.web.bind.annotation.*;
@@ -36,7 +37,7 @@ public class VideoController {
      * 视频上传
      */
     @PostMapping("/upload")
-    public R<?> uploadVideo(@RequestParam("file") MultipartFile file) {
+    public R<VideoUploadVO> uploadVideo(@RequestParam("file") MultipartFile file) {
         return R.ok(videoService.uploadVideo(file));
     }
 

@@ -20,6 +20,7 @@ import com.qiniu.model.video.domain.*;
 import com.qiniu.model.video.dto.VideoFeedDTO;
 import com.qiniu.model.video.dto.VideoPublishDto;
 import com.qiniu.model.video.dto.VideoPageDto;
+import com.qiniu.model.video.vo.VideoUploadVO;
 import com.qiniu.model.video.vo.VideoVO;
 import com.qiniu.service.video.constants.QiniuVideoOssConstants;
 import com.qiniu.service.video.constants.VideoCacheConstants;
@@ -80,13 +81,15 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     @Resource
     private IVideoSensitiveService videoSensitiveService;
 
-
     @Override
-    public String uploadVideo(MultipartFile file) {
+    public VideoUploadVO uploadVideo(MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
         //对文件id进行判断，如果文件已经存在，则不上传，直接返回数据库中文件的存储路径
         String filePath = PathUtils.generateFilePath(originalFilename);
-        return fileStorageService.uploadVideo(file, QiniuVideoOssConstants.PREFIX_URL, filePath);
+        VideoUploadVO videoUploadVO = new VideoUploadVO();
+        videoUploadVO.setVideoUrl(fileStorageService.uploadVideo(file, QiniuVideoOssConstants.PREFIX_URL, filePath));
+        videoUploadVO.setVframe(QiniuVideoOssConstants.PREFIX_URL + filePath + "?vframe/jpg/offset/1");
+        return videoUploadVO;
     }
 
     @Override
