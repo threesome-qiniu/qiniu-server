@@ -1,4 +1,4 @@
-package com.qiniu.service.video.service;
+package com.qiniu.service.behave.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;

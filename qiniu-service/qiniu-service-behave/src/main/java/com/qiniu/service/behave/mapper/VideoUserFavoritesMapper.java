@@ -1,4 +1,4 @@
-package com.qiniu.service.video.mapper;
+package com.qiniu.service.behave.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.qiniu.model.video.domain.VideoUserFavorites;
