@@ -169,6 +169,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             throw new CustomException(HttpCodeEnum.SENSITIVEWORD_ERROR);
         }
         user.setUserId(userId);
+        user.setUpdateTime(LocalDateTime.now());
         boolean update = this.updateById(user);
         if (update) {
             return user;
