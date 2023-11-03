@@ -51,9 +51,6 @@ public class VideoTestApplication {
     private IVideoCategoryService videoCategoryService;
 
     @Autowired
-    private IVideoUserLikeService videoUserLikeService;
-
-    @Autowired
     private RedisService redisService;
 
     @Autowired
@@ -82,24 +79,24 @@ public class VideoTestApplication {
 
     @Test
     void videoLikeTest() {
-        String videoId = "11685954002238832647a8379a1";
-        Long userId = 2L;
-        LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(VideoUserLike::getVideoId, videoId).eq(VideoUserLike::getUserId, userId);
-        List<VideoUserLike> list = videoUserLikeService.list(queryWrapper);
-        if (StringUtils.isNull(list) || list.isEmpty()) {
-            VideoUserLike videoUserLike = new VideoUserLike();
-            videoUserLike.setVideoId(videoId);
-            videoUserLike.setUserId(userId);
-            videoUserLike.setCreateTime(LocalDateTime.now());
-            //将本条点赞信息存储到redis
-            likeNumIncrease(videoId);
-            videoUserLikeService.save(videoUserLike);
-        } else {
-            //将本条点赞信息从redis
-            likeNumDecrease(videoId);
-            videoUserLikeService.remove(queryWrapper);
-        }
+//        String videoId = "11685954002238832647a8379a1";
+//        Long userId = 2L;
+//        LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
+//        queryWrapper.eq(VideoUserLike::getVideoId, videoId).eq(VideoUserLike::getUserId, userId);
+//        List<VideoUserLike> list = videoUserLikeService.list(queryWrapper);
+//        if (StringUtils.isNull(list) || list.isEmpty()) {
+//            VideoUserLike videoUserLike = new VideoUserLike();
+//            videoUserLike.setVideoId(videoId);
+//            videoUserLike.setUserId(userId);
+//            videoUserLike.setCreateTime(LocalDateTime.now());
+//            //将本条点赞信息存储到redis
+//            likeNumIncrease(videoId);
+//            videoUserLikeService.save(videoUserLike);
+//        } else {
+//            //将本条点赞信息从redis
+//            likeNumDecrease(videoId);
+//            videoUserLikeService.remove(queryWrapper);
+//        }
 
 
     }
