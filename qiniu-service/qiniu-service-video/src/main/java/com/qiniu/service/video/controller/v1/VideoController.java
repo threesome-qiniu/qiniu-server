@@ -1,6 +1,7 @@
 package com.qiniu.service.video.controller.v1;
 
 import com.qiniu.common.domain.R;
+import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.dto.VideoPublishDto;
 import com.qiniu.model.video.dto.VideoFeedDTO;
 import com.qiniu.model.video.dto.VideoPageDto;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * 视频表(Video)表控制层
@@ -26,7 +28,7 @@ public class VideoController {
     private IVideoService videoService;
 
     /**
-     * 视频流接口
+     * 视频流接口 ,默认返回5条数据
      */
     @PostMapping("/feed")
     public R<VideoVO> feed(@RequestBody VideoFeedDTO videoFeedDTO) {

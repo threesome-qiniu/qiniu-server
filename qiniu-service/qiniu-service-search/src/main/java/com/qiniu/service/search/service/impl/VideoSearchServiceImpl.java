@@ -33,6 +33,7 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -134,7 +135,7 @@ public class VideoSearchServiceImpl implements VideoSearchService {
         QueryStringQueryBuilder queryStringQueryBuilder = QueryBuilders.queryStringQuery(dto.getKeyword()).field("videoTitle").field("userNickName").defaultOperator(Operator.OR);
         boolQueryBuilder.must(queryStringQueryBuilder);
         //查询小于mindate的数据
-        RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("publishTime").lt(dto.getMinBehotTime().getTime());
+        RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("publishTime").lt(dto.getMinBehotTime() == null ? new Date().getTime() : dto.getMinBehotTime().getTime());
         boolQueryBuilder.filter(rangeQueryBuilder);
         //分页查询
         searchSourceBuilder.from(dto.getPageNum());
