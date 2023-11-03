@@ -236,4 +236,15 @@ public class VideoTestApplication {
 
     }
 
+    @Test
+    void test(){
+        char s1=97;
+        char s2='a';
+
+        System.out.println(s1);
+        System.out.println(s2);
+
+
+    }
+
 }
