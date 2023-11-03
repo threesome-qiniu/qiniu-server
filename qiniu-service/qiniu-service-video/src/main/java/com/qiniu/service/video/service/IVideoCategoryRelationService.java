@@ -12,6 +12,6 @@ import org.springframework.data.domain.PageRequest;
  * @since 2023-10-31 14:44:35
  */
 public interface IVideoCategoryRelationService extends IService<VideoCategoryRelation> {
-    boolean saveVideoCategoryRelation(VideoCategoryRelation videoCategoryRelation);
 
+    boolean saveVideoCategoryRelation(VideoCategoryRelation videoCategoryRelation);
 }

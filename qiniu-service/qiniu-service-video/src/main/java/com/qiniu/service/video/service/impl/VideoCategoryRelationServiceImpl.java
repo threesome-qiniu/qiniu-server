@@ -22,8 +22,8 @@ public class VideoCategoryRelationServiceImpl extends ServiceImpl<VideoCategoryR
     @Resource
     private VideoCategoryRelationMapper videoCategoryRelationMapper;
 
+    @Override
     public boolean saveVideoCategoryRelation(VideoCategoryRelation videoCategoryRelation) {
-        boolean save = this.save(videoCategoryRelation);
-        return save;
+        return this.save(videoCategoryRelation);
     }
 }

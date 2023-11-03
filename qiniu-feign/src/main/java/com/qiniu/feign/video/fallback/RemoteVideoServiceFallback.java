@@ -4,6 +4,7 @@ import com.qiniu.common.domain.R;
 import com.qiniu.feign.video.RemoteVideoService;
 import com.qiniu.model.video.domain.Video;
 import feign.hystrix.FallbackFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ import java.util.List;
  * @AUTHOR: roydon
  * @DATE: 2023/10/28
  **/
+@Component
 public class RemoteVideoServiceFallback implements FallbackFactory<RemoteVideoService> {
 
     /**
