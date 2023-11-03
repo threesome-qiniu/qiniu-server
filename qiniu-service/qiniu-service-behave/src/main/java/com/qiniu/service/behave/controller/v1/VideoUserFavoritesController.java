@@ -1,12 +1,13 @@
-package com.qiniu.service.video.controller.v1;
+package com.qiniu.service.behave.controller.v1;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.qiniu.common.domain.R;
 import com.qiniu.common.domain.vo.PageDataInfo;
+import com.qiniu.feign.video.RemoteVideoService;
 import com.qiniu.model.video.domain.VideoUserFavorites;
 import com.qiniu.model.video.dto.VideoPageDto;
-import com.qiniu.service.video.service.IVideoService;
-import com.qiniu.service.video.service.IVideoUserFavoritesService;
+import com.qiniu.service.behave.service.IVideoUserFavoritesService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -26,8 +27,12 @@ public class VideoUserFavoritesController {
     @Resource
     private IVideoUserFavoritesService videoUserFavoritesService;
 
+//    @Resource
+//    private IVideoService videoService;
+
     @Resource
-    private IVideoService videoService;
+    private RemoteVideoService remoteVideoService;
+
 
     /**
      * 用户收藏
@@ -54,7 +59,7 @@ public class VideoUserFavoritesController {
         if (videoIds.isEmpty()){
             return PageDataInfo.genPageData(null,0);
         }
-        return PageDataInfo.genPageData(videoService.queryVideoByVideoIds(videoIds), favoritesPage.getTotal());
+        return PageDataInfo.genPageData(remoteVideoService.queryVideoByVideoIds(videoIds).getData(), favoritesPage.getTotal());
     }
 }
 

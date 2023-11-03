@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -75,6 +76,17 @@ public class VideoController {
     @PostMapping("/userpage")
     public R<?> userPage(@RequestBody VideoPageDto pageDto) {
         return R.ok(videoService.queryUserVideoPage(pageDto));
+    }
+
+
+    /**
+     * 通过ids获取video集合
+     * @param videoIds
+     * @return
+     */
+    @GetMapping("{videoIds}")
+    public R<List<Video>> queryVideoByVideoIds(@PathVariable("videoIds") List<String> videoIds) {
+        return R.ok(videoService.queryVideoByVideoIds(videoIds));
     }
 
 }

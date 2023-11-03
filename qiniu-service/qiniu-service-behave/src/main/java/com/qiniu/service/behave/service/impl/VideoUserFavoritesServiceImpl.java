@@ -1,4 +1,4 @@
-package com.qiniu.service.video.service.impl;
+package com.qiniu.service.behave.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -9,10 +9,10 @@ import com.qiniu.common.service.RedisService;
 import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.model.video.domain.VideoUserFavorites;
 import com.qiniu.model.video.dto.VideoPageDto;
-import com.qiniu.service.video.constants.VideoCacheConstants;
-import com.qiniu.service.video.mapper.VideoMapper;
-import com.qiniu.service.video.mapper.VideoUserFavoritesMapper;
-import com.qiniu.service.video.service.IVideoUserFavoritesService;
+import com.qiniu.service.behave.constants.VideoCacheConstants;
+import com.qiniu.service.behave.mapper.VideoMapper;
+import com.qiniu.service.behave.mapper.VideoUserFavoritesMapper;
+import com.qiniu.service.behave.service.IVideoUserFavoritesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;

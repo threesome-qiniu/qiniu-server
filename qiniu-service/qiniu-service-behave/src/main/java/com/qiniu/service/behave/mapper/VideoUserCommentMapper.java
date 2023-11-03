@@ -1,8 +1,12 @@
-package com.qiniu.service.video.mapper;
+package com.qiniu.service.behave.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.qiniu.model.video.domain.VideoUserComment;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 /**
  * (VideoUserComment)表数据库访问层
