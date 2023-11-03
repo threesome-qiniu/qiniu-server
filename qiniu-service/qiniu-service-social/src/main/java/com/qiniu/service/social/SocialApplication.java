@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
  * SocialApplication
+ * 社交服务
  *
  * @AUTHOR: roydon
  * @DATE: 2023/11/2

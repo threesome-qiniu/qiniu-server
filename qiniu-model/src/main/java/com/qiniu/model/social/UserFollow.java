@@ -1,4 +1,4 @@
-package com.qiniu.model.user.domain;
+package com.qiniu.model.social;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;

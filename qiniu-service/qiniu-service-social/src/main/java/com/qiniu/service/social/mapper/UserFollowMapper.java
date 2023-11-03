@@ -1,4 +1,4 @@
-package com.qiniu.service.user.mapper;
+package com.qiniu.service.social.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.qiniu.model.social.UserFollow;

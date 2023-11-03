@@ -1,9 +1,8 @@
-package com.qiniu.service.user.service;
+package com.qiniu.service.social.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.qiniu.model.common.dto.PageDTO;
-import com.qiniu.model.user.domain.User;
 import com.qiniu.model.social.UserFollow;
 
 /**
@@ -34,5 +33,5 @@ public interface IUserFollowService extends IService<UserFollow> {
      * @param pageDTO 分页对象
      * @return IPage<User>
      */
-    IPage<User> followPage(PageDTO pageDTO);
+    IPage<UserFollow> followPage(PageDTO pageDTO);
 }
