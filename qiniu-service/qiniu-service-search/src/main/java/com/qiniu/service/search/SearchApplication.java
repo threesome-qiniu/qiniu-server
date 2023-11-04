@@ -13,7 +13,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableAsync
-@EnableFeignClients(clients = {RemoteUserService.class})
+@EnableFeignClients(basePackages = "com.qiniu.feign")
 public class SearchApplication {
 
     public static void main(String[] args) {

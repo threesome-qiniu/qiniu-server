@@ -52,8 +52,7 @@ public class VideoController {
      */
     @PostMapping("/publish")
     public R<?> videoPublish(@RequestBody VideoPublishDto videoPublishDto) {
-        String videoId = videoService.videoPublish(videoPublishDto);
-        return R.ok(videoId);
+        return R.ok(videoService.videoPublish(videoPublishDto));
     }
 
     /**
