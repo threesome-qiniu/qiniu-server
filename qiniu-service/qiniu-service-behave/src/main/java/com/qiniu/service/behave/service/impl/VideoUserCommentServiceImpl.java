@@ -88,4 +88,18 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
         queryWrapper.eq(VideoUserComment::getOriginId, commentId);
         return list(queryWrapper);
     }
+
+    /**
+     * 查找指定视频评论量
+     *
+     * @param videoId
+     * @return
+     */
+    @Override
+    public Long queryCommentCountByVideoId(String videoId) {
+        LambdaQueryWrapper<VideoUserComment> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoUserComment::getVideoId, videoId);
+        queryWrapper.eq(VideoUserComment::getStatus, VideoCommentStatus.NORMAL.getCode());
+        return this.count(queryWrapper);
+    }
 }

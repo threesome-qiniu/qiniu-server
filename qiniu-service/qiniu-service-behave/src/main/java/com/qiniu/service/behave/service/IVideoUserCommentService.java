@@ -48,4 +48,12 @@ public interface IVideoUserCommentService extends IService<VideoUserComment> {
      * @return
      */
     List<VideoUserComment> getChildren(Long commentId);
+
+    /**
+     * 查找指定视频评论量
+     *
+     * @param videoId
+     * @return
+     */
+    Long queryCommentCountByVideoId(String videoId);
 }

@@ -130,5 +130,10 @@ public class VideoUserCommentController {
     public R<?> removeById(@PathVariable Long commentId) {
         return R.ok(this.videoUserCommentService.delCommentByUser(commentId));
     }
+
+    @GetMapping("/{videoId}")
+    public R<Long> getCommentCountByVideoId(@PathVariable("videoId") String videoId) {
+        return R.ok(videoUserCommentService.queryCommentCountByVideoId(videoId));
+    }
 }
 
