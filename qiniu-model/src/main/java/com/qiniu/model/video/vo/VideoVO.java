@@ -14,4 +14,9 @@ import lombok.EqualsAndHashCode;
 @Data
 public class VideoVO extends Video {
     private Long commentNum;
+    private String userNickName;
+    private String userAvatar;
+    // 是否关注
+    private boolean weatherFollow;
+
 }

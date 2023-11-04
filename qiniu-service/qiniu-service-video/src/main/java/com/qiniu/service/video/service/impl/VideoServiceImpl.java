@@ -14,6 +14,7 @@ import com.qiniu.common.utils.bean.BeanCopyUtils;
 import com.qiniu.common.utils.file.PathUtils;
 import com.qiniu.common.utils.uniqueid.IdGenerator;
 import com.qiniu.feign.behave.RemoteBehaveService;
+import com.qiniu.feign.social.RemoteSocialService;
 import com.qiniu.feign.user.RemoteUserService;
 import com.qiniu.model.search.vo.VideoSearchVO;
 import com.qiniu.model.user.domain.User;
@@ -82,6 +83,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Resource
     private RemoteBehaveService remoteBehaveService;
+
+    @Resource
+    private RemoteSocialService remoteSocialService;
 
     @Override
     public VideoUploadVO uploadVideo(MultipartFile file) {
@@ -238,9 +242,10 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             return null;
         }
         List<VideoVO> videoVOList = new ArrayList<>();
-        // 封装点赞数，观看量，评论量
+        // 封装VideoVO
         videoList.forEach(v -> {
             VideoVO videoVO = BeanCopyUtils.copyBean(v, VideoVO.class);
+            // 封装点赞数，观看量，评论量
             Integer cacheLikeNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, v.getVideoId());
             Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, v.getVideoId());
             Integer cacheFavoriteNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, v.getVideoId());
@@ -250,6 +255,13 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             LambdaQueryWrapper<VideoUserComment> commentQW = new LambdaQueryWrapper<>();
             commentQW.eq(VideoUserComment::getVideoId, v.getVideoId());
             videoVO.setCommentNum(remoteBehaveService.getCommentCountByVideoId(videoVO.getVideoId()).getData());
+            // 封装用户信息
+            User poublishUser = remoteUserService.userInfoById(v.getUserId()).getData();
+            videoVO.setUserNickName(StringUtils.isNull(poublishUser) ? null : poublishUser.getNickName());
+            videoVO.setUserAvatar(StringUtils.isNull(poublishUser) ? null : poublishUser.getAvatar());
+            // 是否关注
+            Boolean weatherFollow = remoteSocialService.weatherfollow(v.getUserId()).getData();
+            videoVO.setWeatherFollow(!StringUtils.isNull(weatherFollow) && weatherFollow);
             videoVOList.add(videoVO);
         });
         return videoVOList;

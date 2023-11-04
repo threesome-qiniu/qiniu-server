@@ -1,6 +1,8 @@
 package com.qiniu.service.social.controller.v1;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.qiniu.common.context.UserContext;
 import com.qiniu.common.domain.R;
 import com.qiniu.common.domain.vo.PageDataInfo;
 import com.qiniu.feign.user.RemoteUserService;
@@ -53,11 +55,25 @@ public class UserFollowController {
     public PageDataInfo followPage(@RequestBody PageDTO pageDTO) {
         IPage<UserFollow> userFollowIPage = userFollowService.followPage(pageDTO);
         List<User> userList = new ArrayList<>();
-        userFollowIPage.getRecords().forEach(uf->{
+        userFollowIPage.getRecords().forEach(uf -> {
             User user = remoteUserService.userInfoById(uf.getUserFollowId()).getData();
             userList.add(user);
         });
         return PageDataInfo.genPageData(userList, userFollowIPage.getTotal());
+    }
+
+    /**
+     * 是否关注
+     *
+     * @param userId
+     * @return
+     */
+    @GetMapping("/weatherfollow/{userId}")
+    public R<Boolean> weatherfollow(@PathVariable("userId") Long userId) {
+        LambdaQueryWrapper<UserFollow> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserFollow::getUserId, UserContext.getUserId());
+        queryWrapper.eq(UserFollow::getUserFollowId, userId);
+        return R.ok(userFollowService.count(queryWrapper) > 0);
     }
 
 }
