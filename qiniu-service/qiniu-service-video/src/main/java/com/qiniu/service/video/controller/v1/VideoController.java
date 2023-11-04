@@ -32,7 +32,7 @@ public class VideoController {
      * 视频流接口 ,默认返回5条数据
      */
     @PostMapping("/feed")
-    public R<VideoVO> feed(@RequestBody VideoFeedDTO videoFeedDTO) {
+    public R<List<VideoVO>> feed(@RequestBody VideoFeedDTO videoFeedDTO) {
         return R.ok(videoService.feedVideo(videoFeedDTO));
     }
 

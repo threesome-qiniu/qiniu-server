@@ -13,6 +13,7 @@ import com.qiniu.common.service.RedisService;
 import com.qiniu.common.utils.bean.BeanCopyUtils;
 import com.qiniu.common.utils.file.PathUtils;
 import com.qiniu.common.utils.uniqueid.IdGenerator;
+import com.qiniu.feign.behave.RemoteBehaveService;
 import com.qiniu.feign.user.RemoteUserService;
 import com.qiniu.model.search.vo.VideoSearchVO;
 import com.qiniu.model.user.domain.User;
@@ -39,6 +40,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -76,10 +78,10 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     private RedisService redisService;
 
     @Resource
-    private VideoUserCommentMapper videoUserCommentMapper;
+    private IVideoSensitiveService videoSensitiveService;
 
     @Resource
-    private IVideoSensitiveService videoSensitiveService;
+    private RemoteBehaveService remoteBehaveService;
 
     @Override
     public VideoUploadVO uploadVideo(MultipartFile file) {
@@ -213,42 +215,44 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      * @return video
      */
     @Override
-    public VideoVO feedVideo(VideoFeedDTO videoFeedDTO) {
+    public List<VideoVO> feedVideo(VideoFeedDTO videoFeedDTO) {
         LocalDateTime createTime = videoFeedDTO.getCreateTime();
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
-        // 小于 createTime 的一条数据
-        queryWrapper.lt(Video::getCreateTime, StringUtils.isNull(createTime) ? LocalDateTime.now() : createTime).orderByDesc(Video::getCreateTime).last("limit 1");
-        Video one;
+        // 小于 createTime 的5条数据
+        queryWrapper.lt(Video::getCreateTime, StringUtils.isNull(createTime) ? LocalDateTime.now() : createTime).orderByDesc(Video::getCreateTime).last("limit 5");
+        List<Video> videoList;
         try {
-            one = getOne(queryWrapper);
-            if (StringUtils.isNull(one)) {
+            videoList = this.list(queryWrapper);
+            if (StringUtils.isNull(videoList) || videoList.isEmpty()) {
                 LambdaQueryWrapper<Video> queryWrapper2 = new LambdaQueryWrapper<>();
                 // 小于 LocalDateTime.now() 的一条数据
-                queryWrapper2.lt(Video::getCreateTime, LocalDateTime.now()).orderByDesc(Video::getCreateTime).last("limit 1");
-                one = getOne(queryWrapper2);
+                queryWrapper2.lt(Video::getCreateTime, LocalDateTime.now()).orderByDesc(Video::getCreateTime).last("limit 5");
+                videoList = this.list(queryWrapper2);
             }
             // 浏览自增1存入redis
-            viewNumIncrement(one.getVideoId());
-            if (StringUtils.isNull(one)) {
-                return null;
-            }
+            videoList.forEach(v -> {
+                viewNumIncrement(v.getVideoId());
+            });
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
+        List<VideoVO> videoVOList = new ArrayList<>();
         // 封装点赞数，观看量，评论量
-        VideoVO videoVO = BeanCopyUtils.copyBean(one, VideoVO.class);
-        Integer cacheLikeNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, one.getVideoId());
-        Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, one.getVideoId());
-        Integer cacheFavoriteNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, one.getVideoId());
-        videoVO.setLikeNum(StringUtils.isNull(cacheLikeNum) ? 0L : cacheLikeNum);
-        videoVO.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
-        videoVO.setFavoritesNum(StringUtils.isNull(cacheFavoriteNum) ? 0L : cacheFavoriteNum);
-        LambdaQueryWrapper<VideoUserComment> commentQW = new LambdaQueryWrapper<>();
-        commentQW.eq(VideoUserComment::getVideoId, one.getVideoId());
-        List<VideoUserComment> videoUserComments = videoUserCommentMapper.selectList(commentQW);
-        videoVO.setCommentNum((long) videoUserComments.size());
-        return videoVO;
+        videoList.forEach(v -> {
+            VideoVO videoVO = BeanCopyUtils.copyBean(v, VideoVO.class);
+            Integer cacheLikeNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, v.getVideoId());
+            Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, v.getVideoId());
+            Integer cacheFavoriteNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, v.getVideoId());
+            videoVO.setLikeNum(StringUtils.isNull(cacheLikeNum) ? 0L : cacheLikeNum);
+            videoVO.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
+            videoVO.setFavoritesNum(StringUtils.isNull(cacheFavoriteNum) ? 0L : cacheFavoriteNum);
+            LambdaQueryWrapper<VideoUserComment> commentQW = new LambdaQueryWrapper<>();
+            commentQW.eq(VideoUserComment::getVideoId, v.getVideoId());
+            videoVO.setCommentNum(remoteBehaveService.getCommentCountByVideoId(videoVO.getVideoId()).getData());
+            videoVOList.add(videoVO);
+        });
+        return videoVOList;
     }
 
     private void viewNumIncrement(String videoId) {

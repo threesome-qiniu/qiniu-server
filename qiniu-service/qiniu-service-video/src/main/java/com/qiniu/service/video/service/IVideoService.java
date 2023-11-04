@@ -60,7 +60,7 @@ public interface IVideoService extends IService<Video> {
      * @param videoFeedDTO createTime
      * @return video
      */
-    VideoVO feedVideo(VideoFeedDTO videoFeedDTO);
+    List<VideoVO> feedVideo(VideoFeedDTO videoFeedDTO);
 
     /**
      * 根据ids查询视频
