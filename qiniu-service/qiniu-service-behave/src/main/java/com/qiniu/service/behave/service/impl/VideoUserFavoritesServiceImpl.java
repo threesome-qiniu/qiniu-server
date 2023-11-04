@@ -10,10 +10,8 @@ import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.model.video.domain.VideoUserFavorites;
 import com.qiniu.model.video.dto.VideoPageDto;
 import com.qiniu.service.behave.constants.VideoCacheConstants;
-import com.qiniu.service.behave.mapper.VideoMapper;
 import com.qiniu.service.behave.mapper.VideoUserFavoritesMapper;
 import com.qiniu.service.behave.service.IVideoUserFavoritesService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -34,9 +32,6 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
 
     @Resource
     private RedisService redisService;
-
-    @Autowired
-    private VideoMapper videoMapper;
 
     /**
      * 用户收藏
