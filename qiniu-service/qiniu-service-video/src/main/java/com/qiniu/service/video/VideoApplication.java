@@ -5,6 +5,8 @@ import com.qiniu.common.annotations.EnableUserTokenInterceptor;
 import com.qiniu.common.config.MybatisPlusConfig;
 import com.qiniu.common.swagger.Swagger2Configuration;
 import com.qiniu.feign.behave.RemoteBehaveService;
+import com.qiniu.feign.config.FeignConfig;
+import com.qiniu.feign.social.RemoteSocialService;
 import com.qiniu.feign.user.RemoteUserService;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
@@ -25,7 +27,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  **/
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableFeignClients(clients = {RemoteUserService.class, RemoteBehaveService.class})
+@EnableFeignClients(basePackages = "com.qiniu.feign", defaultConfiguration = {FeignConfig.class})
 @EnableUserTokenInterceptor
 @EnableRedisConfig
 @EnableScheduling
