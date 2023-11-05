@@ -2,11 +2,9 @@ package com.qiniu.service.search.service.impl;
 
 import com.mongodb.client.result.DeleteResult;
 import com.qiniu.common.context.UserContext;
-import com.qiniu.common.domain.R;
 import com.qiniu.common.exception.CustomException;
 import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.model.common.enums.HttpCodeEnum;
-import com.qiniu.model.search.dto.VideoSearchHistoryDTO;
 import com.qiniu.service.search.domain.VideoSearchHistory;
 import com.qiniu.service.search.service.VideoSearchHistoryService;
 import org.springframework.data.domain.Sort;
@@ -18,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 /**

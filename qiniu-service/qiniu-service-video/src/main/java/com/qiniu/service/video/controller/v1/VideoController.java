@@ -77,7 +77,6 @@ public class VideoController {
         return R.ok(videoService.queryUserVideoPage(pageDto));
     }
 
-
     /**
      * 通过ids获取video集合
      * @param videoIds

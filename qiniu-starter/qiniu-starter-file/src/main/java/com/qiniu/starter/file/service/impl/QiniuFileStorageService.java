@@ -26,6 +26,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.UUID;
 
 @Slf4j
 @EnableConfigurationProperties(QiniuOssConfigProperties.class)
@@ -72,8 +75,16 @@ public class QiniuFileStorageService implements FileStorageService {
     }
 
     @Override
-    public String uploadVideo(MultipartFile file, String prefix, String filePath) {
+    public String uploadVideo(MultipartFile file) {
         try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd/");
+            String datePath = sdf.format(new Date());
+            String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+            //后缀和文件后缀一致
+            int index = file.getOriginalFilename().lastIndexOf(".");
+            // test.jpg -> .jpg
+            String fileType = file.getOriginalFilename().substring(index);
+            String filePath = datePath + uuid + fileType;
             InputStream inputStream = file.getInputStream();
             String upToken = Auth.create(qiniuOssConfigProperties.getAccessKey(), qiniuOssConfigProperties.getSecretKey())
                     .uploadToken(qiniuOssConfigProperties.getBucket());
@@ -84,9 +95,9 @@ public class QiniuFileStorageService implements FileStorageService {
                 System.out.println(putRet.key);
                 System.out.println(putRet.hash);
                 // 视频转码
-                return prefix + QiniuUtils.transcoding(putRet.key, qiniuOssConfigProperties.getAccessKey(),
-                        qiniuOssConfigProperties.getSecretKey(), qiniuOssConfigProperties.getBucket());
-//                return prefix + filePath;
+//                QiniuUtils.transcoding(putRet.key, qiniuOssConfigProperties.getAccessKey(),
+//                        qiniuOssConfigProperties.getSecretKey(), qiniuOssConfigProperties.getBucket());
+                return "niuyin" + uuid + "video" + fileType;
             } catch (QiniuException ex) {
                 Response r = ex.response;
                 System.err.println(r.toString());

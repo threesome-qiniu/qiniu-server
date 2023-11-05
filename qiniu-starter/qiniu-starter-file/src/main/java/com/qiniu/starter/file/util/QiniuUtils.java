@@ -8,6 +8,7 @@ import com.qiniu.storage.Configuration;
 import com.qiniu.util.Auth;
 import com.qiniu.util.StringMap;
 import com.qiniu.util.UrlSafeBase64;
+import com.sun.javafx.scene.shape.PathUtils;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -38,12 +39,12 @@ public class QiniuUtils {
     /**
      * 转码
      */
-    public static String transcoding(String name, String accessKey, String secretKey, String bucket) {
+    public static void transcoding(String name, String accessKey, String secretKey, String bucket) {
 
         Auth auth = Auth.create(accessKey, secretKey);
 //        String key = "ce104c91-7f82-493a-9ea6-71afae7e76c44.mp4";
         //存储空间中视频的文件名称
-        String newName = IdUtil.fastUUID(); //转码后，另存的文件名称
+        String newName = IdUtil.fastUUID() + ".mp4"; //转码后，另存的文件名称
         log.info("转码后文件名称：{}", newName);
 //        String newKey = "H264_type.mp4";
         String pipeline = "default.sys";  //处理队列
@@ -59,6 +60,5 @@ public class QiniuUtils {
             System.out.println(e.response.statusCode);
             e.printStackTrace();
         }
-        return newName;
     }
 }

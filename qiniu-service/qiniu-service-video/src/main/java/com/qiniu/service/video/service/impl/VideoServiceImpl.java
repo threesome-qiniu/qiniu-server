@@ -39,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -93,8 +94,13 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         //对文件id进行判断，如果文件已经存在，则不上传，直接返回数据库中文件的存储路径
         String filePath = PathUtils.generateFilePath(originalFilename);
         VideoUploadVO videoUploadVO = new VideoUploadVO();
-        videoUploadVO.setVideoUrl(fileStorageService.uploadVideo(file, QiniuVideoOssConstants.PREFIX_URL, filePath));
-        videoUploadVO.setVframe(QiniuVideoOssConstants.PREFIX_URL + filePath + "?vframe/jpg/offset/1");
+        String uploadVideo = fileStorageService.uploadVideo(file);
+        videoUploadVO.setVideoUrl(QiniuVideoOssConstants.PREFIX_URL + uploadVideo);
+        String niuyin = uploadVideo.replace("niuyin", "");
+        String video = niuyin.replace("video", "");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd/");
+        String datePath = sdf.format(new Date());
+        videoUploadVO.setVframe(QiniuVideoOssConstants.PREFIX_URL + datePath + video + "?vframe/jpg/offset/1");
         return videoUploadVO;
     }
 
@@ -144,6 +150,8 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         // 将video对象存入video表中
         boolean save = this.save(video);
         if (save) {
+            // 发布成功添加缓存
+            redisService.setCacheObject(VideoCacheConstants.VIDEO_INFO_PREFIX + video.getVideoId(), video);
             // 1.发送整个video对象发送消息，
             // 待添加视频封面
             VideoSearchVO videoSearchVO = new VideoSearchVO();
@@ -223,13 +231,15 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         LocalDateTime createTime = videoFeedDTO.getCreateTime();
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
         // 小于 createTime 的5条数据
+        queryWrapper.select(Video::getVideoId);
         queryWrapper.lt(Video::getCreateTime, StringUtils.isNull(createTime) ? LocalDateTime.now() : createTime).orderByDesc(Video::getCreateTime).last("limit 5");
         List<Video> videoList;
         try {
             videoList = this.list(queryWrapper);
             if (StringUtils.isNull(videoList) || videoList.isEmpty()) {
                 LambdaQueryWrapper<Video> queryWrapper2 = new LambdaQueryWrapper<>();
-                // 小于 LocalDateTime.now() 的一条数据
+                // 小于 LocalDateTime.now() 的5条数据
+                queryWrapper2.select(Video::getVideoId);
                 queryWrapper2.lt(Video::getCreateTime, LocalDateTime.now()).orderByDesc(Video::getCreateTime).last("limit 5");
                 videoList = this.list(queryWrapper2);
             }
@@ -244,6 +254,12 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         List<VideoVO> videoVOList = new ArrayList<>();
         // 封装VideoVO
         videoList.forEach(v -> {
+            Video cacheObject = redisService.getCacheObject(VideoCacheConstants.VIDEO_INFO_PREFIX + v.getVideoId());
+            if (StringUtils.isNull(cacheObject)) {
+                v = this.getById(v.getVideoId());
+            } else {
+                v = cacheObject;
+            }
             VideoVO videoVO = BeanCopyUtils.copyBean(v, VideoVO.class);
             // 封装点赞数，观看量，评论量
             Integer cacheLikeNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, v.getVideoId());
