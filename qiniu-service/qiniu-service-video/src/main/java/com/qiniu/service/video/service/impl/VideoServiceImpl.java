@@ -116,7 +116,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         Long userId = UserContext.getUser().getUserId();
         //从数据库获得敏感信息
         //判断传过来的数据是否符合数据库字段标准
-        if (videoPublishDto.getVideoTitle().length() > 30) {
+        if (videoPublishDto.getVideoTitle().length() > 100) {
             throw new CustomException(BIND_CONTENT_TITLE_FAIL);
         }
         if (videoPublishDto.getVideoDesc().length() > 200) {

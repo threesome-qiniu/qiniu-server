@@ -5,10 +5,12 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.qiniu.common.context.UserContext;
 import com.qiniu.common.domain.R;
 import com.qiniu.common.domain.vo.PageDataInfo;
+import com.qiniu.common.exception.CustomException;
 import com.qiniu.common.service.RedisService;
 import com.qiniu.common.utils.bean.BeanCopyUtils;
 import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.feign.user.RemoteUserService;
+import com.qiniu.model.common.enums.HttpCodeEnum;
 import com.qiniu.model.user.domain.User;
 import com.qiniu.model.video.domain.VideoUserComment;
 import com.qiniu.model.video.dto.VideoUserCommentPageDTO;
@@ -110,6 +112,9 @@ public class VideoUserCommentController {
      */
     @PostMapping
     public R<?> add(@RequestBody VideoUserComment videoUserComment) {
+        if (StringUtils.isNull(videoUserComment.getContent())) {
+            throw new CustomException(HttpCodeEnum.COMMENT_CONTENT_NULL);
+        }
         videoUserComment.setCreateTime(LocalDateTime.now());
         videoUserComment.setUserId(UserContext.getUser().getUserId());
         return R.ok(this.videoUserCommentService.save(videoUserComment));
@@ -131,6 +136,9 @@ public class VideoUserCommentController {
         return R.ok(this.videoUserCommentService.delCommentByUser(commentId));
     }
 
+    /**
+     * 获取视频评论数
+     */
     @GetMapping("/{videoId}")
     public R<Long> getCommentCountByVideoId(@PathVariable("videoId") String videoId) {
         return R.ok(videoUserCommentService.queryCommentCountByVideoId(videoId));

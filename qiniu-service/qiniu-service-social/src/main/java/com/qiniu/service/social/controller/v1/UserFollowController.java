@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.qiniu.common.context.UserContext;
 import com.qiniu.common.domain.R;
 import com.qiniu.common.domain.vo.PageDataInfo;
+import com.qiniu.common.utils.string.StringUtils;
 import com.qiniu.feign.user.RemoteUserService;
 import com.qiniu.model.common.dto.PageDTO;
 import com.qiniu.model.user.domain.User;
@@ -53,6 +54,17 @@ public class UserFollowController {
      */
     @PostMapping("/page")
     public PageDataInfo followPage(@RequestBody PageDTO pageDTO) {
+        if (StringUtils.isNull(pageDTO)) {
+            LambdaQueryWrapper<UserFollow> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+            lambdaQueryWrapper.eq(UserFollow::getUserId, UserContext.getUserId());
+            List<UserFollow> list = userFollowService.list(lambdaQueryWrapper);
+            List<User> res = new ArrayList<>();
+            list.forEach(l -> {
+                User user = remoteUserService.userInfoById(l.getUserFollowId()).getData();
+                res.add(user);
+            });
+            return PageDataInfo.genPageData(res, res.size());
+        }
         IPage<UserFollow> userFollowIPage = userFollowService.followPage(pageDTO);
         List<User> userList = new ArrayList<>();
         userFollowIPage.getRecords().forEach(uf -> {

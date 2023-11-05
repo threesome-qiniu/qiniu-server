@@ -1,6 +1,8 @@
 package com.qiniu.service.video.controller.v1;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.qiniu.common.domain.R;
+import com.qiniu.common.domain.vo.PageDataInfo;
 import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.dto.VideoPublishDto;
 import com.qiniu.model.video.dto.VideoFeedDTO;
@@ -62,8 +64,9 @@ public class VideoController {
      * @return
      */
     @PostMapping("/mypage")
-    public R<?> myPage(@RequestBody VideoPageDto pageDto) {
-        return R.ok(videoService.queryMyVideoPage(pageDto));
+    public PageDataInfo myPage(@RequestBody VideoPageDto pageDto) {
+        IPage<Video> videoIPage = videoService.queryMyVideoPage(pageDto);
+        return PageDataInfo.genPageData(videoIPage.getRecords(),videoIPage.getTotal());
     }
 
     /**
@@ -73,8 +76,9 @@ public class VideoController {
      * @return
      */
     @PostMapping("/userpage")
-    public R<?> userPage(@RequestBody VideoPageDto pageDto) {
-        return R.ok(videoService.queryUserVideoPage(pageDto));
+    public PageDataInfo userPage(@RequestBody VideoPageDto pageDto) {
+        IPage<Video> videoIPage = videoService.queryUserVideoPage(pageDto);
+        return PageDataInfo.genPageData(videoIPage.getRecords(),videoIPage.getTotal());
     }
 
     /**

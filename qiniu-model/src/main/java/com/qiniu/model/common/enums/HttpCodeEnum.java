@@ -46,6 +46,8 @@ public enum HttpCodeEnum {
     IMAGE_TYPE_FOLLOW(1201, "图片类型错误"),
     IMAGE_SIZE_FOLLOW(1202, "图片类型错误"),
 
+    COMMENT_CONTENT_NULL(1301, "请输入评论内容"),
+
     UPLOAD_FAIL(10001, "上传失败"),
     BIND_FAIL(10002,"绑定失败"),
     BIND_CONTENT_TITLE_FAIL(10003,"视频标题需在30字符以内"),
