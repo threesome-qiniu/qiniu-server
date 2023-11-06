@@ -9,8 +9,9 @@ spring:
     nacos:
       discovery:
         server-addr: 106.14.105.101:8848
-        ephemeral: false
+        namespace: c8a5722f-83fa-478c-b82d-f0e8b5015351
       config:
+        namespace: c8a5722f-83fa-478c-b82d-f0e8b5015351
         server-addr: 106.14.105.101:8848
         file-extension: yml
         shared-configs:

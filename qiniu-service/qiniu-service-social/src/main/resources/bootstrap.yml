@@ -9,7 +9,6 @@ spring:
     nacos:
       discovery:
         server-addr: 106.14.105.101:8848
-        ephemeral: false
       config:
         server-addr: 106.14.105.101:8848
         file-extension: yml
