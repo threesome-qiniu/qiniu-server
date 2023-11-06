@@ -299,4 +299,23 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         queryWrapper.in(Video::getVideoId, videoIds);
         return this.list(queryWrapper);
     }
+
+    /**
+     * @param videoId
+     */
+    @Transactional
+    @Override
+    public void deleteVideoByVideoIds(String videoId) {
+        //从视频表删除视频（单条）
+        videoMapper.deleteById(videoId);
+        //从视频分类表关联表删除信息（单条）
+        videoCategoryRelationService.removeById(videoId);
+        //删除视频对应的es文档
+        remoteBehaveService.deleteVideoDocumentByVideoId(videoId);
+        //从视频收藏表删除该视频的所有记录
+        remoteBehaveService.deleteVideoFavoriteRecordByVideoId(videoId);
+        //从视频点赞表删除该视频的所有记录
+        remoteBehaveService.deleteVideoLikeRecord(videoId);
+
+    }
 }
