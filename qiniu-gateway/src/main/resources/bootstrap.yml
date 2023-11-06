@@ -6,15 +6,16 @@ spring:
   application:
     name: qiniu-gateway
   profiles:
-    active: dev
+    active: test
   cloud:
     nacos:
       discovery:
         server-addr: 106.14.105.101:8848
-        ephemeral: false
+        namespace: 37384933-8555-45fe-925c-fe6251dcbbb4
       config:
         server-addr: 106.14.105.101:8848
         file-extension: yml
+        namespace: 37384933-8555-45fe-925c-fe6251dcbbb4
     gateway:
       httpclient:
         #        response-timeout: PT10S # 全局的响应超时时间，网络链接后，后端服务多久不返回网关就报错 The response timeout.
@@ -42,6 +43,7 @@ spring:
             dataId: sentinel-qiniu-gateway
             groupId: DEFAULT_GROUP
             data-type: json
+            namespace: 37384933-8555-45fe-925c-fe6251dcbbb4
             rule-type: gw-flow
 logging:
   level:

@@ -23,7 +23,6 @@ import com.qiniu.service.video.mapper.VideoSensitiveMapper;
 import com.qiniu.service.video.service.IVideoCategoryRelationService;
 import com.qiniu.service.video.service.IVideoCategoryService;
 import com.qiniu.service.video.service.IVideoService;
-import com.qiniu.service.video.service.IVideoUserLikeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

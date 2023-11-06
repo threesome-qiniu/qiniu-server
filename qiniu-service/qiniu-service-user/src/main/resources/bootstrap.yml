@@ -5,18 +5,19 @@ spring:
   application:
     name: qiniu-user
   profiles:
-    active: dev
+    active: test
   cloud:
     nacos:
       discovery:
         server-addr: 106.14.105.101:8848
-        ephemeral: false
+        namespace: 37384933-8555-45fe-925c-fe6251dcbbb4
       config:
         server-addr: 106.14.105.101:8848
         file-extension: yml
         shared-configs:
           - dataId: shared-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
           - dataId: shared-mysql-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+        namespace: 37384933-8555-45fe-925c-fe6251dcbbb4
 #    sentinel:
 #      transport:
 #        dashboard: localhost:8090
