@@ -51,4 +51,11 @@ public class VideoSearchController {
         return R.ok(res);
     }
 
+    @DeleteMapping("/{videoId}")
+    public R<?> deleteVideo(@PathVariable("videoId") String videoId) {
+        videoSearchService.deleteVideoDoc(videoId);
+        return R.ok();
+    }
+
+
 }

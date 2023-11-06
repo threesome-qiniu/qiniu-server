@@ -91,5 +91,11 @@ public class VideoController {
         return R.ok(videoService.queryVideoByVideoIds(videoIds));
     }
 
+    @DeleteMapping("/{videoId}")
+    public R<?> deleteVideoByVideoIds(@PathVariable("videoId") String videoId) {
+        videoService.deleteVideoByVideoIds(videoId);
+        return null;
+    }
+
 }
 

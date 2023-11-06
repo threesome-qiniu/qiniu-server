@@ -69,4 +69,9 @@ public interface IVideoService extends IService<Video> {
      */
     List<Video> queryVideoByVideoIds(List<String> videoIds);
 
+    /**
+     * 删除视频，并且将视频同步从 es中删除
+     * @param videoIds
+     */
+    void deleteVideoByVideoIds(String videoId);
 }

@@ -6,15 +6,17 @@ spring:
   application:
     name: qiniu-gateway
   profiles:
-    active: dev
+    active: pro
   cloud:
     nacos:
       discovery:
         server-addr: 106.14.105.101:8848
         ephemeral: false
+        namespace: 3f598f78-c669-409b-9189-ea72adc21d30
       config:
         server-addr: 106.14.105.101:8848
         file-extension: yml
+        namespace: 3f598f78-c669-409b-9189-ea72adc21d30
     gateway:
       httpclient:
         #        response-timeout: PT10S # 全局的响应超时时间，网络链接后，后端服务多久不返回网关就报错 The response timeout.
