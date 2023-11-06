@@ -27,8 +27,6 @@ public class VideoUserLikeController {
     @Resource
     private IVideoUserLikeService videoUserLikeService;
 
-    //    @Resource
-//    private IVideoService videoService;
     @Resource
     private RemoteVideoService remoteVideoService;
 

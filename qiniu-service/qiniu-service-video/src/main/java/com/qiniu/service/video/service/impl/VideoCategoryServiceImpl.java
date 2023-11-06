@@ -1,22 +1,25 @@
 package com.qiniu.service.video.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.google.gson.Gson;
 import com.qiniu.common.service.RedisService;
 import com.qiniu.common.utils.bean.BeanCopyUtils;
+import com.qiniu.common.utils.string.StringUtils;
+import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.domain.VideoCategory;
+import com.qiniu.model.video.domain.VideoCategoryRelation;
+import com.qiniu.model.video.dto.VideoCategoryPageDTO;
 import com.qiniu.model.video.vo.VideoCategoryVo;
 import com.qiniu.service.video.constants.VideoCacheConstants;
 import com.qiniu.service.video.mapper.VideoCategoryMapper;
+import com.qiniu.service.video.service.IVideoCategoryRelationService;
 import com.qiniu.service.video.service.IVideoCategoryService;
+import com.qiniu.service.video.service.IVideoService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -37,6 +40,12 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
 
     @Autowired
     RedisService redisService;
+
+    @Resource
+    private IVideoCategoryRelationService videoCategoryRelationService;
+
+    @Resource
+    private IVideoService videoService;
 
     @Override
     public List<VideoCategory> saveVideoCategoriesToRedis() {
@@ -63,4 +72,26 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
         return videoCategoryVos;
     }
 
+    /**
+     * 分页根据分类获取视频
+     *
+     * @param pageDTO
+     * @return
+     */
+    @Override
+    public IPage<Video> selectVideoByCategory(VideoCategoryPageDTO pageDTO) {
+        if (StringUtils.isNull(pageDTO.getCategoryId())) {
+            return new Page<>();
+        }
+        LambdaQueryWrapper<VideoCategoryRelation> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(VideoCategoryRelation::getVideoId);
+        queryWrapper.eq(VideoCategoryRelation::getCategoryId, pageDTO.getCategoryId());
+        List<VideoCategoryRelation> list = videoCategoryRelationService.list(queryWrapper);
+        if (StringUtils.isNull(list) || list.isEmpty()) {
+            return new Page<>();
+        }
+        LambdaQueryWrapper<Video> videoLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        videoLambdaQueryWrapper.in(Video::getVideoId, list.stream().map(VideoCategoryRelation::getVideoId).collect(Collectors.toList()));
+        return videoService.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), videoLambdaQueryWrapper);
+    }
 }
