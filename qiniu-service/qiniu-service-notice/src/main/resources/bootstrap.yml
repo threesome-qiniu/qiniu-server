@@ -4,12 +4,11 @@ spring:
   application:
     name: qiniu-notice
   profiles:
-    active: dev
+    active: pro
   cloud:
     nacos:
       discovery:
         server-addr: 106.14.105.101:8848
-        ephemeral: true
         namespace: 3f598f78-c669-409b-9189-ea72adc21d30
       config:
         namespace: 3f598f78-c669-409b-9189-ea72adc21d30
