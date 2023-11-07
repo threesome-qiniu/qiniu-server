@@ -4,7 +4,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.qiniu.common.domain.R;
 import com.qiniu.common.domain.vo.PageDataInfo;
 import com.qiniu.common.service.RedisService;
+import com.qiniu.common.utils.bean.BeanCopyUtils;
+import com.qiniu.common.utils.string.StringUtils;
+import com.qiniu.feign.user.RemoteUserService;
 import com.qiniu.model.common.dto.PageDTO;
+import com.qiniu.model.user.domain.User;
 import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.dto.VideoPublishDto;
 import com.qiniu.model.video.dto.VideoFeedDTO;
@@ -38,13 +42,32 @@ public class VideoController {
     @Resource
     private RedisService redisService;
 
+    @Resource
+    private RemoteUserService remoteUserService;
+
     @PostMapping("/hot")
     public PageDataInfo hotVideos(@RequestBody PageDTO pageDTO) {
         Integer startIndex = (pageDTO.getPageNum() - 1) * pageDTO.getPageSize();
         Integer endIndex = startIndex + pageDTO.getPageSize() - 1;
-        Set cacheZSetRange = redisService.getCacheZSetRange(VideoCacheConstants.VIDEO_HOT, startIndex, endIndex);
+        Set videoIds = redisService.getCacheZSetRange(VideoCacheConstants.VIDEO_HOT, startIndex, endIndex);
         Long hotCount = redisService.getCacheZSetZCard(VideoCacheConstants.VIDEO_HOT);
-        return PageDataInfo.genPageData(new ArrayList<>(cacheZSetRange), hotCount);
+        List<VideoVO> videoVOList = new ArrayList<>();
+        videoIds.forEach(vid -> {
+            Video video = videoService.selectById((String) vid);
+            VideoVO videoVO = BeanCopyUtils.copyBean(video, VideoVO.class);
+            User user = new User();
+            try {
+                user = remoteUserService.userInfoById(video.getUserId()).getData();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (StringUtils.isNotNull(user)) {
+                videoVO.setUserNickName(user.getNickName());
+                videoVO.setUserAvatar(user.getAvatar());
+            }
+            videoVOList.add(videoVO);
+        });
+        return PageDataInfo.genPageData(videoVOList, hotCount);
     }
 
     /**

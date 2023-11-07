@@ -267,6 +267,7 @@ public class RedisService {
 
     /**
      * 分页查询zset
+     * range升序，reverseRange降序
      *
      * @param key
      * @param startIndex
@@ -274,7 +275,7 @@ public class RedisService {
      * @return
      */
     public Set getCacheZSetRange(String key, long startIndex, long endIndex) {
-        return redisTemplate.opsForZSet().range(key, startIndex, endIndex);
+        return redisTemplate.opsForZSet().reverseRange(key, startIndex, endIndex);
     }
 
     /**

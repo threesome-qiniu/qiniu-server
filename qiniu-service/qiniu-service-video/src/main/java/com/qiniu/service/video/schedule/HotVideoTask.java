@@ -43,7 +43,7 @@ public class HotVideoTask {
                 log.info("0.o");
             } else {
                 Video video = BeanCopyUtils.copyBean(h, Video.class);
-                redisService.setCacheZSet(VideoCacheConstants.VIDEO_HOT, video, h.getScore());
+                redisService.setCacheZSet(VideoCacheConstants.VIDEO_HOT, video.getVideoId(), h.getScore());
             }
         });
         redisService.expire(VideoCacheConstants.VIDEO_HOT, 1, TimeUnit.HOURS);
