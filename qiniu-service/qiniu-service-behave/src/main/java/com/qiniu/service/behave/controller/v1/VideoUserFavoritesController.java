@@ -1,10 +1,12 @@
 package com.qiniu.service.behave.controller.v1;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.qiniu.common.domain.R;
 import com.qiniu.common.domain.vo.PageDataInfo;
 import com.qiniu.feign.video.RemoteVideoService;
 import com.qiniu.model.video.domain.VideoUserFavorites;
+import com.qiniu.model.video.domain.VideoUserLike;
 import com.qiniu.model.video.dto.VideoPageDto;
 import com.qiniu.service.behave.service.IVideoUserFavoritesService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +62,13 @@ public class VideoUserFavoritesController {
             return PageDataInfo.genPageData(null,0);
         }
         return PageDataInfo.genPageData(remoteVideoService.queryVideoByVideoIds(videoIds).getData(), favoritesPage.getTotal());
+    }
+
+    @DeleteMapping("/{videoId}")
+    public R<?> deleteVideoFavoriteRecordByVideoId(@PathVariable String videoId){
+        LambdaQueryWrapper<VideoUserFavorites> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoUserFavorites::getVideoId,videoId);
+        return R.ok(videoUserFavoritesService.removeById(videoId));
     }
 }
 

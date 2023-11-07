@@ -4,6 +4,7 @@ import com.qiniu.common.constant.ServiceNameConstants;
 import com.qiniu.common.domain.R;
 import com.qiniu.feign.video.fallback.RemoteVideoServiceFallback;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -25,4 +26,12 @@ public interface RemoteBehaveService {
     @GetMapping("/api/v1/comment/{videoId}")
     R<Long> getCommentCountByVideoId(@PathVariable("videoId") String videoId);
 
+    @DeleteMapping("/api/v1/video/{vodeoId}")
+    R<?> deleteVideoDocumentByVideoId(@PathVariable("videoId") String videoId);
+
+    @DeleteMapping("/{videoId}")
+    public R<?> deleteVideoLikeRecord(@PathVariable String videoId);
+
+    @DeleteMapping("/{videoId}")
+    public R<?> deleteVideoFavoriteRecordByVideoId(@PathVariable String videoId);
 }

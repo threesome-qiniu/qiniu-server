@@ -1,5 +1,6 @@
 package com.qiniu.service.behave.controller.v1;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.qiniu.common.domain.R;
 import com.qiniu.common.domain.vo.PageDataInfo;
@@ -54,6 +55,13 @@ public class VideoUserLikeController {
 //        List<Video> videos = videoService.queryVideoByVideoIds(videoIds );
         List<Video> videos = remoteVideoService.queryVideoByVideoIds(videoIds).getData();
         return PageDataInfo.genPageData(videos, likeIPage.getTotal());
+    }
+
+    @DeleteMapping("/{videoId}")
+    public R<?> deleteVideoLikeRecord(@PathVariable String videoId){
+        LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoUserLike::getVideoId,videoId);
+        return R.ok(videoUserLikeService.remove(queryWrapper));
     }
 
 }

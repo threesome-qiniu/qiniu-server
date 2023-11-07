@@ -1,6 +1,7 @@
 package com.qiniu.common.service;
 
 import lombok.AllArgsConstructor;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.HashOperations;
@@ -250,5 +251,50 @@ public class RedisService {
      */
     public void incrementCacheMapValue(String key, String hKey, long v) {
         redisTemplate.boundHashOps(key).increment(hKey, v);
+    }
+
+    /**
+     * 缓存zset
+     *
+     * @param key
+     * @param t
+     * @param score
+     * @param <T>
+     */
+    public <T> void setCacheZSet(String key, T t, long score) {
+        redisTemplate.opsForZSet().add(key, t, score);
+    }
+
+    /**
+     * 分页查询zset
+     * range升序，reverseRange降序
+     *
+     * @param key
+     * @param startIndex
+     * @param endIndex
+     * @return
+     */
+    public Set getCacheZSetRange(String key, long startIndex, long endIndex) {
+        return redisTemplate.opsForZSet().reverseRange(key, startIndex, endIndex);
+    }
+
+    /**
+     * 获取zset数据总条数
+     *
+     * @param key
+     * @return
+     */
+    public Long getCacheZSetZCard(String key) {
+        return redisTemplate.opsForZSet().zCard(key);
+    }
+
+    /**
+     * 查询zset某项的得分
+     *
+     * @param key
+     * @return
+     */
+    public Double getZSetScore(String key, String zkey) {
+        return redisTemplate.opsForZSet().score(key, zkey);
     }
 }

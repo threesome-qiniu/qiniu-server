@@ -25,6 +25,34 @@ public class RemoteBehaveServiceFallback implements FallbackFactory<RemoteBehave
             public R<Long> getCommentCountByVideoId(String videoId) {
                 return R.fail(null);
             }
+
+            /**
+             * @param videoId
+             * @return
+             */
+            @Override
+            public R<?> deleteVideoDocumentByVideoId(String videoId) {
+
+                return R.fail(null);
+            }
+
+            /**
+             * @param videoId
+             * @return
+             */
+            @Override
+            public R<?> deleteVideoLikeRecord(String videoId) {
+                return R.fail(null);
+            }
+
+            /**
+             * @param videoId
+             * @return
+             */
+            @Override
+            public R<?> deleteVideoFavoriteRecordByVideoId(String videoId) {
+                return R.fail(null);
+            }
         };
     }
 }
