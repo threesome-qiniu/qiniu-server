@@ -4,12 +4,12 @@ spring:
   application:
     name: qiniu-behave
   profiles:
-    active: test
+    active: pro
   cloud:
     nacos:
       discovery:
         server-addr: 106.14.105.101:8848
-        namespace: 37384933-8555-45fe-925c-fe6251dcbbb4
+        namespace: 3f598f78-c669-409b-9189-ea72adc21d30
       config:
         server-addr: 106.14.105.101:8848
         file-extension: yml
@@ -17,7 +17,7 @@ spring:
           - dataId: shared-mysql-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
           - dataId: shared-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
           - dataId: shared-rabbitmq-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-        namespace: 37384933-8555-45fe-925c-fe6251dcbbb4
+        namespace: 3f598f78-c669-409b-9189-ea72adc21d30
 logging:
   level:
     com.qiniu: debug
