@@ -45,6 +45,12 @@ public class VideoController {
     @Resource
     private RemoteUserService remoteUserService;
 
+    /**
+     * 热门视频
+     *
+     * @param pageDTO
+     * @return
+     */
     @PostMapping("/hot")
     public PageDataInfo hotVideos(@RequestBody PageDTO pageDTO) {
         Integer startIndex = (pageDTO.getPageNum() - 1) * pageDTO.getPageSize();
