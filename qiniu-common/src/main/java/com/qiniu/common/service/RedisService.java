@@ -287,4 +287,14 @@ public class RedisService {
     public Long getCacheZSetZCard(String key) {
         return redisTemplate.opsForZSet().zCard(key);
     }
+
+    /**
+     * 查询zset某项的得分
+     *
+     * @param key
+     * @return
+     */
+    public Double getZSetScore(String key, String zkey) {
+        return redisTemplate.opsForZSet().score(key, zkey);
+    }
 }

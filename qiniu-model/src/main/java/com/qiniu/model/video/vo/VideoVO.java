@@ -19,4 +19,6 @@ public class VideoVO extends Video {
     // 是否关注
     private boolean weatherFollow;
 
+    // 热力值
+    private Double hotScore;
 }
