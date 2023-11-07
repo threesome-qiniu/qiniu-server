@@ -1,6 +1,7 @@
 package com.qiniu.common.service;
 
 import lombok.AllArgsConstructor;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.HashOperations;
@@ -250,5 +251,9 @@ public class RedisService {
      */
     public void incrementCacheMapValue(String key, String hKey, long v) {
         redisTemplate.boundHashOps(key).increment(hKey, v);
+    }
+
+    public <T> void setCacheZSet(String key, T t, long score) {
+        redisTemplate.opsForZSet().add(key, t, score);
     }
 }

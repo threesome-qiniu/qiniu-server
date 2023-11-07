@@ -32,7 +32,8 @@ spring:
     #DISABLED：不使用任何连接池
     sentinel:
       transport:
-        dashboard: 106.14.105.101:8090
+#        dashboard: 106.14.105.101:8090
+        dashboard: localhost:8080
       eager: true
       http-method-specify: true
       # nacos配置持久化

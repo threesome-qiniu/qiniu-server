@@ -21,5 +21,7 @@ public class VideoCacheConstants {
 
     public static final String VIDEO_VIEW_COVER_IMAGE_KEY = "?vframe/jpg/offset/1";
 
+    // 热门视频
+    public static final String VIDEO_HOT = "video:hot";
 
 }

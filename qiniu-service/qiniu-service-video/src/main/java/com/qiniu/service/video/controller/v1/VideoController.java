@@ -3,6 +3,7 @@ package com.qiniu.service.video.controller.v1;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.qiniu.common.domain.R;
 import com.qiniu.common.domain.vo.PageDataInfo;
+import com.qiniu.model.common.dto.PageDTO;
 import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.dto.VideoPublishDto;
 import com.qiniu.model.video.dto.VideoFeedDTO;
@@ -30,6 +31,11 @@ public class VideoController {
     @Resource
     private IVideoService videoService;
 
+    @GetMapping("/hot")
+    public R<?> hotVideos(@RequestBody PageDTO pageDTO){
+        videoService.hotVideoPage(pageDTO);
+        return R.ok();
+    }
     /**
      * 视频流接口 ,默认返回5条数据
      */
