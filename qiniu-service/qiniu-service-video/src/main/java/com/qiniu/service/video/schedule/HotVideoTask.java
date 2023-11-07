@@ -1,6 +1,7 @@
 package com.qiniu.service.video.schedule;
 
 import com.qiniu.common.service.RedisService;
+import com.qiniu.common.utils.bean.BeanCopyUtils;
 import com.qiniu.common.utils.date.DateUtils;
 import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.vo.HotVideoVO;
@@ -31,7 +32,7 @@ public class HotVideoTask {
     @Resource
     private IVideoService videoService;
 
-    @Scheduled(fixedRate = 1000 * 60)
+    @Scheduled(fixedRate = 1000 * 60 * 5)
     public void computeHotVideo() {
         log.info("==> 开始计算热门视频，首先查询最近两天的视频记录");
         List<Video> videoList = videoService.getVideoListLtCreateTime(DateUtils.getTodayMinusStartLocalDateTime(2));
@@ -41,7 +42,8 @@ public class HotVideoTask {
             if (h.getScore() == 0) {
                 log.info("0.o");
             } else {
-                redisService.setCacheZSet(VideoCacheConstants.VIDEO_HOT, h, h.getScore());
+                Video video = BeanCopyUtils.copyBean(h, Video.class);
+                redisService.setCacheZSet(VideoCacheConstants.VIDEO_HOT, video, h.getScore());
             }
         });
         redisService.expire(VideoCacheConstants.VIDEO_HOT, 1, TimeUnit.HOURS);

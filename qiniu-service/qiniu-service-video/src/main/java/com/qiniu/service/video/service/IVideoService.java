@@ -82,14 +82,6 @@ public interface IVideoService extends IService<Video> {
     void deleteVideoByVideoIds(String videoId);
 
     /**
-     * 分页查询热门视频数据
-     *
-     * @param pageDTO
-     * @return
-     */
-    IPage<Video> hotVideoPage(PageDTO pageDTO);
-
-    /**
      * 筛选大于ctime的视频数据
      *
      * @param ctime

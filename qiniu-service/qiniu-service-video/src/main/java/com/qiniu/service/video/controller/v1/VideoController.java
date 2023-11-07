@@ -3,6 +3,7 @@ package com.qiniu.service.video.controller.v1;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.qiniu.common.domain.R;
 import com.qiniu.common.domain.vo.PageDataInfo;
+import com.qiniu.common.service.RedisService;
 import com.qiniu.model.common.dto.PageDTO;
 import com.qiniu.model.video.domain.Video;
 import com.qiniu.model.video.dto.VideoPublishDto;
@@ -10,13 +11,16 @@ import com.qiniu.model.video.dto.VideoFeedDTO;
 import com.qiniu.model.video.dto.VideoPageDto;
 import com.qiniu.model.video.vo.VideoUploadVO;
 import com.qiniu.model.video.vo.VideoVO;
+import com.qiniu.service.video.constants.VideoCacheConstants;
 import com.qiniu.service.video.service.IVideoService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 视频表(Video)表控制层
@@ -31,11 +35,18 @@ public class VideoController {
     @Resource
     private IVideoService videoService;
 
-    @GetMapping("/hot")
-    public R<?> hotVideos(@RequestBody PageDTO pageDTO){
-        videoService.hotVideoPage(pageDTO);
-        return R.ok();
+    @Resource
+    private RedisService redisService;
+
+    @PostMapping("/hot")
+    public PageDataInfo hotVideos(@RequestBody PageDTO pageDTO) {
+        Integer startIndex = (pageDTO.getPageNum() - 1) * pageDTO.getPageSize();
+        Integer endIndex = startIndex + pageDTO.getPageSize() - 1;
+        Set cacheZSetRange = redisService.getCacheZSetRange(VideoCacheConstants.VIDEO_HOT, startIndex, endIndex);
+        Long hotCount = redisService.getCacheZSetZCard(VideoCacheConstants.VIDEO_HOT);
+        return PageDataInfo.genPageData(new ArrayList<>(cacheZSetRange), hotCount);
     }
+
     /**
      * 视频流接口 ,默认返回5条数据
      */
@@ -72,7 +83,7 @@ public class VideoController {
     @PostMapping("/mypage")
     public PageDataInfo myPage(@RequestBody VideoPageDto pageDto) {
         IPage<Video> videoIPage = videoService.queryMyVideoPage(pageDto);
-        return PageDataInfo.genPageData(videoIPage.getRecords(),videoIPage.getTotal());
+        return PageDataInfo.genPageData(videoIPage.getRecords(), videoIPage.getTotal());
     }
 
     /**
@@ -84,11 +95,12 @@ public class VideoController {
     @PostMapping("/userpage")
     public PageDataInfo userPage(@RequestBody VideoPageDto pageDto) {
         IPage<Video> videoIPage = videoService.queryUserVideoPage(pageDto);
-        return PageDataInfo.genPageData(videoIPage.getRecords(),videoIPage.getTotal());
+        return PageDataInfo.genPageData(videoIPage.getRecords(), videoIPage.getTotal());
     }
 
     /**
      * 通过ids获取video集合
+     *
      * @param videoIds
      * @return
      */

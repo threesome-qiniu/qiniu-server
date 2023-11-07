@@ -253,7 +253,37 @@ public class RedisService {
         redisTemplate.boundHashOps(key).increment(hKey, v);
     }
 
+    /**
+     * 缓存zset
+     *
+     * @param key
+     * @param t
+     * @param score
+     * @param <T>
+     */
     public <T> void setCacheZSet(String key, T t, long score) {
         redisTemplate.opsForZSet().add(key, t, score);
+    }
+
+    /**
+     * 分页查询zset
+     *
+     * @param key
+     * @param startIndex
+     * @param endIndex
+     * @return
+     */
+    public Set getCacheZSetRange(String key, long startIndex, long endIndex) {
+        return redisTemplate.opsForZSet().range(key, startIndex, endIndex);
+    }
+
+    /**
+     * 获取zset数据总条数
+     *
+     * @param key
+     * @return
+     */
+    public Long getCacheZSetZCard(String key) {
+        return redisTemplate.opsForZSet().zCard(key);
     }
 }

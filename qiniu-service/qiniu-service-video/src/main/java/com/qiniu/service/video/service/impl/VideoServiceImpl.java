@@ -235,7 +235,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
         // 小于 createTime 的5条数据
         queryWrapper.select(Video::getVideoId);
-        queryWrapper.lt(Video::getCreateTime, StringUtils.isNull(createTime) ? LocalDateTime.now() : createTime).orderByDesc(Video::getCreateTime).last("limit 5");
+        queryWrapper.lt(Video::getCreateTime, StringUtils.isNull(createTime) ? LocalDateTime.now() : createTime).orderByDesc(Video::getCreateTime).last("limit 3");
         List<Video> videoList;
         try {
             videoList = this.list(queryWrapper);
@@ -243,7 +243,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 LambdaQueryWrapper<Video> queryWrapper2 = new LambdaQueryWrapper<>();
                 // 小于 LocalDateTime.now() 的5条数据
                 queryWrapper2.select(Video::getVideoId);
-                queryWrapper2.lt(Video::getCreateTime, LocalDateTime.now()).orderByDesc(Video::getCreateTime).last("limit 5");
+                queryWrapper2.lt(Video::getCreateTime, LocalDateTime.now()).orderByDesc(Video::getCreateTime).last("limit 3");
                 videoList = this.list(queryWrapper2);
             }
             // 浏览自增1存入redis
@@ -257,36 +257,40 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         List<VideoVO> videoVOList = new ArrayList<>();
         // 封装VideoVO
         videoList.forEach(v -> {
-            Video cacheObject = redisService.getCacheObject(VideoCacheConstants.VIDEO_INFO_PREFIX + v.getVideoId());
-            if (StringUtils.isNull(cacheObject)) {
-                v = this.getById(v.getVideoId());
-            } else {
-                v = cacheObject;
+            try {
+                Video cacheObject = redisService.getCacheObject(VideoCacheConstants.VIDEO_INFO_PREFIX + v.getVideoId());
+                if (StringUtils.isNull(cacheObject)) {
+                    v = this.getById(v.getVideoId());
+                } else {
+                    v = cacheObject;
+                }
+                VideoVO videoVO = BeanCopyUtils.copyBean(v, VideoVO.class);
+                // 封装点赞数，观看量，评论量
+                Integer cacheLikeNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, v.getVideoId());
+                Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, v.getVideoId());
+                Integer cacheFavoriteNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, v.getVideoId());
+                videoVO.setLikeNum(StringUtils.isNull(cacheLikeNum) ? 0L : cacheLikeNum);
+                videoVO.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
+                videoVO.setFavoritesNum(StringUtils.isNull(cacheFavoriteNum) ? 0L : cacheFavoriteNum);
+                LambdaQueryWrapper<VideoUserComment> commentQW = new LambdaQueryWrapper<>();
+                commentQW.eq(VideoUserComment::getVideoId, v.getVideoId());
+                videoVO.setCommentNum(remoteBehaveService.getCommentCountByVideoId(videoVO.getVideoId()).getData());
+                // 封装用户信息
+                User poublishUser = remoteUserService.userInfoById(v.getUserId()).getData();
+                videoVO.setUserNickName(StringUtils.isNull(poublishUser) ? null : poublishUser.getNickName());
+                videoVO.setUserAvatar(StringUtils.isNull(poublishUser) ? null : poublishUser.getAvatar());
+                // 是否关注
+                Long loginUserId = UserContext.getUserId();
+                if (StringUtils.isNotNull(loginUserId) && v.getUserId().equals(loginUserId)) {
+                    videoVO.setWeatherFollow(true);
+                } else {
+                    Boolean weatherFollow = remoteSocialService.weatherfollow(v.getUserId()).getData();
+                    videoVO.setWeatherFollow(!StringUtils.isNull(weatherFollow) && weatherFollow);
+                }
+                videoVOList.add(videoVO);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            VideoVO videoVO = BeanCopyUtils.copyBean(v, VideoVO.class);
-            // 封装点赞数，观看量，评论量
-            Integer cacheLikeNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, v.getVideoId());
-            Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, v.getVideoId());
-            Integer cacheFavoriteNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, v.getVideoId());
-            videoVO.setLikeNum(StringUtils.isNull(cacheLikeNum) ? 0L : cacheLikeNum);
-            videoVO.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
-            videoVO.setFavoritesNum(StringUtils.isNull(cacheFavoriteNum) ? 0L : cacheFavoriteNum);
-            LambdaQueryWrapper<VideoUserComment> commentQW = new LambdaQueryWrapper<>();
-            commentQW.eq(VideoUserComment::getVideoId, v.getVideoId());
-            videoVO.setCommentNum(remoteBehaveService.getCommentCountByVideoId(videoVO.getVideoId()).getData());
-            // 封装用户信息
-            User poublishUser = remoteUserService.userInfoById(v.getUserId()).getData();
-            videoVO.setUserNickName(StringUtils.isNull(poublishUser) ? null : poublishUser.getNickName());
-            videoVO.setUserAvatar(StringUtils.isNull(poublishUser) ? null : poublishUser.getAvatar());
-            // 是否关注
-            Long loginUserId = UserContext.getUserId();
-            if (StringUtils.isNotNull(loginUserId) && v.getUserId().equals(loginUserId)) {
-                videoVO.setWeatherFollow(true);
-            } else {
-                Boolean weatherFollow = remoteSocialService.weatherfollow(v.getUserId()).getData();
-                videoVO.setWeatherFollow(!StringUtils.isNull(weatherFollow) && weatherFollow);
-            }
-            videoVOList.add(videoVO);
         });
         return videoVOList;
     }
@@ -325,22 +329,6 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         //从视频点赞表删除该视频的所有记录
         remoteBehaveService.deleteVideoLikeRecord(videoId);
 
-    }
-
-    @Resource
-    private RedisTemplate redisTemplate;
-
-    /**
-     * 分页查询热门视频数据
-     *
-     * @param pageDTO
-     * @return
-     */
-    @Override
-    public IPage<Video> hotVideoPage(PageDTO pageDTO) {
-
-
-        return null;
     }
 
     @Override
