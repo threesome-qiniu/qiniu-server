@@ -16,14 +16,17 @@ import com.qiniu.common.utils.uniqueid.IdGenerator;
 import com.qiniu.feign.behave.RemoteBehaveService;
 import com.qiniu.feign.social.RemoteSocialService;
 import com.qiniu.feign.user.RemoteUserService;
+import com.qiniu.model.common.dto.PageDTO;
 import com.qiniu.model.search.vo.VideoSearchVO;
 import com.qiniu.model.user.domain.User;
 import com.qiniu.model.video.domain.*;
 import com.qiniu.model.video.dto.VideoFeedDTO;
 import com.qiniu.model.video.dto.VideoPublishDto;
 import com.qiniu.model.video.dto.VideoPageDto;
+import com.qiniu.model.video.vo.HotVideoVO;
 import com.qiniu.model.video.vo.VideoUploadVO;
 import com.qiniu.model.video.vo.VideoVO;
+import com.qiniu.service.video.constants.HotVideoConstants;
 import com.qiniu.service.video.constants.QiniuVideoOssConstants;
 import com.qiniu.service.video.constants.VideoCacheConstants;
 import com.qiniu.service.video.mapper.VideoMapper;
@@ -32,8 +35,11 @@ import com.qiniu.service.video.service.IVideoCategoryRelationService;
 import com.qiniu.service.video.service.IVideoSensitiveService;
 import com.qiniu.service.video.service.IVideoService;
 import com.qiniu.starter.file.service.FileStorageService;
+import jdk.nashorn.internal.ir.IfNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,10 +48,7 @@ import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.qiniu.model.common.enums.HttpCodeEnum.*;
@@ -232,7 +235,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
         // 小于 createTime 的5条数据
         queryWrapper.select(Video::getVideoId);
-        queryWrapper.lt(Video::getCreateTime, StringUtils.isNull(createTime) ? LocalDateTime.now() : createTime).orderByDesc(Video::getCreateTime).last("limit 5");
+        queryWrapper.lt(Video::getCreateTime, StringUtils.isNull(createTime) ? LocalDateTime.now() : createTime).orderByDesc(Video::getCreateTime).last("limit 3");
         List<Video> videoList;
         try {
             videoList = this.list(queryWrapper);
@@ -240,7 +243,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 LambdaQueryWrapper<Video> queryWrapper2 = new LambdaQueryWrapper<>();
                 // 小于 LocalDateTime.now() 的5条数据
                 queryWrapper2.select(Video::getVideoId);
-                queryWrapper2.lt(Video::getCreateTime, LocalDateTime.now()).orderByDesc(Video::getCreateTime).last("limit 5");
+                queryWrapper2.lt(Video::getCreateTime, LocalDateTime.now()).orderByDesc(Video::getCreateTime).last("limit 3");
                 videoList = this.list(queryWrapper2);
             }
             // 浏览自增1存入redis
@@ -254,31 +257,40 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         List<VideoVO> videoVOList = new ArrayList<>();
         // 封装VideoVO
         videoList.forEach(v -> {
-            Video cacheObject = redisService.getCacheObject(VideoCacheConstants.VIDEO_INFO_PREFIX + v.getVideoId());
-            if (StringUtils.isNull(cacheObject)) {
-                v = this.getById(v.getVideoId());
-            } else {
-                v = cacheObject;
+            try {
+                Video cacheObject = redisService.getCacheObject(VideoCacheConstants.VIDEO_INFO_PREFIX + v.getVideoId());
+                if (StringUtils.isNull(cacheObject)) {
+                    v = this.getById(v.getVideoId());
+                } else {
+                    v = cacheObject;
+                }
+                VideoVO videoVO = BeanCopyUtils.copyBean(v, VideoVO.class);
+                // 封装点赞数，观看量，评论量
+                Integer cacheLikeNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, v.getVideoId());
+                Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, v.getVideoId());
+                Integer cacheFavoriteNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, v.getVideoId());
+                videoVO.setLikeNum(StringUtils.isNull(cacheLikeNum) ? 0L : cacheLikeNum);
+                videoVO.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
+                videoVO.setFavoritesNum(StringUtils.isNull(cacheFavoriteNum) ? 0L : cacheFavoriteNum);
+                LambdaQueryWrapper<VideoUserComment> commentQW = new LambdaQueryWrapper<>();
+                commentQW.eq(VideoUserComment::getVideoId, v.getVideoId());
+                videoVO.setCommentNum(remoteBehaveService.getCommentCountByVideoId(videoVO.getVideoId()).getData());
+                // 封装用户信息
+                User poublishUser = remoteUserService.userInfoById(v.getUserId()).getData();
+                videoVO.setUserNickName(StringUtils.isNull(poublishUser) ? null : poublishUser.getNickName());
+                videoVO.setUserAvatar(StringUtils.isNull(poublishUser) ? null : poublishUser.getAvatar());
+                // 是否关注
+                Long loginUserId = UserContext.getUserId();
+                if (StringUtils.isNotNull(loginUserId) && v.getUserId().equals(loginUserId)) {
+                    videoVO.setWeatherFollow(true);
+                } else {
+                    Boolean weatherFollow = remoteSocialService.weatherfollow(v.getUserId()).getData();
+                    videoVO.setWeatherFollow(!StringUtils.isNull(weatherFollow) && weatherFollow);
+                }
+                videoVOList.add(videoVO);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            VideoVO videoVO = BeanCopyUtils.copyBean(v, VideoVO.class);
-            // 封装点赞数，观看量，评论量
-            Integer cacheLikeNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, v.getVideoId());
-            Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, v.getVideoId());
-            Integer cacheFavoriteNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, v.getVideoId());
-            videoVO.setLikeNum(StringUtils.isNull(cacheLikeNum) ? 0L : cacheLikeNum);
-            videoVO.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
-            videoVO.setFavoritesNum(StringUtils.isNull(cacheFavoriteNum) ? 0L : cacheFavoriteNum);
-            LambdaQueryWrapper<VideoUserComment> commentQW = new LambdaQueryWrapper<>();
-            commentQW.eq(VideoUserComment::getVideoId, v.getVideoId());
-            videoVO.setCommentNum(remoteBehaveService.getCommentCountByVideoId(videoVO.getVideoId()).getData());
-            // 封装用户信息
-            User poublishUser = remoteUserService.userInfoById(v.getUserId()).getData();
-            videoVO.setUserNickName(StringUtils.isNull(poublishUser) ? null : poublishUser.getNickName());
-            videoVO.setUserAvatar(StringUtils.isNull(poublishUser) ? null : poublishUser.getAvatar());
-            // 是否关注
-            Boolean weatherFollow = remoteSocialService.weatherfollow(v.getUserId()).getData();
-            videoVO.setWeatherFollow(!StringUtils.isNull(weatherFollow) && weatherFollow);
-            videoVOList.add(videoVO);
         });
         return videoVOList;
     }
@@ -318,4 +330,50 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         remoteBehaveService.deleteVideoLikeRecord(videoId);
 
     }
+
+    @Override
+    public List<Video> getVideoListLtCreateTime(LocalDateTime ctime) {
+        LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
+        // 视频发布时间大于ctime的数据
+        queryWrapper.ge(Video::getCreateTime, ctime);
+        return this.list(queryWrapper);
+    }
+
+    /**
+     * 视频算分
+     *
+     * @param videoList
+     * @return
+     */
+    @Override
+    public List<HotVideoVO> computeHotVideoScore(List<Video> videoList) {
+        List<HotVideoVO> hotVideoVOList = new ArrayList<>();
+        if (!videoList.isEmpty()) {
+            videoList.forEach(v -> {
+                HotVideoVO hotVideoVO = BeanCopyUtils.copyBean(v, HotVideoVO.class);
+                hotVideoVO.setScore(computeVideoScore(v));
+                hotVideoVOList.add(hotVideoVO);
+            });
+        } else {
+            return null;
+        }
+        return hotVideoVOList;
+    }
+
+    // 视频算分
+    private Long computeVideoScore(Video video) {
+        Long score = 0L;
+        if (video.getLikeNum() != null) {
+            score += video.getLikeNum() * HotVideoConstants.WEIGHT_LIKE;
+        }
+        if (video.getViewNum() != null) {
+            //获取redis中的浏览量
+            score += video.getViewNum() * HotVideoConstants.WEIGHT_VIEW;
+        }
+        if (video.getFavoritesNum() != null) {
+            score += video.getFavoritesNum() * HotVideoConstants.WEIGHT_FAVORITE;
+        }
+        return score;
+    }
+
 }

@@ -8,7 +8,6 @@ import com.qiniu.storage.Configuration;
 import com.qiniu.util.Auth;
 import com.qiniu.util.StringMap;
 import com.qiniu.util.UrlSafeBase64;
-import com.sun.javafx.scene.shape.PathUtils;
 import lombok.extern.slf4j.Slf4j;
 
 /**

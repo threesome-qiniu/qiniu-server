@@ -112,7 +112,7 @@ public class VideoUserCommentController {
      */
     @PostMapping
     public R<?> add(@RequestBody VideoUserComment videoUserComment) {
-        if (StringUtils.isNull(videoUserComment.getContent())) {
+        if (StringUtils.isNull(videoUserComment.getContent()) || StringUtils.isBlank(videoUserComment.getContent())) {
             throw new CustomException(HttpCodeEnum.COMMENT_CONTENT_NULL);
         }
         videoUserComment.setCreateTime(LocalDateTime.now());

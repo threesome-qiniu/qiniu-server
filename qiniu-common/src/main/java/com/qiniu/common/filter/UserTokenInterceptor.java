@@ -20,7 +20,6 @@ public class UserTokenInterceptor implements HandlerInterceptor {
             //存入到当前线程中
             User user = new User();
             user.setUserId(Long.valueOf(userId));
-//            UserThreadLocalUtil.setUser(user);
             UserContext.setUser(user);
         }
         return true;
